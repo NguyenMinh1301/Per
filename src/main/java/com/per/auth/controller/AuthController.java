@@ -1,0 +1,118 @@
+package com.per.auth.controller;
+
+import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.per.auth.dto.request.ForgotPasswordRequest;
+import com.per.auth.dto.request.LogoutRequest;
+import com.per.auth.dto.request.RefreshTokenRequest;
+import com.per.auth.dto.request.ResetPasswordRequest;
+import com.per.auth.dto.request.SigninRequest;
+import com.per.auth.dto.request.SignupRequest;
+import com.per.auth.dto.request.VerifyEmailRequest;
+import com.per.auth.dto.response.AuthResponse;
+import com.per.auth.dto.response.ResetTokenValidationResponse;
+import com.per.auth.dto.response.user.MeResponse;
+import com.per.auth.service.AuthService;
+import com.per.auth.service.MeService;
+import com.per.common.ApiConstants;
+import com.per.common.ApiResponse;
+import com.per.common.response.ApiSuccessCode;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping(ApiConstants.Auth.ROOT)
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+    private final MeService meService;
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthResponse>> register(
+            @Valid @RequestBody SignupRequest request) {
+        AuthResponse response = authService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(ApiSuccessCode.AUTH_REGISTER_SUCCESS, response));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(
+            @Valid @RequestBody SigninRequest request) {
+        AuthResponse response = authService.login(request);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGIN_SUCCESS, response));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        AuthResponse response = authService.refreshToken(request);
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.AUTH_REFRESH_SUCCESS, response));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Void>> logout(
+            @Valid @RequestBody LogoutRequest request,
+            @AuthenticationPrincipal UserDetails userDetails) {
+        String username = userDetails != null ? userDetails.getUsername() : null;
+        authService.logout(request, username);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGOUT_SUCCESS));
+    }
+
+    @PostMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(
+            @Valid @RequestBody VerifyEmailRequest request) {
+        authService.verifyEmail(request);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_VERIFY_SUCCESS));
+    }
+
+    @GetMapping("/verify-email")
+    public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam("token") String token) {
+        VerifyEmailRequest request = new VerifyEmailRequest();
+        request.setToken(token);
+        authService.verifyEmail(request);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_VERIFY_SUCCESS));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(
+            @Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_FORGOT_SUCCESS));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(
+            @Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_RESET_SUCCESS));
+    }
+
+    @GetMapping("/reset-password")
+    public ResponseEntity<ApiResponse<ResetTokenValidationResponse>> validateResetToken(
+            @RequestParam("token") String token) {
+        authService.validateResetToken(token);
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        ApiSuccessCode.AUTH_RESET_TOKEN_VALID,
+                        ResetTokenValidationResponse.builder().token(token).build()));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<MeResponse>> getCurrentUser() {
+        MeResponse response = meService.getCurrentUser();
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_ME_SUCCESS, response));
+    }
+}

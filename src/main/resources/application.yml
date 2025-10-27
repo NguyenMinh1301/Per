@@ -1,0 +1,51 @@
+#debug: true
+
+spring:
+  config:
+    import: optional:file:.env[.properties]   # link .env
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD:}
+  mail:
+    host: ${MAIL_HOST}
+    port: ${MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
+    properties:
+      mail.smtp.auth: ${MAIL_SMTP_AUTH}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS}
+      mail.smtp.starttls.required: ${MAIL_SMTP_STARTTLS}
+      mail.smtp.ssl.trust: ${MAIL_SMTP_SSL_TRUST:smtp.gmail.com}
+      mail.smtp.connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
+      mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT:5000}
+      mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
+    default-encoding: UTF-8
+
+server:
+  port: ${SERVER_PORT}
+
+security:
+  jwt:
+    secret: ${JWT_SECRET}             # base64 256-bit+
+    access-ttl: ${ACCESS_TOKEN_TTL}   # 15 minutes (ISO-8601)
+    refresh-ttl: ${REFRESH_TOKEN_TTL} # 30 days (ISO-8601)
+    issuer: ${JWT_ISSUER}
+
+app:
+  base-url: ${APP_BASE_URL}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  mail:
+    from: ${MAIL_FROM}
