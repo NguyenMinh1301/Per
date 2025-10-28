@@ -16,6 +16,19 @@ public enum ApiErrorCode {
     USER_USERNAME_CONFLICT(
             "USER_USERNAME_CONFLICT", "Username already exists", HttpStatus.CONFLICT),
     USER_EMAIL_CONFLICT("USER_EMAIL_CONFLICT", "Email already exists", HttpStatus.CONFLICT),
+    MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
+    MEDIA_FILE_TOO_LARGE(
+            "MEDIA_FILE_TOO_LARGE",
+            "Media file exceeds the allowed size limit",
+            HttpStatus.PAYLOAD_TOO_LARGE),
+    MEDIA_UNSUPPORTED_TYPE(
+            "MEDIA_UNSUPPORTED_TYPE",
+            "Media type is not supported",
+            HttpStatus.BAD_REQUEST),
+    MEDIA_UPLOAD_FAILED(
+            "MEDIA_UPLOAD_FAILED",
+            "Unable to store media at this time",
+            HttpStatus.INTERNAL_SERVER_ERROR),
     INTERNAL_ERROR(
             "INTERNAL_ERROR", "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
 

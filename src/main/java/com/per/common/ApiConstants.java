@@ -18,6 +18,16 @@ public final class ApiConstants {
         public static final String RESET_PASSWORD = ROOT + "/reset-password";
     }
 
+    public static final class Media {
+        private Media() {}
+
+        public static final String ROOT = API_V1 + "/media";
+        public static final String UPLOAD = "/upload";
+        public static final String UPLOAD_BATCH = "/upload/batch";
+        public static final String UPLOAD_ENDPOINT = ROOT + UPLOAD;
+        public static final String UPLOAD_BATCH_ENDPOINT = ROOT + UPLOAD_BATCH;
+    }
+
     public static final class User {
         private User() {}
 

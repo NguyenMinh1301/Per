@@ -21,7 +21,10 @@ public enum ApiSuccessCode {
     USER_DELETE_SUCCESS("USER_DELETE_SUCCESS", "User deleted successfully"),
     USER_FETCH_SUCCESS("USER_FETCH_SUCCESS", "User retrieved successfully"),
     USER_LIST_SUCCESS("USER_LIST_SUCCESS", "User list retrieved successfully"),
-    USER_SEARCH_SUCCESS("USER_SEARCH_SUCCESS", "User search completed successfully");
+    USER_SEARCH_SUCCESS("USER_SEARCH_SUCCESS", "User search completed successfully"),
+
+    MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
+    MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");
 
     private final String code;
     private final String defaultMessage;
