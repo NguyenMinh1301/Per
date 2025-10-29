@@ -12,11 +12,11 @@ This document explains the internals of the authentication module so future main
 ## 2. Key Packages
 | Package | Description |
 |---------|-------------|
-| `com.auth.auth.controller` | REST endpoints for auth flows and `/me`. |
-| `com.auth.auth.service` | Core business logic for auth, mail, and token management. |
-| `com.auth.auth.security` | JWT utilities, filter chain, and user details integration with Spring Security. |
-| `com.auth.auth.service.token` | Abstractions for refresh tokens (Redis) and DB-backed single-use tokens. |
-| `com.auth.common` | Shared response envelope, error handling, and constants. |
+| `com.per.auth.controller` | REST endpoints for auth flows and `/me`. |
+| `com.per.auth.service` | Core business logic for auth, mail, and token management. |
+| `com.per.auth.security` | JWT utilities, filter chain, and user details integration with Spring Security. |
+| `com.per.auth.service.token` | Abstractions for refresh tokens (Redis) and DB-backed single-use tokens. |
+| `com.per.common` | Shared response envelope, error handling, and constants. |
 
 ## 3. Request Flow Summary
 1. **Login (`POST /api/v1/auth/login`)**
