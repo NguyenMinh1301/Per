@@ -28,9 +28,9 @@ import com.per.auth.dto.response.AuthTokenResponse;
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.entity.TokenType;
-import com.per.user.entity.User;
 import com.per.auth.entity.UserToken;
 import com.per.auth.mapper.UserMapper;
+import com.per.user.entity.User;
 import com.per.auth.repository.RoleRepository;
 import com.per.auth.repository.UserRepository;
 import com.per.auth.security.jwt.JwtService;
@@ -61,6 +61,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserTokenService userTokenService;
     private final MailService mailService;
     private final Clock clock;
+    private final UserMapper userMapper;
 
     @Override
     public AuthResponse register(SignupRequest request) {
@@ -198,7 +199,7 @@ public class AuthServiceImpl implements AuthService {
                         .orElse(Duration.ofMinutes(15).getSeconds());
 
         return AuthResponse.builder()
-                .user(UserMapper.toResponse(user))
+                .user(userMapper.toResponse(user))
                 .tokens(AuthTokenResponse.bearer(accessToken, refreshToken, expiresIn))
                 .build();
     }

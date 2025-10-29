@@ -1,27 +1,27 @@
 package com.per.user.mapper;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.per.user.entity.User;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import com.per.auth.entity.Role;
 import com.per.user.dto.response.UserResponse;
+import com.per.user.entity.User;
 
-public final class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-    private UserMapper() {}
+	@Mapping(target = "roles", source = "roles", qualifiedByName = "mapRoles")
+	UserResponse toResponse(User user);
 
-    public static UserResponse toResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .username(user.getUsername())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .emailVerified(user.isEmailVerified())
-                .active(user.isActive())
-                .roles(
-                        user.getRoles().stream()
-                                .map(role -> role.getName().name())
-                                .collect(Collectors.toSet()))
-                .build();
-    }
+	@Named("mapRoles")
+	default Set<String> mapRoles(Set<Role> roles) {
+		if (roles == null || roles.isEmpty()) {
+			return Set.of();
+		}
+		return roles.stream().map(role -> role.getName().name()).collect(Collectors.toSet());
+	}
 }

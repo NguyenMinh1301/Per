@@ -35,12 +35,13 @@ public class UserServiceImpl implements UserService {
     private final UserAdminRepository userRepository;
     private final RoleAdminRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     @Override
     @Transactional(readOnly = true)
     public PageResponse<UserResponse> getUsers(Pageable pageable) {
         Page<User> page = userRepository.findAllBy(pageable);
-        return PageResponse.from(page.map(UserMapper::toResponse));
+        return PageResponse.from(page.map(userMapper::toResponse));
     }
 
     @Override
@@ -50,14 +51,14 @@ public class UserServiceImpl implements UserService {
             throw new ApiException(ApiErrorCode.BAD_REQUEST, "Search keyword is required");
         }
         Page<User> page = userRepository.search(query.trim(), pageable);
-        return PageResponse.from(page.map(UserMapper::toResponse));
+        return PageResponse.from(page.map(userMapper::toResponse));
     }
 
     @Override
     @Transactional(readOnly = true)
     public UserResponse getUser(UUID id) {
         User user = findUser(id);
-        return UserMapper.toResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
         assignRoles(user, resolveRoles(request.getRoles()));
         user = userRepository.save(user);
-        return UserMapper.toResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @Override
@@ -117,7 +118,7 @@ public class UserServiceImpl implements UserService {
         }
 
         user = userRepository.save(user);
-        return UserMapper.toResponse(user);
+        return userMapper.toResponse(user);
     }
 
     @Override
