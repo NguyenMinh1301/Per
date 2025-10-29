@@ -26,9 +26,7 @@ public class MediaController {
 
     private final MediaService mediaService;
 
-    @PostMapping(
-            value = ApiConstants.Media.UPLOAD,
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = ApiConstants.Media.UPLOAD, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadSingle(
             @RequestPart("file") MultipartFile file) {
         MediaUploadResponse response = mediaService.uploadSingle(file);
@@ -43,8 +41,6 @@ public class MediaController {
             @RequestPart("files") List<MultipartFile> files) {
         List<MediaUploadResponse> responses = mediaService.uploadBatch(files);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(
-                        ApiResponse.success(
-                                ApiSuccessCode.MEDIA_UPLOAD_BATCH_SUCCESS, responses));
+                .body(ApiResponse.success(ApiSuccessCode.MEDIA_UPLOAD_BATCH_SUCCESS, responses));
     }
 }

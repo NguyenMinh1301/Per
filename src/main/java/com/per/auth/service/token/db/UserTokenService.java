@@ -1,8 +1,8 @@
 package com.per.auth.service.token.db;
 
 import com.per.auth.entity.TokenType;
-import com.per.user.entity.User;
 import com.per.auth.entity.UserToken;
+import com.per.user.entity.User;
 
 public interface UserTokenService {
     UserToken create(User user, TokenType type, java.time.Duration ttl);

@@ -1,12 +1,12 @@
 package com.per.product.enums;
 
 public enum FragranceFamily {
-    //Amber
+    // Amber
     WOODY_AMBER,
     AMBER,
     SOFT_AMBER,
 
-    //Florals
+    // Florals
     FRUITY,
     FLORAL,
     SOFT_FLORAL,
@@ -21,5 +21,4 @@ public enum FragranceFamily {
     MOSSY_WOODS,
     WOODS,
     DRY_WOODS
-
 }

@@ -14,14 +14,11 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "cloudinary")
 public class CloudinaryProperties {
 
-    @NotBlank
-    private String cloudName;
+    @NotBlank private String cloudName;
 
-    @NotBlank
-    private String apiKey;
+    @NotBlank private String apiKey;
 
-    @NotBlank
-    private String apiSecret;
+    @NotBlank private String apiSecret;
 
     private String folder;
 }

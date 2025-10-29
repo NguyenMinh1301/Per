@@ -3,17 +3,10 @@ package com.per.product.entity;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.per.brand.entity.Brand;
-import com.per.category.entity.Category;
-import com.per.made_in.entity.MadeIn;
-import com.per.product.enums.FragranceFamily;
-import com.per.product.enums.Gender;
-import com.per.product.enums.Sillage;
-import com.per.product.enums.Longevity;
-import com.per.product.enums.Seasonality;
-import com.per.product.enums.Occasion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,12 +14,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+
+import com.per.brand.entity.Brand;
+import com.per.category.entity.Category;
+import com.per.made_in.entity.MadeIn;
+import com.per.product.enums.FragranceFamily;
+import com.per.product.enums.Gender;
+import com.per.product.enums.Longevity;
+import com.per.product.enums.Occasion;
+import com.per.product.enums.Seasonality;
+import com.per.product.enums.Sillage;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -121,5 +122,4 @@ public class Product {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
 }

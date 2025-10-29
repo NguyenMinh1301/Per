@@ -28,7 +28,6 @@ import com.per.auth.dto.response.AuthTokenResponse;
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.entity.TokenType;
-import com.per.user.entity.User;
 import com.per.auth.entity.UserToken;
 import com.per.auth.mapper.UserMapper;
 import com.per.auth.repository.RoleRepository;
@@ -40,6 +39,7 @@ import com.per.auth.service.AuthService;
 import com.per.auth.service.MailService;
 import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
+import com.per.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 

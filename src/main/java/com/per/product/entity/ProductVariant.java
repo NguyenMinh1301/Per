@@ -82,5 +82,4 @@ public class ProductVariant {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
 }

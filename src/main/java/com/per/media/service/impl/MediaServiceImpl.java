@@ -7,12 +7,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cloudinary.Cloudinary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.media.config.CloudinaryProperties;
@@ -44,7 +44,8 @@ public class MediaServiceImpl implements MediaService {
     @Override
     public List<MediaUploadResponse> uploadBatch(List<MultipartFile> files) {
         if (files == null || files.isEmpty()) {
-            throw new ApiException(ApiErrorCode.MEDIA_FILE_REQUIRED, "At least one file is required");
+            throw new ApiException(
+                    ApiErrorCode.MEDIA_FILE_REQUIRED, "At least one file is required");
         }
 
         List<MediaUploadResponse> responses = new ArrayList<>(files.size());

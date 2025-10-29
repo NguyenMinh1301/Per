@@ -1,6 +1,7 @@
 package com.per.category.dto.request;
 
 import jakarta.validation.constraints.Size;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -21,5 +22,4 @@ public class CategoryUpdateRequest {
     private String imageUrl;
 
     private Boolean isActive;
-
 }

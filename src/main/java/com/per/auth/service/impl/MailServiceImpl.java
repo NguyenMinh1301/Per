@@ -5,9 +5,9 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.per.auth.configuration.ApplicationProperties;
-import com.per.user.entity.User;
 import com.per.auth.service.MailService;
 import com.per.common.ApiConstants;
+import com.per.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 

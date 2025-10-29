@@ -3,11 +3,11 @@ package com.per.media.config;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.cloudinary.Cloudinary;
-
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import com.cloudinary.Cloudinary;
 
 import lombok.RequiredArgsConstructor;
 

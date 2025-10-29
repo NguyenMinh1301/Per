@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.per.auth.entity.TokenType;
-import com.per.user.entity.User;
 import com.per.auth.entity.UserToken;
 import com.per.auth.repository.UserTokenRepository;
 import com.per.auth.service.token.db.UserTokenService;
+import com.per.user.entity.User;
 
 import lombok.RequiredArgsConstructor;
 

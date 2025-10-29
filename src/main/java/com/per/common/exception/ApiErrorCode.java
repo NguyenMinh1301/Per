@@ -28,9 +28,7 @@ public enum ApiErrorCode {
             "Media file exceeds the allowed size limit",
             HttpStatus.PAYLOAD_TOO_LARGE),
     MEDIA_UNSUPPORTED_TYPE(
-            "MEDIA_UNSUPPORTED_TYPE",
-            "Media type is not supported",
-            HttpStatus.BAD_REQUEST),
+            "MEDIA_UNSUPPORTED_TYPE", "Media type is not supported", HttpStatus.BAD_REQUEST),
     MEDIA_UPLOAD_FAILED(
             "MEDIA_UPLOAD_FAILED",
             "Unable to store media at this time",

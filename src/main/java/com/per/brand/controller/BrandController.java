@@ -3,6 +3,7 @@ package com.per.brand.controller;
 import java.util.UUID;
 
 import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -42,13 +43,11 @@ public class BrandController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         PageResponse<BrandResponse> response = brandService.searchBrands(query, pageable);
-        return ResponseEntity.ok(
-                ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, response));
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, response));
     }
 
     @GetMapping(ApiConstants.Brand.DETAILS)
-    public ResponseEntity<ApiResponse<BrandResponse>> getBrand(
-            @PathVariable("id") UUID id) {
+    public ResponseEntity<ApiResponse<BrandResponse>> getBrand(@PathVariable("id") UUID id) {
         BrandResponse response = brandService.getBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_FETCH_SUCCESS, response));
     }
@@ -65,7 +64,8 @@ public class BrandController {
     public ResponseEntity<ApiResponse<BrandResponse>> updateBrand(
             @PathVariable("id") UUID id, @Valid @RequestBody BrandUpdateRequest request) {
         BrandResponse response = brandService.updateBrand(id, request);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_UPDATE_SUCCESS, response));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.BRAND_UPDATE_SUCCESS, response));
     }
 
     @DeleteMapping(ApiConstants.Brand.DETAILS)

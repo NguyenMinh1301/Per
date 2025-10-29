@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.per.auth.entity.TokenType;
-import com.per.user.entity.User;
 import com.per.auth.entity.UserToken;
+import com.per.user.entity.User;
 
 public interface UserTokenRepository extends JpaRepository<UserToken, UUID> {
     Optional<UserToken> findByTokenAndType(String token, TokenType type);

@@ -3,7 +3,6 @@ package com.per.auth.entity;
 import java.time.Instant;
 import java.util.UUID;
 
-import com.per.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +18,8 @@ import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+
+import com.per.user.entity.User;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
