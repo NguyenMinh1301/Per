@@ -23,6 +23,12 @@ public enum ApiSuccessCode {
     USER_LIST_SUCCESS("USER_LIST_SUCCESS", "User list retrieved successfully"),
     USER_SEARCH_SUCCESS("USER_SEARCH_SUCCESS", "User search completed successfully"),
 
+    BRAND_CREATE_SUCCESS("BRAND_CREATE_SUCCESS", "Brand has been created successfully"),
+    BRAND_UPDATE_SUCCESS("BRAND_UPDATE_SUCCESS", "Brand has been updated successfully"),
+    BRAND_DELETE_SUCCESS("BRAND_DELETE_SUCCESS", "Brand has been deleted successfully"),
+    BRAND_FETCH_SUCCESS("BRAND_FETCH_SUCCESS", "Brand details retrieved successfully"),
+    BRAND_LIST_SUCCESS("BRAND_LIST_SUCCESS", "Brand list retrieved successfully"),
+
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
     MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");
 

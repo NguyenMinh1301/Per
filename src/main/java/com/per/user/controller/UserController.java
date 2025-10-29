@@ -39,14 +39,6 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
-                    Pageable pageable) {
-        PageResponse<UserResponse> response = userService.getUsers(pageable);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_LIST_SUCCESS, response));
-    }
-
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> searchUsers(
             @RequestParam("q") String query,

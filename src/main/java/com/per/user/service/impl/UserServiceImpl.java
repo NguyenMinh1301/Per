@@ -38,18 +38,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<UserResponse> getUsers(Pageable pageable) {
-        Page<User> page = userRepository.findAllBy(pageable);
-        return PageResponse.from(page.map(UserMapper::toResponse));
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public PageResponse<UserResponse> searchUsers(String query, Pageable pageable) {
+        Page<User> page;
+
         if (query == null || query.isBlank()) {
-            throw new ApiException(ApiErrorCode.BAD_REQUEST, "Search keyword is required");
+            page = userRepository.findAllBy(pageable);
+        } else {
+            page = userRepository.search(query.trim(), pageable);
         }
-        Page<User> page = userRepository.search(query.trim(), pageable);
+
         return PageResponse.from(page.map(UserMapper::toResponse));
     }
 

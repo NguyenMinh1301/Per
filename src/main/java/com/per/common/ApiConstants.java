@@ -28,6 +28,13 @@ public final class ApiConstants {
         public static final String UPLOAD_BATCH_ENDPOINT = ROOT + UPLOAD_BATCH;
     }
 
+    public static final class Brand {
+        private Brand() {}
+
+        public static final String ROOT = API_V1 + "/brands";
+        public static final String DETAILS = ROOT + "/{id}";
+    }
+
     public static final class User {
         private User() {}
 

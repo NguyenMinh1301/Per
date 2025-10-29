@@ -16,6 +16,12 @@ public enum ApiErrorCode {
     USER_USERNAME_CONFLICT(
             "USER_USERNAME_CONFLICT", "Username already exists", HttpStatus.CONFLICT),
     USER_EMAIL_CONFLICT("USER_EMAIL_CONFLICT", "Email already exists", HttpStatus.CONFLICT),
+    BRAND_NAME_CONFLICT(
+            "BRAND_NAME_CONFLICT",
+            "A brand with the provided name already exists",
+            HttpStatus.CONFLICT),
+    BRAND_NOT_FOUND(
+            "BRAND_NOT_FOUND", "The requested brand could not be found", HttpStatus.NOT_FOUND),
     MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
     MEDIA_FILE_TOO_LARGE(
             "MEDIA_FILE_TOO_LARGE",

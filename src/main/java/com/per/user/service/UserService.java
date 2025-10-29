@@ -10,7 +10,6 @@ import com.per.user.dto.request.UserUpdateRequest;
 import com.per.user.dto.response.UserResponse;
 
 public interface UserService {
-    PageResponse<UserResponse> getUsers(Pageable pageable);
 
     PageResponse<UserResponse> searchUsers(String query, Pageable pageable);
 
