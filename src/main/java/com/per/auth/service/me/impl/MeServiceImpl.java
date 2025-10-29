@@ -17,19 +17,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MeServiceImpl implements MeService {
 
-	private final UserRepository userRepository;
-	private final AuthUserMapper authUserMapper;
+    private final UserRepository userRepository;
 
-	@Override
-	public MeResponse getCurrentUser() {
-		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-		if (authentication == null || !authentication.isAuthenticated()) {
-			throw new ApiException(ApiErrorCode.UNAUTHORIZED, "Unauthorized");
-		}
-		String username = authentication.getName();
-		return userRepository
-				.findByUsername(username)
-				.map(authUserMapper::toMeResponse)
-				.orElseThrow(() -> new ApiException(ApiErrorCode.NOT_FOUND, "User not found"));
-	}
+    @Override
+    public MeResponse getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ApiException(ApiErrorCode.UNAUTHORIZED, "Unauthorized");
+        }
+        String username = authentication.getName();
+        return userRepository
+                .findByUsername(username)
+                .map(AuthUserMapper::toMeResponse)
+                .orElseThrow(() -> new ApiException(ApiErrorCode.NOT_FOUND, "User not found"));
+    }
 }
