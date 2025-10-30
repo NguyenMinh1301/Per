@@ -11,7 +11,7 @@ import com.per.user.dto.response.UserResponse;
 
 public interface UserService {
 
-    PageResponse<UserResponse> searchUsers(String query, Pageable pageable);
+    PageResponse<UserResponse> getUsers(String query, Pageable pageable);
 
     UserResponse getUser(UUID id);
 

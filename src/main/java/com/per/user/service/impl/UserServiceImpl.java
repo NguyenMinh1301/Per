@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<UserResponse> searchUsers(String query, Pageable pageable) {
+    public PageResponse<UserResponse> getUsers(String query, Pageable pageable) {
         Page<User> page;
 
         if (query == null || query.isBlank()) {

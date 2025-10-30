@@ -40,11 +40,11 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping(ApiConstants.User.SEARCH)
-    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> searchUsers(
+    public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
             @RequestParam(value = "q", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
-        PageResponse<UserResponse> response = userService.searchUsers(query, pageable);
+        PageResponse<UserResponse> response = userService.getUsers(query, pageable);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_SEARCH_SUCCESS, response));
     }
 
