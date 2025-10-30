@@ -26,24 +26,23 @@ import lombok.RequiredArgsConstructor;
 public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brandRepository;
+    private final BrandMapper brandMapper;
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<BrandResponse> searchBrands(String query, Pageable pageable) {
-        Page<Brand> page;
-        if (query == null || query.isBlank()) {
-            page = brandRepository.findAll(pageable);
-        } else {
-            page = brandRepository.findByNameContainingIgnoreCase(query.trim(), pageable);
-        }
-        return PageResponse.from(page.map(BrandMapper::toResponse));
+    public PageResponse<BrandResponse> getBrands(String query, Pageable pageable) {
+        Page<Brand> page =
+                (query == null || query.isBlank())
+                        ? brandRepository.findAll(pageable)
+                        : brandRepository.findByNameContainingIgnoreCase(query.trim(), pageable);
+        return PageResponse.from(page.map(brandMapper::toResponse));
     }
 
     @Override
     @Transactional(readOnly = true)
     public BrandResponse getBrand(UUID id) {
         Brand brand = findBrand(id);
-        return BrandMapper.toResponse(brand);
+        return brandMapper.toResponse(brand);
     }
 
     @Override
@@ -51,46 +50,37 @@ public class BrandServiceImpl implements BrandService {
         String normalizedName = normalizeName(request.getName());
         validateNameUniqueness(normalizedName);
 
-        Brand brand = BrandMapper.toEntity(request);
+        Brand brand = brandMapper.toEntity(request);
         brand.setName(normalizedName);
+        brand.setActive(request.getActive() == null || Boolean.TRUE.equals(request.getActive()));
 
         Brand saved = brandRepository.save(brand);
-        return BrandMapper.toResponse(saved);
+        return brandMapper.toResponse(saved);
     }
 
     @Override
     public BrandResponse updateBrand(UUID id, BrandUpdateRequest request) {
         Brand brand = findBrand(id);
 
+        String normalizedName = null;
         if (request.getName() != null) {
-            String normalizedName = normalizeName(request.getName());
+            normalizedName = normalizeName(request.getName());
             if (!normalizedName.equalsIgnoreCase(brand.getName())) {
                 validateNameUniqueness(normalizedName, id);
-                brand.setName(normalizedName);
             }
         }
 
-        if (request.getDescription() != null) {
-            brand.setDescription(trimToNull(request.getDescription()));
-        }
-        if (request.getWebsiteUrl() != null) {
-            brand.setWebsiteUrl(trimToNull(request.getWebsiteUrl()));
-        }
-        if (request.getFoundedYear() != null) {
-            brand.setFoundedYear(request.getFoundedYear());
-        }
-        if (request.getImagePublicId() != null) {
-            brand.setImagePublicId(trimToNull(request.getImagePublicId()));
-        }
-        if (request.getImageUrl() != null) {
-            brand.setImageUrl(trimToNull(request.getImageUrl()));
+        brandMapper.updateEntity(request, brand);
+
+        if (normalizedName != null) {
+            brand.setName(normalizedName);
         }
         if (request.getActive() != null) {
             brand.setActive(request.getActive());
         }
 
         Brand saved = brandRepository.save(brand);
-        return BrandMapper.toResponse(saved);
+        return brandMapper.toResponse(saved);
     }
 
     @Override
@@ -128,11 +118,4 @@ public class BrandServiceImpl implements BrandService {
         return trimmed;
     }
 
-    private String trimToNull(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
 }

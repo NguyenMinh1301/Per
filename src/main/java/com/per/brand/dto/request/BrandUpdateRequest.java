@@ -20,7 +20,7 @@ public class BrandUpdateRequest {
     @Size(min = 1, max = 150)
     private String name;
 
-    @Size(max = 2000)
+    @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String description;
 
     @Size(max = 255)
@@ -33,7 +33,6 @@ public class BrandUpdateRequest {
     @Size(max = 255)
     private String imagePublicId;
 
-    @Size(max = 2048)
     private String imageUrl;
 
     private Boolean active;

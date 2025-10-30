@@ -11,7 +11,7 @@ import com.per.common.response.PageResponse;
 
 public interface BrandService {
 
-    PageResponse<BrandResponse> searchBrands(String query, Pageable pageable);
+    PageResponse<BrandResponse> getBrands(String query, Pageable pageable);
 
     BrandResponse getBrand(UUID id);
 

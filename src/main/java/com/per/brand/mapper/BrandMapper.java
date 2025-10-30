@@ -1,56 +1,29 @@
 package com.per.brand.mapper;
 
+import org.mapstruct.BeanMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.NullValuePropertyMappingStrategy;
+
 import com.per.brand.dto.request.BrandCreateRequest;
+import com.per.brand.dto.request.BrandUpdateRequest;
 import com.per.brand.dto.response.BrandResponse;
 import com.per.brand.entity.Brand;
 
-public final class BrandMapper {
+@Mapper(componentModel = "spring")
+public interface BrandMapper {
 
-    private BrandMapper() {}
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    Brand toEntity(BrandCreateRequest request);
 
-    public static Brand toEntity(BrandCreateRequest request) {
-        String normalizedName = normalize(request.getName());
-        boolean active = request.getActive() == null || Boolean.TRUE.equals(request.getActive());
+    BrandResponse toResponse(Brand brand);
 
-        return Brand.builder()
-                .name(normalizedName)
-                .description(trimToNull(request.getDescription()))
-                .websiteUrl(trimToNull(request.getWebsiteUrl()))
-                .foundedYear(request.getFoundedYear())
-                .imagePublicId(trimToNull(request.getImagePublicId()))
-                .imageUrl(trimToNull(request.getImageUrl()))
-                .isActive(active)
-                .build();
-    }
-
-    public static BrandResponse toResponse(Brand brand) {
-        return BrandResponse.builder()
-                .id(brand.getId())
-                .name(brand.getName())
-                .description(brand.getDescription())
-                .websiteUrl(brand.getWebsiteUrl())
-                .foundedYear(brand.getFoundedYear())
-                .imagePublicId(brand.getImagePublicId())
-                .imageUrl(brand.getImageUrl())
-                .active(brand.isActive())
-                .createdAt(brand.getCreatedAt())
-                .updatedAt(brand.getUpdatedAt())
-                .build();
-    }
-
-    private static String normalize(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
-
-    private static String trimToNull(String value) {
-        if (value == null) {
-            return null;
-        }
-        String trimmed = value.trim();
-        return trimmed.isEmpty() ? null : trimmed;
-    }
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    void updateEntity(BrandUpdateRequest request, @MappingTarget Brand brand);
 }
