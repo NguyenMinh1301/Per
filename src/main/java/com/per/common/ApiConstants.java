@@ -16,6 +16,7 @@ public final class ApiConstants {
         public static final String VERIFY_EMAIL = ROOT + "/verify-email";
         public static final String FORGOT_PASSWORD = ROOT + "/forgot-password";
         public static final String RESET_PASSWORD = ROOT + "/reset-password";
+        public static final String ME = ROOT + "/me";
     }
 
     public static final class Media {
@@ -24,8 +25,6 @@ public final class ApiConstants {
         public static final String ROOT = API_V1 + "/media";
         public static final String UPLOAD = "/upload";
         public static final String UPLOAD_BATCH = "/upload/batch";
-        public static final String UPLOAD_ENDPOINT = ROOT + UPLOAD;
-        public static final String UPLOAD_BATCH_ENDPOINT = ROOT + UPLOAD_BATCH;
     }
 
     public static final class Brand {
@@ -39,5 +38,11 @@ public final class ApiConstants {
         private User() {}
 
         public static final String ROOT = API_V1 + "/users";
+        public static final String SEARCH = ROOT + "/search";
+        public static final String GET = ROOT + "/{id}";
+        public static final String CREATE = ROOT;
+        public static final String UPDATE = ROOT + "/{id}";
+        public static final String DELETE = ROOT + "/{id}";
+
     }
 }

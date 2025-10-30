@@ -39,7 +39,7 @@ public class AuthController {
     private final AuthService authService;
     private final MeService meService;
 
-    @PostMapping("/register")
+    @PostMapping(ApiConstants.Auth.REGISTER)
     public ResponseEntity<ApiResponse<AuthResponse>> register(
             @Valid @RequestBody SignupRequest request) {
         AuthResponse response = authService.register(request);
@@ -47,14 +47,14 @@ public class AuthController {
                 .body(ApiResponse.success(ApiSuccessCode.AUTH_REGISTER_SUCCESS, response));
     }
 
-    @PostMapping("/login")
+    @PostMapping(ApiConstants.Auth.LOGIN)
     public ResponseEntity<ApiResponse<AuthResponse>> login(
             @Valid @RequestBody SigninRequest request) {
         AuthResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGIN_SUCCESS, response));
     }
 
-    @PostMapping("/refresh")
+    @PostMapping(ApiConstants.Auth.REFRESH)
     public ResponseEntity<ApiResponse<AuthResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request) {
         AuthResponse response = authService.refreshToken(request);
@@ -62,7 +62,7 @@ public class AuthController {
                 ApiResponse.success(ApiSuccessCode.AUTH_REFRESH_SUCCESS, response));
     }
 
-    @PostMapping("/logout")
+    @PostMapping(ApiConstants.Auth.LOGOUT)
     public ResponseEntity<ApiResponse<Void>> logout(
             @Valid @RequestBody LogoutRequest request,
             @AuthenticationPrincipal UserDetails userDetails) {
@@ -71,14 +71,14 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGOUT_SUCCESS));
     }
 
-    @PostMapping("/verify-email")
+    @PostMapping(ApiConstants.Auth.VERIFY_EMAIL)
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
             @Valid @RequestBody VerifyEmailRequest request) {
         authService.verifyEmail(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_VERIFY_SUCCESS));
     }
 
-    @GetMapping("/verify-email")
+    @GetMapping(ApiConstants.Auth.VERIFY_EMAIL)
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam("token") String token) {
         VerifyEmailRequest request = new VerifyEmailRequest();
         request.setToken(token);
@@ -86,21 +86,21 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_VERIFY_SUCCESS));
     }
 
-    @PostMapping("/forgot-password")
+    @PostMapping(ApiConstants.Auth.FORGOT_PASSWORD)
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_FORGOT_SUCCESS));
     }
 
-    @PostMapping("/reset-password")
+    @PostMapping(ApiConstants.Auth.RESET_PASSWORD)
     public ResponseEntity<ApiResponse<Void>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_RESET_SUCCESS));
     }
 
-    @GetMapping("/reset-password")
+    @GetMapping(ApiConstants.Auth.RESET_PASSWORD)
     public ResponseEntity<ApiResponse<ResetTokenValidationResponse>> validateResetToken(
             @RequestParam("token") String token) {
         authService.validateResetToken(token);
@@ -110,7 +110,7 @@ public class AuthController {
                         ResetTokenValidationResponse.builder().token(token).build()));
     }
 
-    @GetMapping("/me")
+    @GetMapping(ApiConstants.Auth.ME)
     public ResponseEntity<ApiResponse<MeResponse>> getCurrentUser() {
         MeResponse response = meService.getCurrentUser();
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_ME_SUCCESS, response));

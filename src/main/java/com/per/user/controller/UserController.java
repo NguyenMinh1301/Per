@@ -39,7 +39,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/search")
+    @GetMapping(ApiConstants.User.SEARCH)
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> searchUsers(
             @RequestParam(value = "q", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -48,13 +48,13 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_SEARCH_SUCCESS, response));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(ApiConstants.User.GET)
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable("id") UUID id) {
         UserResponse response = userService.getUser(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.User.CREATE)
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @Valid @RequestBody UserCreateRequest request) {
         UserResponse response = userService.createUser(request);
@@ -62,14 +62,14 @@ public class UserController {
                 .body(ApiResponse.success(ApiSuccessCode.USER_CREATE_SUCCESS, response));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping(ApiConstants.User.UPDATE)
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest request) {
         UserResponse response = userService.updateUser(id, request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(ApiConstants.User.DELETE)
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable("id") UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_DELETE_SUCCESS));
