@@ -139,6 +139,13 @@
 			<version>1.39.0</version>
 		</dependency>
 
+		<!-- MapStruct -->
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.6.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -185,6 +192,11 @@
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>org.mapstruct</groupId>
+							<artifactId>mapstruct-processor</artifactId>
+							<version>1.6.3</version>
 						</path>
 					</annotationProcessorPaths>
 				</configuration>
