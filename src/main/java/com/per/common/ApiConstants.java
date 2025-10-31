@@ -34,6 +34,13 @@ public final class ApiConstants {
         public static final String DETAILS = ROOT + "/{id}";
     }
 
+    public static final class Category {
+        private Category() {}
+
+        public static final String ROOT = API_V1 + "/categories";
+        public static final String DETAILS = ROOT + "/{id}";
+    }
+
     public static final class User {
         private User() {}
 
