@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.per.brand.entity.Brand;
+import org.springframework.data.jpa.repository.Query;
 
 public interface BrandRepository extends JpaRepository<Brand, UUID> {
 
@@ -14,5 +15,11 @@ public interface BrandRepository extends JpaRepository<Brand, UUID> {
 
     boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
-    Page<Brand> findByNameContainingIgnoreCase(String name, Pageable pageable);
+    @Query("""
+            SELECT b FROM Brand b
+            WHERE LOWER(b.name) LIKE LOWER(CONCAT('%', :query, '%'))
+            OR LOWER(COALESCE(b.websiteUrl, '')) LIKE LOWER(CONCAT('%', :query, '%'))
+            """)
+    Page<Brand> search(String name, Pageable pageable);
+
 }

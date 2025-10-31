@@ -15,8 +15,8 @@ import com.per.brand.mapper.BrandMapper;
 import com.per.brand.repository.BrandRepository;
 import com.per.brand.service.BrandService;
 import com.per.common.exception.ApiErrorCode;
+import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
-import com.per.common.util.ApiPreconditions;
 
 import lombok.RequiredArgsConstructor;
 
@@ -32,11 +32,13 @@ public class BrandServiceImpl implements BrandService {
     @Transactional(readOnly = true)
     public PageResponse<BrandResponse> getBrands(String query, Pageable pageable) {
         Page<Brand> page;
-        if (query == null || query.isBlank()) {
+
+        if(query == null || query.isBlank()) {
             page = brandRepository.findAll(pageable);
         } else {
-            page = brandRepository.findByNameContainingIgnoreCase(query, pageable);
+            page = brandRepository.search(query, pageable);
         }
+
         return PageResponse.from(page.map(brandMapper::toResponse));
     }
 
@@ -49,13 +51,12 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public BrandResponse createBrand(BrandCreateRequest request) {
-        String normalizedName = normalizeName(request.getName());
-        assertNameAvailable(normalizedName);
+        String name = request.getName();
+        validateNameUniqueness(name);
 
         Brand brand = brandMapper.toEntity(request);
-        brand.setName(normalizedName);
-        boolean shouldActivate = request.getActive() == null || Boolean.TRUE.equals(request.getActive());
-        brand.setActive(shouldActivate);
+        brand.setName(name);
+        brand.setActive(request.getActive() == null || Boolean.TRUE.equals(request.getActive()));
 
         Brand saved = brandRepository.save(brand);
         return brandMapper.toResponse(saved);
@@ -65,19 +66,18 @@ public class BrandServiceImpl implements BrandService {
     public BrandResponse updateBrand(UUID id, BrandUpdateRequest request) {
         Brand brand = findBrand(id);
 
-        String normalizedName = null;
+        String name = null;
         if (request.getName() != null) {
-            normalizedName = normalizeName(request.getName());
-            boolean nameChanged = !normalizedName.equalsIgnoreCase(brand.getName());
-            if (nameChanged) {
-                assertNameAvailable(normalizedName, id);
+            name = request.getName();
+            if (!name.equalsIgnoreCase(brand.getName())) {
+                validateNameUniqueness(name, id);
             }
         }
 
         brandMapper.updateEntity(request, brand);
 
-        if (normalizedName != null) {
-            brand.setName(normalizedName);
+        if (name != null) {
+            brand.setName(name);
         }
         if (request.getActive() != null) {
             brand.setActive(request.getActive());
@@ -94,25 +94,21 @@ public class BrandServiceImpl implements BrandService {
     }
 
     private Brand findBrand(UUID id) {
-        return ApiPreconditions.checkFound(
-                brandRepository.findById(id), ApiErrorCode.BRAND_NOT_FOUND);
+        return brandRepository
+                .findById(id)
+                .orElseThrow(() -> new ApiException(ApiErrorCode.BRAND_NOT_FOUND));
     }
 
-    private void assertNameAvailable(String name) {
-        boolean exists = brandRepository.existsByNameIgnoreCase(name);
-        ApiPreconditions.checkUnique(
-                exists, ApiErrorCode.BRAND_NAME_CONFLICT, "Brand name already exists");
+    private void validateNameUniqueness(String name) {
+        if (brandRepository.existsByNameIgnoreCase(name)) {
+            throw new ApiException(ApiErrorCode.BRAND_NAME_CONFLICT);
+        }
     }
 
-    private void assertNameAvailable(String name, UUID excludeId) {
-        boolean exists = brandRepository.existsByNameIgnoreCaseAndIdNot(name, excludeId);
-        ApiPreconditions.checkUnique(
-                exists, ApiErrorCode.BRAND_NAME_CONFLICT, "Brand name already exists");
+    private void validateNameUniqueness(String name, UUID id) {
+        if (brandRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
+            throw new ApiException(ApiErrorCode.BRAND_NAME_CONFLICT);
+        }
     }
 
-    private String normalizeName(String name) {
-        ApiPreconditions.checkArgument(
-                name != null && !name.isBlank(), ApiErrorCode.BAD_REQUEST, "Brand name must not be blank");
-        return name;
-    }
 }
