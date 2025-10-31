@@ -1,7 +1,16 @@
 package com.per.category.controller;
 
-import com.cloudinary.Api;
-import com.per.brand.dto.response.BrandResponse;
+import java.util.UUID;
+
+import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.per.category.dto.request.CategoryCreateRequest;
 import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
@@ -10,17 +19,8 @@ import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Category.ROOT)
@@ -32,30 +32,34 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<CategoryResponse>>> searchCategories(
             @RequestParam(value = "query", required = false) String query,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-            ) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+                    Pageable pageable) {
         PageResponse<CategoryResponse> response = categoryService.getCategories(query, pageable);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_LIST_SUCCESS, response));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.CATEGORY_LIST_SUCCESS, response));
     }
 
     @GetMapping(ApiConstants.Category.DETAILS)
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") UUID id) {
         CategoryResponse response = categoryService.getCategory(id);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_FETCH_SUCCESS, response));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.CATEGORY_FETCH_SUCCESS, response));
     }
 
     @PostMapping
     public ResponseEntity<ApiResponse<CategoryResponse>> create(
             @Valid @RequestBody CategoryCreateRequest request) {
         CategoryResponse response = categoryService.createCategory(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(ApiSuccessCode.CATEGORY_CREATE_SUCCESS, response));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(ApiSuccessCode.CATEGORY_CREATE_SUCCESS, response));
     }
 
     @PutMapping(ApiConstants.Category.DETAILS)
     public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody CategoryUpdateRequest request) {
         CategoryResponse response = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_UPDATE_SUCCESS, response));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.CATEGORY_UPDATE_SUCCESS, response));
     }
 
     @DeleteMapping(ApiConstants.Category.DETAILS)

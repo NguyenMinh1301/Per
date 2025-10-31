@@ -33,7 +33,7 @@ public class BrandServiceImpl implements BrandService {
     public PageResponse<BrandResponse> getBrands(String query, Pageable pageable) {
         Page<Brand> page;
 
-        if(query == null || query.isBlank()) {
+        if (query == null || query.isBlank()) {
             page = brandRepository.findAll(pageable);
         } else {
             page = brandRepository.search(query, pageable);
@@ -56,7 +56,8 @@ public class BrandServiceImpl implements BrandService {
 
         Brand brand = brandMapper.toEntity(request);
         brand.setName(name);
-        brand.setIsActive(request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
+        brand.setIsActive(
+                request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         Brand saved = brandRepository.save(brand);
         return brandMapper.toResponse(saved);
@@ -110,5 +111,4 @@ public class BrandServiceImpl implements BrandService {
             throw new ApiException(ApiErrorCode.BRAND_NAME_CONFLICT);
         }
     }
-
 }

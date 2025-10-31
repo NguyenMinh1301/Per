@@ -50,6 +50,5 @@ public final class ApiConstants {
         public static final String CREATE = ROOT;
         public static final String UPDATE = ROOT + "/{id}";
         public static final String DELETE = ROOT + "/{id}";
-
     }
 }

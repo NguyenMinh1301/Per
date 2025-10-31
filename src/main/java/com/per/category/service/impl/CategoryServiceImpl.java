@@ -1,5 +1,12 @@
 package com.per.category.service.impl;
 
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.per.category.dto.request.CategoryCreateRequest;
 import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
@@ -10,13 +17,8 @@ import com.per.category.service.CategoryService;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     public PageResponse<CategoryResponse> getCategories(String query, Pageable pageable) {
         Page<Category> page;
 
-        if(query == null || query.isBlank()) {
+        if (query == null || query.isBlank()) {
             page = categoryRepository.findAll(pageable);
         } else {
             page = categoryRepository.search(query, pageable);
@@ -55,7 +57,8 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = categoryMapper.toEntity(request);
         category.setName(name);
-        category.setIsActive(request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
+        category.setIsActive(
+                request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         Category saved = categoryMapper.toEntity(request);
         return categoryMapper.toResponse(saved);
@@ -86,7 +89,6 @@ public class CategoryServiceImpl implements CategoryService {
         Category saved = categoryRepository.save(category);
         return categoryMapper.toResponse(saved);
     }
-
 
     @Override
     @Transactional(readOnly = true)
