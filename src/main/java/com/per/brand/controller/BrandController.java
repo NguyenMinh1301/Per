@@ -42,7 +42,7 @@ public class BrandController {
             @RequestParam(value = "q", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
-        PageResponse<BrandResponse> response = brandService.searchBrands(query, pageable);
+        PageResponse<BrandResponse> response = brandService.getBrands(query, pageable);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, response));
     }
 

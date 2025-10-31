@@ -15,8 +15,8 @@ import com.per.brand.mapper.BrandMapper;
 import com.per.brand.repository.BrandRepository;
 import com.per.brand.service.BrandService;
 import com.per.common.exception.ApiErrorCode;
-import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
+import com.per.common.util.ApiPreconditions;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,10 +31,12 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<BrandResponse> getBrands(String query, Pageable pageable) {
-        Page<Brand> page =
-                (query == null || query.isBlank())
-                        ? brandRepository.findAll(pageable)
-                        : brandRepository.findByNameContainingIgnoreCase(query.trim(), pageable);
+        Page<Brand> page;
+        if (query == null || query.isBlank()) {
+            page = brandRepository.findAll(pageable);
+        } else {
+            page = brandRepository.findByNameContainingIgnoreCase(query, pageable);
+        }
         return PageResponse.from(page.map(brandMapper::toResponse));
     }
 
@@ -48,11 +50,12 @@ public class BrandServiceImpl implements BrandService {
     @Override
     public BrandResponse createBrand(BrandCreateRequest request) {
         String normalizedName = normalizeName(request.getName());
-        validateNameUniqueness(normalizedName);
+        assertNameAvailable(normalizedName);
 
         Brand brand = brandMapper.toEntity(request);
         brand.setName(normalizedName);
-        brand.setActive(request.getActive() == null || Boolean.TRUE.equals(request.getActive()));
+        boolean shouldActivate = request.getActive() == null || Boolean.TRUE.equals(request.getActive());
+        brand.setActive(shouldActivate);
 
         Brand saved = brandRepository.save(brand);
         return brandMapper.toResponse(saved);
@@ -65,8 +68,9 @@ public class BrandServiceImpl implements BrandService {
         String normalizedName = null;
         if (request.getName() != null) {
             normalizedName = normalizeName(request.getName());
-            if (!normalizedName.equalsIgnoreCase(brand.getName())) {
-                validateNameUniqueness(normalizedName, id);
+            boolean nameChanged = !normalizedName.equalsIgnoreCase(brand.getName());
+            if (nameChanged) {
+                assertNameAvailable(normalizedName, id);
             }
         }
 
@@ -90,32 +94,25 @@ public class BrandServiceImpl implements BrandService {
     }
 
     private Brand findBrand(UUID id) {
-        return brandRepository
-                .findById(id)
-                .orElseThrow(() -> new ApiException(ApiErrorCode.BRAND_NOT_FOUND));
+        return ApiPreconditions.checkFound(
+                brandRepository.findById(id), ApiErrorCode.BRAND_NOT_FOUND);
     }
 
-    private void validateNameUniqueness(String name) {
-        if (brandRepository.existsByNameIgnoreCase(name)) {
-            throw new ApiException(ApiErrorCode.BRAND_NAME_CONFLICT);
-        }
+    private void assertNameAvailable(String name) {
+        boolean exists = brandRepository.existsByNameIgnoreCase(name);
+        ApiPreconditions.checkUnique(
+                exists, ApiErrorCode.BRAND_NAME_CONFLICT, "Brand name already exists");
     }
 
-    private void validateNameUniqueness(String name, UUID id) {
-        if (brandRepository.existsByNameIgnoreCaseAndIdNot(name, id)) {
-            throw new ApiException(ApiErrorCode.BRAND_NAME_CONFLICT);
-        }
+    private void assertNameAvailable(String name, UUID excludeId) {
+        boolean exists = brandRepository.existsByNameIgnoreCaseAndIdNot(name, excludeId);
+        ApiPreconditions.checkUnique(
+                exists, ApiErrorCode.BRAND_NAME_CONFLICT, "Brand name already exists");
     }
 
     private String normalizeName(String name) {
-        if (name == null) {
-            return null;
-        }
-        String trimmed = name.trim();
-        if (trimmed.isEmpty()) {
-            throw new ApiException(ApiErrorCode.BAD_REQUEST, "Brand name must not be blank");
-        }
-        return trimmed;
+        ApiPreconditions.checkArgument(
+                name != null && !name.isBlank(), ApiErrorCode.BAD_REQUEST, "Brand name must not be blank");
+        return name;
     }
-
 }
