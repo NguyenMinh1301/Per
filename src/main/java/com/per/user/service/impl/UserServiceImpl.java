@@ -42,9 +42,9 @@ public class UserServiceImpl implements UserService {
         Page<User> page;
 
         if (query == null || query.isBlank()) {
-            page = userRepository.findAllBy(pageable);
+            page = userRepository.findAll(pageable);
         } else {
-            page = userRepository.search(query.trim(), pageable);
+            page = userRepository.search(query, pageable);
         }
 
         return PageResponse.from(page.map(UserMapper::toResponse));
