@@ -35,5 +35,5 @@ public class BrandUpdateRequest {
 
     private String imageUrl;
 
-    private Boolean active;
+    private Boolean isActive;
 }

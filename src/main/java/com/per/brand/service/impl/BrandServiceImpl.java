@@ -45,7 +45,7 @@ public class BrandServiceImpl implements BrandService {
     @Override
     @Transactional(readOnly = true)
     public BrandResponse getBrand(UUID id) {
-        Brand brand = findBrand(id);
+        Brand brand = findById(id);
         return brandMapper.toResponse(brand);
     }
 
@@ -56,7 +56,7 @@ public class BrandServiceImpl implements BrandService {
 
         Brand brand = brandMapper.toEntity(request);
         brand.setName(name);
-        brand.setActive(request.getActive() == null || Boolean.TRUE.equals(request.getActive()));
+        brand.setIsActive(request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         Brand saved = brandRepository.save(brand);
         return brandMapper.toResponse(saved);
@@ -64,7 +64,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public BrandResponse updateBrand(UUID id, BrandUpdateRequest request) {
-        Brand brand = findBrand(id);
+        Brand brand = findById(id);
 
         String name = null;
         if (request.getName() != null) {
@@ -79,8 +79,8 @@ public class BrandServiceImpl implements BrandService {
         if (name != null) {
             brand.setName(name);
         }
-        if (request.getActive() != null) {
-            brand.setActive(request.getActive());
+        if (request.getIsActive() != null) {
+            brand.setIsActive(request.getIsActive());
         }
 
         Brand saved = brandRepository.save(brand);
@@ -89,11 +89,11 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     public void deleteBrand(UUID id) {
-        Brand brand = findBrand(id);
+        Brand brand = findById(id);
         brandRepository.delete(brand);
     }
 
-    private Brand findBrand(UUID id) {
+    private Brand findById(UUID id) {
         return brandRepository
                 .findById(id)
                 .orElseThrow(() -> new ApiException(ApiErrorCode.BRAND_NOT_FOUND));

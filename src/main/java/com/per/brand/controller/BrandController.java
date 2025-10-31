@@ -39,7 +39,7 @@ public class BrandController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<BrandResponse>>> searchBrands(
-            @RequestParam(value = "q", required = false) String query,
+            @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         PageResponse<BrandResponse> response = brandService.getBrands(query, pageable);
@@ -53,7 +53,7 @@ public class BrandController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<BrandResponse>> createBrand(
+    public ResponseEntity<ApiResponse<BrandResponse>> create(
             @Valid @RequestBody BrandCreateRequest request) {
         BrandResponse response = brandService.createBrand(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -61,7 +61,7 @@ public class BrandController {
     }
 
     @PutMapping(ApiConstants.Brand.DETAILS)
-    public ResponseEntity<ApiResponse<BrandResponse>> updateBrand(
+    public ResponseEntity<ApiResponse<BrandResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody BrandUpdateRequest request) {
         BrandResponse response = brandService.updateBrand(id, request);
         return ResponseEntity.ok(
@@ -69,7 +69,7 @@ public class BrandController {
     }
 
     @DeleteMapping(ApiConstants.Brand.DETAILS)
-    public ResponseEntity<ApiResponse<Void>> deleteBrand(@PathVariable("id") UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_DELETE_SUCCESS));
     }
