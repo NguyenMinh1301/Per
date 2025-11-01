@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
@@ -44,16 +44,14 @@ public class ProductController {
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         PageResponse<ProductResponse> data = productService.getProducts(query, pageable);
-        return ResponseEntity.ok(
-                ApiResponse.success(ApiSuccessCode.PRODUCT_LIST_SUCCESS, data));
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_LIST_SUCCESS, data));
     }
 
     @GetMapping(ApiConstants.Product.DETAILS)
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProduct(
             @PathVariable("id") UUID id) {
         ProductDetailResponse data = productService.getProduct(id);
-        return ResponseEntity.ok(
-                ApiResponse.success(ApiSuccessCode.PRODUCT_FETCH_SUCCESS, data));
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_FETCH_SUCCESS, data));
     }
 
     @PostMapping
@@ -68,8 +66,7 @@ public class ProductController {
     public ResponseEntity<ApiResponse<ProductDetailResponse>> updateProduct(
             @PathVariable("id") UUID id, @Valid @RequestBody ProductUpdateRequest request) {
         ProductDetailResponse data = productService.updateProduct(id, request);
-        return ResponseEntity.ok(
-                ApiResponse.success(ApiSuccessCode.PRODUCT_UPDATE_SUCCESS, data));
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_UPDATE_SUCCESS, data));
     }
 
     @DeleteMapping(ApiConstants.Product.DETAILS)

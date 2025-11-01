@@ -54,6 +54,7 @@ public class ProductVariantController {
     public ResponseEntity<ApiResponse<Void>> deleteVariant(
             @PathVariable("productId") UUID productId, @PathVariable("variantId") UUID variantId) {
         productService.deleteVariant(productId, variantId);
-        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_DELETE_SUCCESS));
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_DELETE_SUCCESS));
     }
 }

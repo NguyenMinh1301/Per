@@ -258,7 +258,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Product findProduct(UUID id) {
-        return require(productRepository.findById(id), ApiErrorCode.PRODUCT_NOT_FOUND, "Product not found");
+        return require(
+                productRepository.findById(id),
+                ApiErrorCode.PRODUCT_NOT_FOUND,
+                "Product not found");
     }
 
     private ProductVariant findVariant(UUID productId, UUID variantId) {
@@ -269,28 +272,35 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Brand findBrand(UUID id) {
-        return require(brandRepository.findById(id), ApiErrorCode.BRAND_NOT_FOUND, "Brand not found");
+        return require(
+                brandRepository.findById(id), ApiErrorCode.BRAND_NOT_FOUND, "Brand not found");
     }
 
     private Category findCategory(UUID id) {
         return require(
-                categoryRepository.findById(id), ApiErrorCode.CATEGORY_NOT_FOUND, "Category not found");
+                categoryRepository.findById(id),
+                ApiErrorCode.CATEGORY_NOT_FOUND,
+                "Category not found");
     }
 
     private MadeIn findMadeIn(UUID id) {
         return require(
-                madeInRepository.findById(id), ApiErrorCode.MADEIN_NOT_FOUND, "Made in origin not found");
+                madeInRepository.findById(id),
+                ApiErrorCode.MADEIN_NOT_FOUND,
+                "Made in origin not found");
     }
 
     private void assertProductNameAvailable(String name) {
         if (productRepository.existsByNameIgnoreCase(name)) {
-            throw new ApiException(ApiErrorCode.PRODUCT_NAME_CONFLICT, "Product name already exists");
+            throw new ApiException(
+                    ApiErrorCode.PRODUCT_NAME_CONFLICT, "Product name already exists");
         }
     }
 
     private void assertProductNameAvailable(String name, UUID excludeId) {
         if (productRepository.existsByNameIgnoreCaseAndIdNot(name, excludeId)) {
-            throw new ApiException(ApiErrorCode.PRODUCT_NAME_CONFLICT, "Product name already exists");
+            throw new ApiException(
+                    ApiErrorCode.PRODUCT_NAME_CONFLICT, "Product name already exists");
         }
     }
 
