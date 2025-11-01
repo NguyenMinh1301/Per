@@ -1,12 +1,13 @@
 package com.per.made_in.repository;
 
-import com.per.made_in.entity.MadeIn;
+import java.util.UUID;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.UUID;
+import com.per.made_in.entity.MadeIn;
 
 public interface MadeInRepository extends JpaRepository<MadeIn, UUID> {
 

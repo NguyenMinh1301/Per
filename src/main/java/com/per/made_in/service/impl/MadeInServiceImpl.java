@@ -1,6 +1,12 @@
 package com.per.made_in.service.impl;
 
-import com.per.category.entity.Category;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -11,13 +17,8 @@ import com.per.made_in.entity.MadeIn;
 import com.per.made_in.mapper.MadeInMapper;
 import com.per.made_in.repository.MadeInRepository;
 import com.per.made_in.service.MadeInService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +57,8 @@ public class MadeInServiceImpl implements MadeInService {
 
         MadeIn madeIn = madeInMapper.toEntity(request);
         madeIn.setName(name);
-        madeIn.setIsActive(request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
+        madeIn.setIsActive(
+                request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         MadeIn saved = madeInMapper.toEntity(request);
         return madeInMapper.toResponse(saved);

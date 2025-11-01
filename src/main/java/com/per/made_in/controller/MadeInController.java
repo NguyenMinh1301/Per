@@ -1,5 +1,16 @@
 package com.per.made_in.controller;
 
+import java.util.UUID;
+
+import jakarta.validation.Valid;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
@@ -8,16 +19,8 @@ import com.per.made_in.dto.request.MadeInCreateRequest;
 import com.per.made_in.dto.request.MadeInUpdateRequest;
 import com.per.made_in.dto.response.MadeInResponse;
 import com.per.made_in.service.MadeInService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.MadeIn.ROOT)
@@ -29,8 +32,8 @@ public class MadeInController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<MadeInResponse>>> searchMadeIn(
             @RequestParam(value = "query", required = false) String query,
-            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
-            ) {
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+                    Pageable pageable) {
         PageResponse<MadeInResponse> response = madeInService.getMadeIns(query, pageable);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_LIST_SUCCESS, response));
     }
