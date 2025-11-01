@@ -45,6 +45,10 @@ public class SecurityConfig {
         ApiConstants.Auth.RESET_PASSWORD
     };
 
+    private static final String[] swaggerEndpoints = {
+        "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**"
+    };
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
@@ -53,9 +57,9 @@ public class SecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers(
-                                                publicEndpoint // Public endpoint
-                                                )
+                                auth.requestMatchers(publicEndpoint)
+                                        .permitAll()
+                                        .requestMatchers(swaggerEndpoints)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()
