@@ -48,6 +48,20 @@ public final class ApiConstants {
         public static final String DETAILS = ROOT + "/{id}";
     }
 
+    public static final class Product {
+        private Product() {}
+
+        public static final String ROOT = API_V1 + "/products";
+        public static final String DETAILS = "/{id}";
+    }
+
+    public static final class ProductVariant {
+        private ProductVariant() {}
+
+        public static final String ROOT = Product.ROOT + "/{productId}/variants";
+        public static final String DETAILS = "/{variantId}";
+    }
+
     public static final class User {
         private User() {}
 

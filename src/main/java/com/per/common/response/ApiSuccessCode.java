@@ -48,7 +48,20 @@ public enum ApiSuccessCode {
 
     // Media
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
-    MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");
+    MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully"),
+
+    // Product
+    PRODUCT_CREATE_SUCCESS("PRODUCT_CREATE_SUCCESS", "Product has been created successfully"),
+    PRODUCT_UPDATE_SUCCESS("PRODUCT_UPDATE_SUCCESS", "Product has been updated successfully"),
+    PRODUCT_DELETE_SUCCESS("PRODUCT_DELETE_SUCCESS", "Product has been deleted successfully"),
+    PRODUCT_FETCH_SUCCESS("PRODUCT_FETCH_SUCCESS", "Product details retrieved successfully"),
+    PRODUCT_LIST_SUCCESS("PRODUCT_LIST_SUCCESS", "Product list retrieved successfully"),
+    PRODUCT_VARIANT_CREATE_SUCCESS(
+            "PRODUCT_VARIANT_CREATE_SUCCESS", "Product variant has been created successfully"),
+    PRODUCT_VARIANT_UPDATE_SUCCESS(
+            "PRODUCT_VARIANT_UPDATE_SUCCESS", "Product variant has been updated successfully"),
+    PRODUCT_VARIANT_DELETE_SUCCESS(
+            "PRODUCT_VARIANT_DELETE_SUCCESS", "Product variant has been deleted successfully");
 
     // spotless:on
     private final String code;

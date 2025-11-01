@@ -35,6 +35,11 @@ public enum ApiErrorCode {
     MADEIN_NAME_CONFLICT("MADEIN_NAME_CONFLICT", "A made in with the provided name already exists", HttpStatus.CONFLICT),
     MADEIN_NOT_FOUND("MADEIN_NOT_FOUND", "The requested made in could not be found", HttpStatus.NOT_FOUND),
 
+    // Product
+    PRODUCT_NAME_CONFLICT("PRODUCT_NAME_CONFLICT", "A product with the provided name already exists", HttpStatus.CONFLICT),
+    PRODUCT_NOT_FOUND("PRODUCT_NOT_FOUND", "The requested product could not be found", HttpStatus.NOT_FOUND),
+    PRODUCT_VARIANT_SKU_CONFLICT("PRODUCT_VARIANT_SKU_CONFLICT", "A product variant with the provided SKU already exists", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_NOT_FOUND("PRODUCT_VARIANT_NOT_FOUND", "The requested product variant could not be found", HttpStatus.NOT_FOUND),
 
     // Media
     MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
