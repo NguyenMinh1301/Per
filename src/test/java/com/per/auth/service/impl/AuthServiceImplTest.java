@@ -61,7 +61,6 @@ import com.per.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuthService Unit Tests")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthServiceImplTest {
 
     @Mock
@@ -278,12 +277,9 @@ class AuthServiceImplTest {
                             .password(PASSWORD)
                             .build();
 
-            Authentication authentication = mock(Authentication.class);
-            when(authentication.isAuthenticated()).thenReturn(true);
-
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                    .thenReturn(authentication);
+                    .thenReturn(mock(Authentication.class));
             when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -363,13 +359,10 @@ class AuthServiceImplTest {
                             .password(PASSWORD)
                             .build();
 
-            Authentication authentication = mock(Authentication.class);
-            when(authentication.isAuthenticated()).thenReturn(true);
-
             when(userRepository.findByUsername(EMAIL)).thenReturn(Optional.empty());
             when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                    .thenReturn(authentication);
+                    .thenReturn(mock(Authentication.class));
             when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
             when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -670,4 +663,3 @@ class AuthServiceImplTest {
         }
     }
 }
-
