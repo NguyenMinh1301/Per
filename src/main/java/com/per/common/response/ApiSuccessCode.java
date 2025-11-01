@@ -39,6 +39,13 @@ public enum ApiSuccessCode {
     CATEGORY_FETCH_SUCCESS("CATEGORY_FETCH_SUCCESS", "Category details retrieved successfully"),
     CATEGORY_LIST_SUCCESS("CATEGORY_LIST_SUCCESS", "Category list retrieved successfully"),
 
+    // MadeIn
+    MADEIN_CREATE_SUCCESS("MADEIN_CREATE_SUCCESS", "Made in has been created successfully"),
+    MADEIN_UPDATE_SUCCESS("MADEIN_UPDATE_SUCCESS", "Made in has been updated successfully"),
+    MADEIN_DELETE_SUCCESS("MADEIN_DELETE_SUCCESS", "Made in has been deleted successfully"),
+    MADEIN_FETCH_SUCCESS("MADEIN_FETCH_SUCCESS", "Made in details retrieved successfully"),
+    MADEIN_LIST_SUCCESS("MADEIN_LIST_SUCCESS", "Made in list retrieved successfully"),
+
     // Media
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
     MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");

@@ -41,6 +41,13 @@ public final class ApiConstants {
         public static final String DETAILS = ROOT + "/{id}";
     }
 
+    public static final class MadeIn {
+        private MadeIn() {}
+
+        public static final String ROOT = API_V1 + "/made-in";
+        public static final String DETAILS = ROOT + "/{id}";
+    }
+
     public static final class User {
         private User() {}
 
