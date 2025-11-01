@@ -4,16 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -41,9 +37,7 @@ import com.per.common.response.PageResponse;
 import com.per.made_in.entity.MadeIn;
 import com.per.made_in.repository.MadeInRepository;
 import com.per.product.dto.request.ProductCreateRequest;
-import com.per.product.dto.request.ProductUpdateRequest;
 import com.per.product.dto.request.ProductVariantCreateRequest;
-import com.per.product.dto.request.ProductVariantUpdateRequest;
 import com.per.product.dto.response.ProductDetailResponse;
 import com.per.product.dto.response.ProductResponse;
 import com.per.product.dto.response.ProductVariantResponse;
@@ -58,29 +52,21 @@ import com.per.product.repository.ProductVariantRepository;
 @DisplayName("ProductService Unit Tests")
 class ProductServiceImplTest {
 
-    @Mock
-    private ProductRepository productRepository;
+    @Mock private ProductRepository productRepository;
 
-    @Mock
-    private ProductVariantRepository productVariantRepository;
+    @Mock private ProductVariantRepository productVariantRepository;
 
-    @Mock
-    private BrandRepository brandRepository;
+    @Mock private BrandRepository brandRepository;
 
-    @Mock
-    private CategoryRepository categoryRepository;
+    @Mock private CategoryRepository categoryRepository;
 
-    @Mock
-    private MadeInRepository madeInRepository;
+    @Mock private MadeInRepository madeInRepository;
 
-    @Mock
-    private ProductMapper productMapper;
+    @Mock private ProductMapper productMapper;
 
-    @Mock
-    private ProductVariantMapper productVariantMapper;
+    @Mock private ProductVariantMapper productVariantMapper;
 
-    @InjectMocks
-    private ProductServiceImpl productService;
+    @InjectMocks private ProductServiceImpl productService;
 
     private Product testProduct;
     private Brand testBrand;
@@ -346,7 +332,8 @@ class ProductServiceImplTest {
             when(productVariantRepository.existsByVariantSkuIgnoreCase("SKU-001"))
                     .thenReturn(false);
             when(productVariantMapper.toEntity(variantRequest)).thenReturn(variant);
-            when(productVariantRepository.saveAll(anyList())).thenReturn(java.util.List.of(variant));
+            when(productVariantRepository.saveAll(anyList()))
+                    .thenReturn(java.util.List.of(variant));
             when(productVariantRepository.findByProductId(newProduct.getId()))
                     .thenReturn(java.util.List.of(variant));
             when(productMapper.toDetail(newProduct)).thenReturn(detailResponse);
@@ -506,4 +493,3 @@ class ProductServiceImplTest {
         }
     }
 }
-

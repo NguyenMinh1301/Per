@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,14 +38,11 @@ import com.per.made_in.repository.MadeInRepository;
 @DisplayName("MadeInService Unit Tests")
 class MadeInServiceImplTest {
 
-    @Mock
-    private MadeInRepository madeInRepository;
+    @Mock private MadeInRepository madeInRepository;
 
-    @Mock
-    private MadeInMapper madeInMapper;
+    @Mock private MadeInMapper madeInMapper;
 
-    @InjectMocks
-    private MadeInServiceImpl madeInService;
+    @InjectMocks private MadeInServiceImpl madeInService;
 
     private MadeIn testMadeIn;
     private MadeInResponse madeInResponse;
@@ -65,14 +61,15 @@ class MadeInServiceImplTest {
                         .isActive(true)
                         .build();
 
-        madeInResponse = MadeInResponse.builder()
-                .id(madeInId)
-                .name("Test Country")
-                .isoCode("TC")
-                .region("Test Region")
-                .description("Test Description")
-                .isActive(true)
-                .build();
+        madeInResponse =
+                MadeInResponse.builder()
+                        .id(madeInId)
+                        .name("Test Country")
+                        .isoCode("TC")
+                        .region("Test Region")
+                        .description("Test Description")
+                        .isActive(true)
+                        .build();
     }
 
     @Nested
@@ -190,14 +187,15 @@ class MadeInServiceImplTest {
                             .isActive(true)
                             .build();
 
-            MadeInResponse newMadeInResponse = MadeInResponse.builder()
-                    .id(newMadeIn.getId())
-                    .name("New Country")
-                    .isoCode("NC")
-                    .region("New Region")
-                    .description("New Description")
-                    .isActive(true)
-                    .build();
+            MadeInResponse newMadeInResponse =
+                    MadeInResponse.builder()
+                            .id(newMadeIn.getId())
+                            .name("New Country")
+                            .isoCode("NC")
+                            .region("New Region")
+                            .description("New Description")
+                            .isActive(true)
+                            .build();
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
             when(madeInMapper.toEntity(request)).thenReturn(newMadeIn);
@@ -233,11 +231,12 @@ class MadeInServiceImplTest {
                             .isActive(true)
                             .build();
 
-            MadeInResponse newMadeInResponse = MadeInResponse.builder()
-                    .id(newMadeIn.getId())
-                    .name("New Country")
-                    .isActive(true)
-                    .build();
+            MadeInResponse newMadeInResponse =
+                    MadeInResponse.builder()
+                            .id(newMadeIn.getId())
+                            .name("New Country")
+                            .isActive(true)
+                            .build();
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
             when(madeInMapper.toEntity(request)).thenReturn(newMadeIn);
@@ -256,10 +255,7 @@ class MadeInServiceImplTest {
         void shouldThrowExceptionWhenMadeInNameExists() {
             // Given
             MadeInCreateRequest request =
-                    MadeInCreateRequest.builder()
-                            .name("Existing Country")
-                            .isoCode("EC")
-                            .build();
+                    MadeInCreateRequest.builder().name("Existing Country").isoCode("EC").build();
 
             when(madeInRepository.existsByNameIgnoreCase("Existing Country")).thenReturn(true);
 
@@ -298,13 +294,14 @@ class MadeInServiceImplTest {
                             .isActive(false)
                             .build();
 
-            MadeInResponse updatedMadeInResponse = MadeInResponse.builder()
-                    .id(madeInId)
-                    .name("Updated Country")
-                    .isoCode("UC")
-                    .description("Updated Description")
-                    .isActive(false)
-                    .build();
+            MadeInResponse updatedMadeInResponse =
+                    MadeInResponse.builder()
+                            .id(madeInId)
+                            .name("Updated Country")
+                            .isoCode("UC")
+                            .description("Updated Description")
+                            .isActive(false)
+                            .build();
 
             when(madeInRepository.findById(madeInId)).thenReturn(Optional.of(testMadeIn));
             when(madeInRepository.existsByNameIgnoreCaseAndIdNot("Updated Country", madeInId))
@@ -329,9 +326,7 @@ class MadeInServiceImplTest {
         void shouldThrowExceptionWhenUpdatedNameExists() {
             // Given
             MadeInUpdateRequest request =
-                    MadeInUpdateRequest.builder()
-                            .name("Existing Country")
-                            .build();
+                    MadeInUpdateRequest.builder().name("Existing Country").build();
 
             when(madeInRepository.findById(madeInId)).thenReturn(Optional.of(testMadeIn));
             when(madeInRepository.existsByNameIgnoreCaseAndIdNot("Existing Country", madeInId))
@@ -350,9 +345,7 @@ class MadeInServiceImplTest {
             // Given
             UUID nonExistentId = UUID.randomUUID();
             MadeInUpdateRequest request =
-                    MadeInUpdateRequest.builder()
-                            .name("Updated Country")
-                            .build();
+                    MadeInUpdateRequest.builder().name("Updated Country").build();
 
             when(madeInRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -399,4 +392,3 @@ class MadeInServiceImplTest {
         }
     }
 }
-

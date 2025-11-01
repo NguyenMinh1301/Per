@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,14 +38,11 @@ import com.per.common.response.PageResponse;
 @DisplayName("BrandService Unit Tests")
 class BrandServiceImplTest {
 
-    @Mock
-    private BrandRepository brandRepository;
+    @Mock private BrandRepository brandRepository;
 
-    @Mock
-    private BrandMapper brandMapper;
+    @Mock private BrandMapper brandMapper;
 
-    @InjectMocks
-    private BrandServiceImpl brandService;
+    @InjectMocks private BrandServiceImpl brandService;
 
     private Brand testBrand;
     private BrandResponse brandResponse;
@@ -63,12 +59,13 @@ class BrandServiceImplTest {
                         .isActive(true)
                         .build();
 
-        brandResponse = BrandResponse.builder()
-                .id(brandId)
-                .name("Test Brand")
-                .description("Test Description")
-                .isActive(true)
-                .build();
+        brandResponse =
+                BrandResponse.builder()
+                        .id(brandId)
+                        .name("Test Brand")
+                        .description("Test Description")
+                        .isActive(true)
+                        .build();
     }
 
     @Nested
@@ -201,12 +198,13 @@ class BrandServiceImplTest {
                             .isActive(true)
                             .build();
 
-            BrandResponse newBrandResponse = BrandResponse.builder()
-                    .id(newBrand.getId())
-                    .name("New Brand")
-                    .description("New Description")
-                    .isActive(true)
-                    .build();
+            BrandResponse newBrandResponse =
+                    BrandResponse.builder()
+                            .id(newBrand.getId())
+                            .name("New Brand")
+                            .description("New Description")
+                            .isActive(true)
+                            .build();
 
             when(brandRepository.existsByNameIgnoreCase("New Brand")).thenReturn(false);
             when(brandMapper.toEntity(request)).thenReturn(newBrand);
@@ -244,11 +242,12 @@ class BrandServiceImplTest {
                             .isActive(true)
                             .build();
 
-            BrandResponse newBrandResponse = BrandResponse.builder()
-                    .id(newBrand.getId())
-                    .name("New Brand")
-                    .isActive(true)
-                    .build();
+            BrandResponse newBrandResponse =
+                    BrandResponse.builder()
+                            .id(newBrand.getId())
+                            .name("New Brand")
+                            .isActive(true)
+                            .build();
 
             when(brandRepository.existsByNameIgnoreCase("New Brand")).thenReturn(false);
             when(brandMapper.toEntity(request)).thenReturn(newBrand);
@@ -308,12 +307,13 @@ class BrandServiceImplTest {
                             .isActive(false)
                             .build();
 
-            BrandResponse updatedBrandResponse = BrandResponse.builder()
-                    .id(brandId)
-                    .name("Updated Brand")
-                    .description("Updated Description")
-                    .isActive(false)
-                    .build();
+            BrandResponse updatedBrandResponse =
+                    BrandResponse.builder()
+                            .id(brandId)
+                            .name("Updated Brand")
+                            .description("Updated Description")
+                            .isActive(false)
+                            .build();
 
             when(brandRepository.findById(brandId)).thenReturn(Optional.of(testBrand));
             when(brandRepository.existsByNameIgnoreCaseAndIdNot("Updated Brand", brandId))
@@ -351,11 +351,12 @@ class BrandServiceImplTest {
                             .isActive(true)
                             .build();
 
-            BrandResponse updatedBrandResponse = BrandResponse.builder()
-                    .id(brandId)
-                    .name("Test Brand")
-                    .description("Updated Description")
-                    .build();
+            BrandResponse updatedBrandResponse =
+                    BrandResponse.builder()
+                            .id(brandId)
+                            .name("Test Brand")
+                            .description("Updated Description")
+                            .build();
 
             when(brandRepository.findById(brandId)).thenReturn(Optional.of(testBrand));
             when(brandRepository.save(any(Brand.class))).thenReturn(updatedBrand);
@@ -375,9 +376,7 @@ class BrandServiceImplTest {
         void shouldThrowExceptionWhenUpdatedNameExists() {
             // Given
             BrandUpdateRequest request =
-                    BrandUpdateRequest.builder()
-                            .name("Existing Brand")
-                            .build();
+                    BrandUpdateRequest.builder().name("Existing Brand").build();
 
             when(brandRepository.findById(brandId)).thenReturn(Optional.of(testBrand));
             when(brandRepository.existsByNameIgnoreCaseAndIdNot("Existing Brand", brandId))
@@ -395,10 +394,7 @@ class BrandServiceImplTest {
         void shouldThrowExceptionWhenBrandNotFound() {
             // Given
             UUID nonExistentId = UUID.randomUUID();
-            BrandUpdateRequest request =
-                    BrandUpdateRequest.builder()
-                            .name("Updated Brand")
-                            .build();
+            BrandUpdateRequest request = BrandUpdateRequest.builder().name("Updated Brand").build();
 
             when(brandRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -445,4 +441,3 @@ class BrandServiceImplTest {
         }
     }
 }
-

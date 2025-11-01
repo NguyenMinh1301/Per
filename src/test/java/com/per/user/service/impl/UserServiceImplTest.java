@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,17 +43,13 @@ import com.per.user.repository.UserAdminRepository;
 @DisplayName("UserService Unit Tests")
 class UserServiceImplTest {
 
-    @Mock
-    private UserAdminRepository userRepository;
+    @Mock private UserAdminRepository userRepository;
 
-    @Mock
-    private RoleAdminRepository roleRepository;
+    @Mock private RoleAdminRepository roleRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    @Mock private PasswordEncoder passwordEncoder;
 
-    @InjectMocks
-    private UserServiceImpl userService;
+    @InjectMocks private UserServiceImpl userService;
 
     private User testUser;
     private Role userRole;
@@ -451,4 +446,3 @@ class UserServiceImplTest {
         }
     }
 }
-

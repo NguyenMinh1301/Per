@@ -35,27 +35,21 @@ import com.per.common.exception.ApiException;
 import com.per.media.config.CloudinaryProperties;
 import com.per.media.dto.response.MediaUploadResponse;
 import com.per.media.entity.MediaAsset;
-import com.per.media.mapper.MediaMapper;
 import com.per.media.repository.MediaAssetRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("MediaService Unit Tests")
 class MediaServiceImplTest {
 
-    @Mock
-    private Cloudinary cloudinary;
+    @Mock private Cloudinary cloudinary;
 
-    @Mock
-    private CloudinaryProperties cloudinaryProperties;
+    @Mock private CloudinaryProperties cloudinaryProperties;
 
-    @Mock
-    private MediaAssetRepository mediaAssetRepository;
+    @Mock private MediaAssetRepository mediaAssetRepository;
 
-    @Mock
-    private Uploader uploader;
+    @Mock private Uploader uploader;
 
-    @InjectMocks
-    private MediaServiceImpl mediaService;
+    @InjectMocks private MediaServiceImpl mediaService;
 
     private static final long MAX_FILE_SIZE = 10L * 1024 * 1024;
     private static final String TEST_FOLDER = "test-folder";
@@ -76,8 +70,7 @@ class MediaServiceImplTest {
             // Given
             byte[] fileContent = "fake image content".getBytes();
             MultipartFile file =
-                    new MockMultipartFile(
-                            "image", "test-image.jpg", "image/jpeg", fileContent);
+                    new MockMultipartFile("image", "test-image.jpg", "image/jpeg", fileContent);
 
             Map<String, Object> uploadResult = createMockUploadResult("image", "test-image.jpg");
 
@@ -104,8 +97,7 @@ class MediaServiceImplTest {
             // Given
             byte[] fileContent = "fake video content".getBytes();
             MultipartFile file =
-                    new MockMultipartFile(
-                            "video", "test-video.mp4", "video/mp4", fileContent);
+                    new MockMultipartFile("video", "test-video.mp4", "video/mp4", fileContent);
 
             Map<String, Object> uploadResult = createMockUploadResult("video", "test-video.mp4");
 
@@ -154,8 +146,7 @@ class MediaServiceImplTest {
             // Given
             byte[] largeContent = new byte[(int) (MAX_FILE_SIZE + 1)];
             MultipartFile largeFile =
-                    new MockMultipartFile(
-                            "image", "large-image.jpg", "image/jpeg", largeContent);
+                    new MockMultipartFile("image", "large-image.jpg", "image/jpeg", largeContent);
 
             // When & Then
             assertThatThrownBy(() -> mediaService.uploadSingle(largeFile))
@@ -187,8 +178,7 @@ class MediaServiceImplTest {
             // Given
             byte[] fileContent = "fake image content".getBytes();
             MultipartFile file =
-                    new MockMultipartFile(
-                            "image", "test-image.jpg", "image/jpeg", fileContent);
+                    new MockMultipartFile("image", "test-image.jpg", "image/jpeg", fileContent);
 
             when(uploader.upload(any(byte[].class), anyMap()))
                     .thenThrow(new IOException("Upload failed"));
@@ -273,7 +263,10 @@ class MediaServiceImplTest {
 
     private Map<String, Object> createMockUploadResult(String resourceType, String filename) {
         return createMockUploadResult(
-                resourceType, filename, "http://example.com/" + filename, "https://example.com/" + filename);
+                resourceType,
+                filename,
+                "http://example.com/" + filename,
+                "https://example.com/" + filename);
     }
 
     private Map<String, Object> createMockUploadResult(
@@ -316,4 +309,3 @@ class MediaServiceImplTest {
                 .build();
     }
 }
-

@@ -1,10 +1,10 @@
 package com.per.auth;
 
+import java.util.TimeZone;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.TimeZone;
 
 @SpringBootTest
 class AuthApplicationTests {

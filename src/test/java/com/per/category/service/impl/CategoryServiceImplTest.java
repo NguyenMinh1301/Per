@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,14 +38,11 @@ import com.per.common.response.PageResponse;
 @DisplayName("CategoryService Unit Tests")
 class CategoryServiceImplTest {
 
-    @Mock
-    private CategoryRepository categoryRepository;
+    @Mock private CategoryRepository categoryRepository;
 
-    @Mock
-    private CategoryMapper categoryMapper;
+    @Mock private CategoryMapper categoryMapper;
 
-    @InjectMocks
-    private CategoryServiceImpl categoryService;
+    @InjectMocks private CategoryServiceImpl categoryService;
 
     private Category testCategory;
     private CategoryResponse categoryResponse;
@@ -63,12 +59,13 @@ class CategoryServiceImplTest {
                         .isActive(true)
                         .build();
 
-        categoryResponse = CategoryResponse.builder()
-                .id(categoryId)
-                .name("Test Category")
-                .description("Test Description")
-                .isActive(true)
-                .build();
+        categoryResponse =
+                CategoryResponse.builder()
+                        .id(categoryId)
+                        .name("Test Category")
+                        .description("Test Description")
+                        .isActive(true)
+                        .build();
     }
 
     @Nested
@@ -182,12 +179,13 @@ class CategoryServiceImplTest {
                             .isActive(true)
                             .build();
 
-            CategoryResponse newCategoryResponse = CategoryResponse.builder()
-                    .id(newCategory.getId())
-                    .name("New Category")
-                    .description("New Description")
-                    .isActive(true)
-                    .build();
+            CategoryResponse newCategoryResponse =
+                    CategoryResponse.builder()
+                            .id(newCategory.getId())
+                            .name("New Category")
+                            .description("New Description")
+                            .isActive(true)
+                            .build();
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
             when(categoryMapper.toEntity(request)).thenReturn(newCategory);
@@ -223,11 +221,12 @@ class CategoryServiceImplTest {
                             .isActive(true)
                             .build();
 
-            CategoryResponse newCategoryResponse = CategoryResponse.builder()
-                    .id(newCategory.getId())
-                    .name("New Category")
-                    .isActive(true)
-                    .build();
+            CategoryResponse newCategoryResponse =
+                    CategoryResponse.builder()
+                            .id(newCategory.getId())
+                            .name("New Category")
+                            .isActive(true)
+                            .build();
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
             when(categoryMapper.toEntity(request)).thenReturn(newCategory);
@@ -286,12 +285,13 @@ class CategoryServiceImplTest {
                             .isActive(false)
                             .build();
 
-            CategoryResponse updatedCategoryResponse = CategoryResponse.builder()
-                    .id(categoryId)
-                    .name("Updated Category")
-                    .description("Updated Description")
-                    .isActive(false)
-                    .build();
+            CategoryResponse updatedCategoryResponse =
+                    CategoryResponse.builder()
+                            .id(categoryId)
+                            .name("Updated Category")
+                            .description("Updated Description")
+                            .isActive(false)
+                            .build();
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
             when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Updated Category", categoryId))
@@ -316,9 +316,7 @@ class CategoryServiceImplTest {
         void shouldThrowExceptionWhenUpdatedNameExists() {
             // Given
             CategoryUpdateRequest request =
-                    CategoryUpdateRequest.builder()
-                            .name("Existing Category")
-                            .build();
+                    CategoryUpdateRequest.builder().name("Existing Category").build();
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
             when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Existing Category", categoryId))
@@ -337,9 +335,7 @@ class CategoryServiceImplTest {
             // Given
             UUID nonExistentId = UUID.randomUUID();
             CategoryUpdateRequest request =
-                    CategoryUpdateRequest.builder()
-                            .name("Updated Category")
-                            .build();
+                    CategoryUpdateRequest.builder().name("Updated Category").build();
 
             when(categoryRepository.findById(nonExistentId)).thenReturn(Optional.empty());
 
@@ -386,4 +382,3 @@ class CategoryServiceImplTest {
         }
     }
 }
-

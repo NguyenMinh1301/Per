@@ -19,12 +19,11 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -63,38 +62,27 @@ import com.per.user.entity.User;
 @DisplayName("AuthService Unit Tests")
 class AuthServiceImplTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
 
-    @Mock
-    private RoleRepository roleRepository;
+    @Mock private RoleRepository roleRepository;
 
-    @Mock
-    private PasswordEncoder passwordEncoder;
+    @Mock private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AuthenticationManager authenticationManager;
+    @Mock private AuthenticationManager authenticationManager;
 
-    @Mock
-    private JwtService jwtService;
+    @Mock private JwtService jwtService;
 
-    @Mock
-    private JwtProperties jwtProperties;
+    @Mock private JwtProperties jwtProperties;
 
-    @Mock
-    private RefreshTokenService refreshTokenService;
+    @Mock private RefreshTokenService refreshTokenService;
 
-    @Mock
-    private UserTokenService userTokenService;
+    @Mock private UserTokenService userTokenService;
 
-    @Mock
-    private MailService mailService;
+    @Mock private MailService mailService;
 
-    @Mock
-    private Clock clock;
+    @Mock private Clock clock;
 
-    @InjectMocks
-    private AuthServiceImpl authService;
+    @InjectMocks private AuthServiceImpl authService;
 
     private static final String USERNAME = "testuser";
     private static final String EMAIL = "test@example.com";
@@ -133,7 +121,7 @@ class AuthServiceImplTest {
         testUser.addRole(userRole);
 
         lenient().when(jwtProperties.getAccessTtl()).thenReturn(Duration.ofMinutes(15));
-        
+
         // Reset SecurityContext before each test
         SecurityContextHolder.clearContext();
     }
@@ -159,7 +147,8 @@ class AuthServiceImplTest {
             when(userRepository.existsByEmail(EMAIL)).thenReturn(false);
             when(roleRepository.findByName(RoleType.USER)).thenReturn(Optional.of(userRole));
             when(passwordEncoder.encode(PASSWORD)).thenReturn(ENCODED_PASSWORD);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
             when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
 
@@ -272,17 +261,15 @@ class AuthServiceImplTest {
         void shouldLoginUserSuccessfully() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder()
-                            .identifier(USERNAME)
-                            .password(PASSWORD)
-                            .build();
+                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(mock(Authentication.class));
             when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // When
             AuthResponse response = authService.login(request);
@@ -293,7 +280,8 @@ class AuthServiceImplTest {
             assertThat(response.getTokens().getAccessToken()).isEqualTo(ACCESS_TOKEN);
 
             verify(userRepository).findByUsername(USERNAME);
-            verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
+            verify(authenticationManager)
+                    .authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userRepository).save(any(User.class));
         }
 
@@ -315,10 +303,7 @@ class AuthServiceImplTest {
             lockedUser.addRole(userRole);
 
             SigninRequest request =
-                    SigninRequest.builder()
-                            .identifier(USERNAME)
-                            .password(PASSWORD)
-                            .build();
+                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(lockedUser));
 
@@ -335,10 +320,7 @@ class AuthServiceImplTest {
         void shouldThrowExceptionWhenAuthenticationFails() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder()
-                            .identifier(USERNAME)
-                            .password(PASSWORD)
-                            .build();
+                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -354,10 +336,7 @@ class AuthServiceImplTest {
         void shouldLoginWithEmailIdentifier() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder()
-                            .identifier(EMAIL)
-                            .password(PASSWORD)
-                            .build();
+                    SigninRequest.builder().identifier(EMAIL).password(PASSWORD).build();
 
             when(userRepository.findByUsername(EMAIL)).thenReturn(Optional.empty());
             when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
@@ -365,7 +344,8 @@ class AuthServiceImplTest {
                     .thenReturn(mock(Authentication.class));
             when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // When
             AuthResponse response = authService.login(request);
@@ -456,8 +436,7 @@ class AuthServiceImplTest {
         @DisplayName("Should logout successfully")
         void shouldLogoutSuccessfully() {
             // Given
-            LogoutRequest request =
-                    LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
+            LogoutRequest request = LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
 
             when(refreshTokenService.isValid(REFRESH_TOKEN, USERNAME)).thenReturn(true);
 
@@ -472,8 +451,7 @@ class AuthServiceImplTest {
         @DisplayName("Should handle logout when username is null")
         void shouldHandleLogoutWhenUsernameIsNull() {
             // Given
-            LogoutRequest request =
-                    LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
+            LogoutRequest request = LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
 
             // When
             authService.logout(request, null);
@@ -486,8 +464,7 @@ class AuthServiceImplTest {
         @DisplayName("Should handle logout when token is invalid")
         void shouldHandleLogoutWhenTokenIsInvalid() {
             // Given
-            LogoutRequest request =
-                    LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
+            LogoutRequest request = LogoutRequest.builder().refreshToken(REFRESH_TOKEN).build();
 
             when(refreshTokenService.isValid(REFRESH_TOKEN, USERNAME)).thenReturn(false);
 
@@ -522,11 +499,13 @@ class AuthServiceImplTest {
 
             when(userTokenService.consume(token, TokenType.EMAIL_VERIFICATION))
                     .thenReturn(userToken);
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
-                User savedUser = invocation.getArgument(0);
-                savedUser.setEmailVerified(true);
-                return savedUser;
-            });
+            when(userRepository.save(any(User.class)))
+                    .thenAnswer(
+                            invocation -> {
+                                User savedUser = invocation.getArgument(0);
+                                savedUser.setEmailVerified(true);
+                                return savedUser;
+                            });
 
             // When
             authService.verifyEmail(request);
@@ -545,8 +524,7 @@ class AuthServiceImplTest {
         @DisplayName("Should send password reset email when user exists")
         void shouldSendPasswordResetEmailWhenUserExists() {
             // Given
-            ForgotPasswordRequest request =
-                    ForgotPasswordRequest.builder().email(EMAIL).build();
+            ForgotPasswordRequest request = ForgotPasswordRequest.builder().email(EMAIL).build();
 
             when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));
 
@@ -578,8 +556,7 @@ class AuthServiceImplTest {
         @DisplayName("Should handle forgot password when user does not exist")
         void shouldHandleForgotPasswordWhenUserNotExists() {
             // Given
-            ForgotPasswordRequest request =
-                    ForgotPasswordRequest.builder().email(EMAIL).build();
+            ForgotPasswordRequest request = ForgotPasswordRequest.builder().email(EMAIL).build();
 
             when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
@@ -604,10 +581,7 @@ class AuthServiceImplTest {
             String token = "reset_token";
             String newPassword = "new_password123";
             ResetPasswordRequest request =
-                    ResetPasswordRequest.builder()
-                            .token(token)
-                            .newPassword(newPassword)
-                            .build();
+                    ResetPasswordRequest.builder().token(token).newPassword(newPassword).build();
 
             UserToken resetToken =
                     UserToken.builder()
@@ -621,7 +595,8 @@ class AuthServiceImplTest {
 
             when(userTokenService.consume(token, TokenType.PASSWORD_RESET)).thenReturn(resetToken);
             when(passwordEncoder.encode(newPassword)).thenReturn("encoded_new_password");
-            when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+            when(userRepository.save(any(User.class)))
+                    .thenAnswer(invocation -> invocation.getArgument(0));
 
             // When
             authService.resetPassword(request);
@@ -652,8 +627,7 @@ class AuthServiceImplTest {
                             .revoked(false)
                             .build();
 
-            when(userTokenService.validate(token, TokenType.PASSWORD_RESET))
-                    .thenReturn(validToken);
+            when(userTokenService.validate(token, TokenType.PASSWORD_RESET)).thenReturn(validToken);
 
             // When
             authService.validateResetToken(token);
