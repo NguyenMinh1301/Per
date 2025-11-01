@@ -24,13 +24,17 @@ public enum ApiErrorCode {
     USER_EMAIL_CONFLICT("USER_EMAIL_CONFLICT", "Email already exists", HttpStatus.CONFLICT),
 
     // Brand
-    BRAND_NAME_CONFLICT("BRAND_NAME_CONFLICT", "A brand with the provided name already exists",
-            HttpStatus.CONFLICT),
+    BRAND_NAME_CONFLICT("BRAND_NAME_CONFLICT", "A brand with the provided name already exists", HttpStatus.CONFLICT),
     BRAND_NOT_FOUND("BRAND_NOT_FOUND", "The requested brand could not be found", HttpStatus.NOT_FOUND),
 
     // Category
     CATEGORY_NAME_CONFLICT("CATEGORY_NAME_CONFLICT", "A category with the provided name already exists", HttpStatus.CONFLICT),
     CATEGORY_NOT_FOUND("CATEGORY_NOT_FOUND", "The requested category could not be found", HttpStatus.NOT_FOUND),
+
+    // MadeIn
+    MADEIN_NAME_CONFLICT("MADEIN_NAME_CONFLICT", "A made in with the provided name already exists", HttpStatus.CONFLICT),
+    MADEIN_NOT_FOUND("MADEIN_NOT_FOUND", "The requested made in could not be found", HttpStatus.NOT_FOUND),
+
 
     // Media
     MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
