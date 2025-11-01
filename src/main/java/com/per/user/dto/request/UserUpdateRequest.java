@@ -7,11 +7,13 @@ import jakarta.validation.constraints.Size;
 
 import com.per.auth.entity.RoleType;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class UserUpdateRequest {
 
     @Size(min = 3, max = 50)

@@ -80,8 +80,7 @@ public class AuthController {
 
     @GetMapping(ApiConstants.Auth.VERIFY_EMAIL)
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam("token") String token) {
-        VerifyEmailRequest request = new VerifyEmailRequest();
-        request.setToken(token);
+        VerifyEmailRequest request = VerifyEmailRequest.builder().token(token).build();
         authService.verifyEmail(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_VERIFY_SUCCESS));
     }

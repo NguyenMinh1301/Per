@@ -9,11 +9,13 @@ import jakarta.validation.constraints.Size;
 
 import com.per.auth.entity.RoleType;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@Builder
 public class UserCreateRequest {
 
     @NotBlank(message = "Username is required")
@@ -36,7 +38,7 @@ public class UserCreateRequest {
 
     private boolean emailVerified;
 
-    private boolean active = true;
+    @Builder.Default private boolean active = true;
 
-    private Set<RoleType> roles = new HashSet<>();
+    @Builder.Default private Set<RoleType> roles = new HashSet<>();
 }

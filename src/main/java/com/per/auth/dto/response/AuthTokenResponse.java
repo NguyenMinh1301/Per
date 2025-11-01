@@ -1,10 +1,12 @@
 package com.per.auth.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
+@Builder
 public class AuthTokenResponse {
     private final String accessToken;
     private final String refreshToken;

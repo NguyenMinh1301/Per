@@ -21,7 +21,7 @@ public class BrandResponse {
     private Integer foundedYear;
     private String imagePublicId;
     private String imageUrl;
-    private boolean active;
+    private boolean isActive;
     private Instant createdAt;
     private Instant updatedAt;
 }
