@@ -12,7 +12,7 @@ import lombok.Setter;
 public class SigninRequest {
 
     @NotBlank(message = "Username or email is required")
-    private String identifier;
+    private String username;
 
     @NotBlank(message = "Password is required")
     private String password;

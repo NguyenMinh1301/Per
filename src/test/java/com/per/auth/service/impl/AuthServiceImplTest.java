@@ -261,7 +261,7 @@ class AuthServiceImplTest {
         void shouldLoginUserSuccessfully() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
+                    SigninRequest.builder().username(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -303,7 +303,7 @@ class AuthServiceImplTest {
             lockedUser.addRole(userRole);
 
             SigninRequest request =
-                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
+                    SigninRequest.builder().username(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(lockedUser));
 
@@ -320,7 +320,7 @@ class AuthServiceImplTest {
         void shouldThrowExceptionWhenAuthenticationFails() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder().identifier(USERNAME).password(PASSWORD).build();
+                    SigninRequest.builder().username(USERNAME).password(PASSWORD).build();
 
             when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(testUser));
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
@@ -332,11 +332,11 @@ class AuthServiceImplTest {
         }
 
         @Test
-        @DisplayName("Should login with email identifier")
-        void shouldLoginWithEmailIdentifier() {
+        @DisplayName("Should login with email username")
+        void shouldLoginWithEmailUser() {
             // Given
             SigninRequest request =
-                    SigninRequest.builder().identifier(EMAIL).password(PASSWORD).build();
+                    SigninRequest.builder().username(EMAIL).password(PASSWORD).build();
 
             when(userRepository.findByUsername(EMAIL)).thenReturn(Optional.empty());
             when(userRepository.findByEmail(EMAIL)).thenReturn(Optional.of(testUser));

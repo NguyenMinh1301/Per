@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(SigninRequest request) {
-        User user = resolveUser(request.getIdentifier());
+        User user = resolveUser(request.getUsername());
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");
         }
@@ -109,7 +109,7 @@ public class AuthServiceImpl implements AuthService {
         Authentication authentication =
                 authenticationManager.authenticate(
                         new UsernamePasswordAuthenticationToken(
-                                request.getIdentifier(), request.getPassword()));
+                                request.getUsername(), request.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         user.setLastLoginAt(Instant.now(clock));
@@ -203,13 +203,13 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
-    private User resolveUser(String identifier) {
-        Optional<User> byUsername = userRepository.findByUsername(identifier);
+    private User resolveUser(String username) {
+        Optional<User> byUsername = userRepository.findByUsername(username);
         if (byUsername.isPresent()) {
             return byUsername.get();
         }
         return userRepository
-                .findByEmail(identifier)
+                .findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("User does not exist"));
     }
 }

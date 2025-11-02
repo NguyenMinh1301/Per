@@ -37,16 +37,18 @@ public class SecurityConfig {
     private final ApplicationProperties applicationProperties;
 
     private static final String[] publicEndpoint = {
-        ApiConstants.Auth.REGISTER,
-        ApiConstants.Auth.LOGIN,
-        ApiConstants.Auth.REFRESH,
-        ApiConstants.Auth.VERIFY_EMAIL,
-        ApiConstants.Auth.FORGOT_PASSWORD,
-        ApiConstants.Auth.RESET_PASSWORD
-    };
+        // Auth
+        "/api/v1/auth/register",
+        "/api/v1/auth/login",
+        "/api/v1/auth/refresh",
+        "/api/v1/auth/verify-email",
+        "/api/v1/auth/forgot-password",
+        "/api/v1/auth/reset-password",
 
-    private static final String[] swaggerEndpoints = {
-        "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**"
+        // Swagger
+        "/v3/api-docs/**",
+        "/swagger-ui.html",
+        "/swagger-ui/**"
     };
 
     @Bean
@@ -58,8 +60,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers(publicEndpoint)
-                                        .permitAll()
-                                        .requestMatchers(swaggerEndpoints)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()
