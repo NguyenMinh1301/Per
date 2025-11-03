@@ -7,14 +7,14 @@ import com.per.auth.dto.request.ResetPasswordRequest;
 import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
-import com.per.auth.dto.response.AuthResponse;
+import com.per.auth.dto.response.AuthTokenResponse;
 
 public interface AuthService {
-    AuthResponse register(SignupRequest request);
+    void register(SignupRequest request);
 
-    AuthResponse login(SigninRequest request);
+    AuthTokenResponse login(SigninRequest request);
 
-    AuthResponse refreshToken(RefreshTokenRequest request);
+    AuthTokenResponse refreshToken(RefreshTokenRequest request);
 
     void logout(LogoutRequest request, String username);
 

@@ -43,7 +43,7 @@ import com.per.auth.dto.request.ResetPasswordRequest;
 import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
-import com.per.auth.dto.response.AuthResponse;
+import com.per.auth.dto.response.AuthTokenResponse;
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.entity.TokenType;
@@ -149,9 +149,6 @@ class AuthServiceImplTest {
             when(passwordEncoder.encode(PASSWORD)).thenReturn(ENCODED_PASSWORD);
             when(userRepository.save(any(User.class)))
                     .thenAnswer(invocation -> invocation.getArgument(0));
-            when(jwtService.generateAccessToken(any(User.class))).thenReturn(ACCESS_TOKEN);
-            when(jwtService.generateRefreshToken(any(User.class))).thenReturn(REFRESH_TOKEN);
-
             UserToken verificationToken =
                     UserToken.builder()
                             .id(UUID.randomUUID())
@@ -169,22 +166,18 @@ class AuthServiceImplTest {
             // since it's a void method and Mockito handles void methods automatically
 
             // When
-            AuthResponse response = authService.register(request);
+            authService.register(request);
 
             // Then
-            assertThat(response).isNotNull();
-            assertThat(response.getUser()).isNotNull();
-            assertThat(response.getUser().getUsername()).isEqualTo(USERNAME);
-            assertThat(response.getTokens()).isNotNull();
-            assertThat(response.getTokens().getAccessToken()).isEqualTo(ACCESS_TOKEN);
-            assertThat(response.getTokens().getRefreshToken()).isEqualTo(REFRESH_TOKEN);
-
             verify(userRepository).existsByUsername(USERNAME);
             verify(userRepository).existsByEmail(EMAIL);
             verify(roleRepository).findByName(RoleType.USER);
             verify(passwordEncoder).encode(PASSWORD);
             verify(userRepository).save(any(User.class));
             verify(mailService).sendVerificationEmail(any(User.class), anyString());
+            verify(jwtService, never()).generateAccessToken(any(User.class));
+            verify(jwtService, never()).generateRefreshToken(any(User.class));
+            verify(refreshTokenService, never()).store(anyString(), anyString());
         }
 
         @Test
@@ -272,17 +265,20 @@ class AuthServiceImplTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // When
-            AuthResponse response = authService.login(request);
+            AuthTokenResponse response = authService.login(request);
 
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getTokens()).isNotNull();
-            assertThat(response.getTokens().getAccessToken()).isEqualTo(ACCESS_TOKEN);
+            assertThat(response.getAccessToken()).isEqualTo(ACCESS_TOKEN);
+            assertThat(response.getRefreshToken()).isEqualTo(REFRESH_TOKEN);
+            assertThat(response.getTokenType()).isEqualTo("Bearer");
+            assertThat(response.getExpiresIn()).isEqualTo(Duration.ofMinutes(15).getSeconds());
 
             verify(userRepository).findByUsername(USERNAME);
             verify(authenticationManager)
                     .authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userRepository).save(any(User.class));
+            verify(refreshTokenService).store(REFRESH_TOKEN, USERNAME);
         }
 
         @Test
@@ -348,11 +344,15 @@ class AuthServiceImplTest {
                     .thenAnswer(invocation -> invocation.getArgument(0));
 
             // When
-            AuthResponse response = authService.login(request);
+            AuthTokenResponse response = authService.login(request);
 
             // Then
             assertThat(response).isNotNull();
+            assertThat(response.getAccessToken()).isEqualTo(ACCESS_TOKEN);
+            assertThat(response.getRefreshToken()).isEqualTo(REFRESH_TOKEN);
+            assertThat(response.getTokenType()).isEqualTo("Bearer");
             verify(userRepository).findByEmail(EMAIL);
+            verify(refreshTokenService).store(REFRESH_TOKEN, USERNAME);
         }
     }
 
@@ -377,14 +377,17 @@ class AuthServiceImplTest {
             when(jwtService.generateRefreshToken(any(User.class))).thenReturn("new_refresh_token");
 
             // When
-            AuthResponse response = authService.refreshToken(request);
+            AuthTokenResponse response = authService.refreshToken(request);
 
             // Then
             assertThat(response).isNotNull();
-            assertThat(response.getTokens()).isNotNull();
+            assertThat(response.getAccessToken()).isEqualTo("new_access_token");
+            assertThat(response.getRefreshToken()).isEqualTo("new_refresh_token");
+            assertThat(response.getTokenType()).isEqualTo("Bearer");
+            assertThat(response.getExpiresIn()).isEqualTo(Duration.ofMinutes(15).getSeconds());
 
             verify(refreshTokenService).revoke(REFRESH_TOKEN);
-            verify(refreshTokenService).store(anyString(), eq(USERNAME));
+            verify(refreshTokenService).store("new_refresh_token", USERNAME);
             verify(userRepository).findByUsername(USERNAME);
         }
 

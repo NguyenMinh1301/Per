@@ -17,7 +17,7 @@ public enum ApiErrorCode {
     INTERNAL_ERROR("INTERNAL_ERROR", "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // Auth
-    AUTH_INVALID_CREDENTIALS("AUTH_INVALID_CREDENTIALS", "Invalid username or password", HttpStatus.UNAUTHORIZED),
+    AUTH_INVALID_CREDENTIALS("BAD_REQUEST", "Invalid username or password", HttpStatus.UNAUTHORIZED),
 
     // User
     USER_USERNAME_CONFLICT("USER_USERNAME_CONFLICT", "Username already exists", HttpStatus.CONFLICT),

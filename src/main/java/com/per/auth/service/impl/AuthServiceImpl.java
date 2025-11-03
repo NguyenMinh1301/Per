@@ -23,13 +23,11 @@ import com.per.auth.dto.request.ResetPasswordRequest;
 import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
-import com.per.auth.dto.response.AuthResponse;
 import com.per.auth.dto.response.AuthTokenResponse;
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.entity.TokenType;
 import com.per.auth.entity.UserToken;
-import com.per.auth.mapper.UserMapper;
 import com.per.auth.repository.RoleRepository;
 import com.per.auth.repository.UserRepository;
 import com.per.auth.security.jwt.JwtService;
@@ -63,7 +61,7 @@ public class AuthServiceImpl implements AuthService {
     private final Clock clock;
 
     @Override
-    public AuthResponse register(SignupRequest request) {
+    public void register(SignupRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new IllegalArgumentException("Username already exists");
         }
@@ -95,12 +93,10 @@ public class AuthServiceImpl implements AuthService {
         UserToken verificationToken =
                 userTokenService.create(user, TokenType.EMAIL_VERIFICATION, EMAIL_VERIFY_TTL);
         mailService.sendVerificationEmail(user, verificationToken.getToken());
-
-        return buildAuthResponse(user);
     }
 
     @Override
-    public AuthResponse login(SigninRequest request) {
+    public AuthTokenResponse login(SigninRequest request) {
         User user = resolveUser(request.getUsername());
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");
@@ -115,11 +111,11 @@ public class AuthServiceImpl implements AuthService {
         user.setLastLoginAt(Instant.now(clock));
         userRepository.save(user);
 
-        return buildAuthResponse(user);
+        return buildAuthTokenResponse(user);
     }
 
     @Override
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
+    public AuthTokenResponse refreshToken(RefreshTokenRequest request) {
         String token = request.getRefreshToken();
         String username = jwtService.extractUsername(token);
         User user = resolveUser(username);
@@ -137,7 +133,7 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenService.revoke(token);
 
-        return buildAuthResponse(user);
+        return buildAuthTokenResponse(user);
     }
 
     @Override
@@ -187,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
         userTokenService.validate(token, TokenType.PASSWORD_RESET);
     }
 
-    private AuthResponse buildAuthResponse(User user) {
+    private AuthTokenResponse buildAuthTokenResponse(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
         refreshTokenService.store(refreshToken, user.getUsername());
@@ -197,10 +193,7 @@ public class AuthServiceImpl implements AuthService {
                         .map(Duration::getSeconds)
                         .orElse(Duration.ofMinutes(15).getSeconds());
 
-        return AuthResponse.builder()
-                .user(UserMapper.toResponse(user))
-                .tokens(AuthTokenResponse.bearer(accessToken, refreshToken, expiresIn))
-                .build();
+        return AuthTokenResponse.bearer(accessToken, refreshToken, expiresIn);
     }
 
     private User resolveUser(String username) {
@@ -210,6 +203,6 @@ public class AuthServiceImpl implements AuthService {
         }
         return userRepository
                 .findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("User does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
     }
 }

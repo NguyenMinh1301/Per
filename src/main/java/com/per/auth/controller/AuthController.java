@@ -20,7 +20,7 @@ import com.per.auth.dto.request.ResetPasswordRequest;
 import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
-import com.per.auth.dto.response.AuthResponse;
+import com.per.auth.dto.response.AuthTokenResponse;
 import com.per.auth.dto.response.ResetTokenValidationResponse;
 import com.per.auth.dto.response.user.MeResponse;
 import com.per.auth.service.AuthService;
@@ -40,24 +40,23 @@ public class AuthController {
     private final MeService meService;
 
     @PostMapping(ApiConstants.Auth.REGISTER)
-    public ResponseEntity<ApiResponse<AuthResponse>> register(
-            @Valid @RequestBody SignupRequest request) {
-        AuthResponse response = authService.register(request);
+    public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody SignupRequest request) {
+        authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success(ApiSuccessCode.AUTH_REGISTER_SUCCESS, response));
+                .body(ApiResponse.success(ApiSuccessCode.AUTH_REGISTER_SUCCESS));
     }
 
     @PostMapping(ApiConstants.Auth.LOGIN)
-    public ResponseEntity<ApiResponse<AuthResponse>> login(
+    public ResponseEntity<ApiResponse<AuthTokenResponse>> login(
             @Valid @RequestBody SigninRequest request) {
-        AuthResponse response = authService.login(request);
+        AuthTokenResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGIN_SUCCESS, response));
     }
 
     @PostMapping(ApiConstants.Auth.REFRESH)
-    public ResponseEntity<ApiResponse<AuthResponse>> refresh(
+    public ResponseEntity<ApiResponse<AuthTokenResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request) {
-        AuthResponse response = authService.refreshToken(request);
+        AuthTokenResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(
                 ApiResponse.success(ApiSuccessCode.AUTH_REFRESH_SUCCESS, response));
     }

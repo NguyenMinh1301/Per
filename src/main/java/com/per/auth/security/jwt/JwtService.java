@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,7 +29,11 @@ public class JwtService {
     private final Clock clock;
 
     public String generateAccessToken(User user) {
-        return buildToken(user, properties.getAccessTtl(), JwtTokenType.ACCESS, Map.of());
+        return buildToken(
+                user,
+                properties.getAccessTtl(),
+                JwtTokenType.ACCESS,
+                Map.of("roles", extractRoleNames(user)));
     }
 
     public String generateRefreshToken(User user) {
@@ -93,13 +98,15 @@ public class JwtService {
     }
 
     private Map<String, Object> buildDefaultClaims(User user, JwtTokenType tokenType) {
-        return new HashMap<>(
-                Map.of(
-                        "type", tokenType.name(),
-                        "userId", user.getId().toString(),
-                        "roles",
-                                user.getRoles().stream()
-                                        .map(role -> role.getName().name())
-                                        .collect(Collectors.toSet())));
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", tokenType.name());
+        claims.put("userId", user.getId().toString());
+        return claims;
+    }
+
+    private Set<String> extractRoleNames(User user) {
+        return user.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
     }
 }
