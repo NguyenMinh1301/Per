@@ -23,7 +23,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.per.auth.security.filter.JwtAuthenticationFilter;
 import com.per.auth.security.principal.DatabaseUserDetailsService;
-import com.per.common.ApiConstants;
 
 import lombok.RequiredArgsConstructor;
 
