@@ -62,6 +62,14 @@ public final class ApiConstants {
         public static final String DETAILS = "/{variantId}";
     }
 
+    public static final class Cart {
+        private Cart() {}
+
+        public static final String ROOT = API_V1 + "/cart";
+        public static final String ITEMS = "/items";
+        public static final String ITEM_DETAILS = "/items/{itemId}";
+    }
+
     public static final class User {
         private User() {}
 

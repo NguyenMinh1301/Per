@@ -56,6 +56,13 @@ public enum ApiSuccessCode {
     PRODUCT_VARIANT_UPDATE_SUCCESS("PRODUCT_VARIANT_UPDATE_SUCCESS", "Product variant has been updated successfully"),
     PRODUCT_VARIANT_DELETE_SUCCESS("PRODUCT_VARIANT_DELETE_SUCCESS", "Product variant has been deleted successfully"),
 
+    // Cart
+    CART_FETCH_SUCCESS("CART_FETCH_SUCCESS", "Cart retrieved successfully"),
+    CART_ITEM_ADD_SUCCESS("CART_ITEM_ADD_SUCCESS", "Item added to cart successfully"),
+    CART_ITEM_UPDATE_SUCCESS("CART_ITEM_UPDATE_SUCCESS", "Cart item updated successfully"),
+    CART_ITEM_REMOVE_SUCCESS("CART_ITEM_REMOVE_SUCCESS", "Cart item removed successfully"),
+    CART_CLEAR_SUCCESS("CART_CLEAR_SUCCESS", "Cart cleared successfully"),
+
     // Media
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
     MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");

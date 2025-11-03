@@ -41,6 +41,11 @@ public enum ApiErrorCode {
     PRODUCT_VARIANT_SKU_CONFLICT("PRODUCT_VARIANT_SKU_CONFLICT", "A product variant with the provided SKU already exists", HttpStatus.CONFLICT),
     PRODUCT_VARIANT_NOT_FOUND("PRODUCT_VARIANT_NOT_FOUND", "The requested product variant could not be found", HttpStatus.NOT_FOUND),
 
+    // Cart
+    CART_NOT_FOUND("CART_NOT_FOUND", "The requested cart could not be found", HttpStatus.NOT_FOUND),
+    CART_ITEM_NOT_FOUND("CART_ITEM_NOT_FOUND", "The requested cart item could not be found", HttpStatus.NOT_FOUND),
+    CART_ITEM_OUT_OF_STOCK("CART_ITEM_OUT_OF_STOCK", "Requested quantity exceeds available stock", HttpStatus.BAD_REQUEST),
+
     // Media
     MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
     MEDIA_FILE_TOO_LARGE("MEDIA_FILE_TOO_LARGE", "Media file exceeds the allowed size limit", HttpStatus.PAYLOAD_TOO_LARGE),
