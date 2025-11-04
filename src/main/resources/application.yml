@@ -4,9 +4,9 @@ spring:
   config:
     import: optional:file:.env[.properties]   # link .env
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${POSTGRES_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -19,34 +19,34 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
   mail:
-    host: ${MAIL_HOST}
-    port: ${MAIL_PORT}
+    host: smtp.gmail.com
+    port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
-      mail.smtp.auth: ${MAIL_SMTP_AUTH}
-      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS}
-      mail.smtp.starttls.required: ${MAIL_SMTP_STARTTLS}
-      mail.smtp.ssl.trust: ${MAIL_HOST}
-      mail.smtp.connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT}
-      mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT}
-      mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT}
+      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
+      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:true}
+      mail.smtp.starttls.required: ${MAIL_SMTP_STARTTLS:true}
+      mail.smtp.ssl.trust: smtp.gmail.com
+      mail.smtp.connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
+      mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT:5000}
+      mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
     default-encoding: UTF-8
 
 server:
-  port: ${SERVER_PORT}
+  port: ${SERVER_PORT:8080}
 
 security:
   jwt:
-    secret: ${JWT_SECRET}             # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL}   # 15 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL} # 30 days (ISO-8601)
-    issuer: ${JWT_ISSUER}
+    secret: ${JWT_SECRET}                   # base64 256-bit+
+    access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 15 minutes (ISO-8601)
+    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
+    issuer: ${JWT_ISSUER:auth-service}
 
 app:
-  base-url: ${APP_BASE_URL}
+  base-url: ${APP_BASE_URL:http://localhost:8080}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
   mail:
     from: ${MAIL_FROM}
 
@@ -54,4 +54,4 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
-  folder: ${CLOUDINARY_FOLDER}
+  folder: ${CLOUDINARY_FOLDER:per/uploads}

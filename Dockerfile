@@ -1,35 +1,22 @@
-# syntax=docker/dockerfile:1.7
+# Stage 1: build
+# Start with a Maven image that includes JDK 21
+FROM maven:3.9.11-amazoncorretto-21 AS build
 
-######################################
-# Build stage
-######################################
-FROM maven:3.9.9-eclipse-temurin-21 AS build
-
-WORKDIR /workspace
-
-# Pre-copy pom and wrapper to leverage Docker layer caching
-COPY pom.xml mvnw mvnw.cmd ./
-COPY .mvn .mvn
-
-# Resolve dependencies
-RUN ./mvnw -q -B dependency:go-offline
-
-# Copy source and build
-COPY src src
-RUN ./mvnw -q -B clean package -Dspotless.check.skip=true -DskipTests
-
-######################################
-# Runtime stage
-######################################
-FROM eclipse-temurin:21-jre
-
+# Copy source code and pom.xml file to /app folder
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
 
-ENV JAVA_OPTS="" \
-    SPRING_PROFILES_ACTIVE=prod
+# Build source code with maven
+RUN mvn -q -B clean package -Dspotless.check.skip=true -DskipTests
 
-COPY --from=build /workspace/target/*.jar /app/app.jar
+#Stage 2: create image
+# Start with Amazon Correto JDK 21
+FROM amazoncorretto:21.0.9
 
-EXPOSE 8080
+# Set working folder to App and copy complied file from above step
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /app/app.jar"]
+# Command to run the application
+ENTRYPOINT ["java", "-jar", "app.jar"]
