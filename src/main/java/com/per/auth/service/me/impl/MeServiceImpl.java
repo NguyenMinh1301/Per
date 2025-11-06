@@ -29,6 +29,10 @@ public class MeServiceImpl implements MeService {
         return userRepository
                 .findByUsername(username)
                 .map(AuthUserMapper::toMeResponse)
-                .orElseThrow(() -> new ApiException(ApiErrorCode.AUTH_INVALID_CREDENTIALS, "Invalid username or password"));
+                .orElseThrow(
+                        () ->
+                                new ApiException(
+                                        ApiErrorCode.AUTH_INVALID_CREDENTIALS,
+                                        "Invalid username or password"));
     }
 }
