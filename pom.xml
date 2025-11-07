@@ -153,6 +153,14 @@
 			<version>2.8.5</version>
 		</dependency>
 
+		<!-- PayOS -->
+
+		<dependency>
+			<groupId>vn.payos</groupId>
+			<artifactId>payos-java</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

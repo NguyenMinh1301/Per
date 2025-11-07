@@ -55,3 +55,11 @@ cloudinary:
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
   folder: ${CLOUDINARY_FOLDER:per/uploads}
+
+payos:
+  client-id: ${PAY_OS_CLIENT_ID}
+  api-key: ${PAY_OS_API_KEY}
+  checksum-key: ${PAY_OS_CHECKSUM_KEY}
+  webhook-path: /api/v1/payments/payos/webhook
+  return-path: /payments/payos/return
+  cancel-path: /payments/payos/return
