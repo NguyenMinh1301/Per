@@ -63,6 +63,11 @@ public enum ApiSuccessCode {
     CART_ITEM_REMOVE_SUCCESS("CART_ITEM_REMOVE_SUCCESS", "Cart item removed successfully"),
     CART_CLEAR_SUCCESS("CART_CLEAR_SUCCESS", "Cart cleared successfully"),
 
+    // Payment
+    PAYMENT_CHECKOUT_SUCCESS("PAYMENT_CHECKOUT_SUCCESS", "Checkout link created successfully"),
+    PAYMENT_WEBHOOK_SUCCESS("PAYMENT_WEBHOOK_SUCCESS", "Payment webhook processed successfully"),
+    PAYMENT_RETURN_SUCCESS("PAYMENT_RETURN_SUCCESS", "Payment status retrieved successfully"),
+
     // Media
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
     MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");

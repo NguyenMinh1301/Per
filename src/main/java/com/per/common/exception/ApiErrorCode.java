@@ -50,7 +50,13 @@ public enum ApiErrorCode {
     MEDIA_FILE_REQUIRED("MEDIA_FILE_REQUIRED", "Media file is required", HttpStatus.BAD_REQUEST),
     MEDIA_FILE_TOO_LARGE("MEDIA_FILE_TOO_LARGE", "Media file exceeds the allowed size limit", HttpStatus.PAYLOAD_TOO_LARGE),
     MEDIA_UNSUPPORTED_TYPE("MEDIA_UNSUPPORTED_TYPE", "Media type is not supported", HttpStatus.BAD_REQUEST),
-    MEDIA_UPLOAD_FAILED("MEDIA_UPLOAD_FAILED", "Unable to store media at this time", HttpStatus.INTERNAL_SERVER_ERROR);
+    MEDIA_UPLOAD_FAILED("MEDIA_UPLOAD_FAILED", "Unable to store media at this time", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    // Payment
+    ORDER_NOT_FOUND("ORDER_NOT_FOUND", "The requested order could not be found", HttpStatus.NOT_FOUND),
+    PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND", "Payment information could not be found", HttpStatus.NOT_FOUND),
+    PAYMENT_GATEWAY_ERROR("PAYMENT_GATEWAY_ERROR", "Unable to create payment link at this time", HttpStatus.BAD_GATEWAY),
+    PAYMENT_WEBHOOK_INVALID("PAYMENT_WEBHOOK_INVALID", "Invalid payment webhook payload", HttpStatus.BAD_REQUEST);
 
     // spotless:on
     private final String code;

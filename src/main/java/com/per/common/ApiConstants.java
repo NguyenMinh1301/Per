@@ -62,6 +62,13 @@ public final class ApiConstants {
         public static final String DETAILS = "/{variantId}";
     }
 
+    public static final class Payment {
+        private Payment() {}
+
+        public static final String ROOT = API_V1 + "/payments";
+        public static final String CHECKOUT = "/checkout";
+    }
+
     public static final class Cart {
         private Cart() {}
 
