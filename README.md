@@ -82,6 +82,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 - **JWT**: `JWT_SECRET` (base64-encoded 256-bit key), `ACCESS_TOKEN_TTL`, `REFRESH_TOKEN_TTL`, `JWT_ISSUER`
 - **Mail**: Configure MailHog (local) or SMTP credentials (e.g., Gmail app password)
 - **Application**: `SERVER_PORT`, `CORS_ALLOWED_ORIGINS`, `APP_BASE_URL`
+- **PayOS**: `PAY_OS_CLIENT_ID`, `PAY_OS_API_KEY`, `PAY_OS_CHECKSUM_KEY`
 
 ### Running Locally (with Docker Compose)
 ```bash
@@ -89,7 +90,7 @@ docker compose up -d
 ./mvnw spring-boot:run
 ```
 Docker Compose provisions PostgreSQL, Redis, and MailHog:
-- PostgreSQL: `localhost:5432` (`authdb` / `postgres` / `postgres`)
+- PostgreSQL: `localhost:5432`
 - Redis: `localhost:6379`
 - MailHog UI: `http://localhost:8025`
 
@@ -126,6 +127,9 @@ The runnable JAR is produced at `target/auth-0.0.1-SNAPSHOT.jar`.
 |      | `POST /api/v1/users` | Create user |
 |      | `PUT /api/v1/users/{id}` | Update user |
 |      | `DELETE /api/v1/users/{id}` | Delete user |
+| Payment | `POST /api/v1/payments/checkout` | Create PayOS checkout link from cart items |
+|         | `POST /api/v1/payments/payos/webhook` | PayOS webhook endpoint |
+|         | `GET /api/v1/payments/payos/return` | PayOS return URL (status summary) |
 
 All responses follow the unified `ApiResponse` contract with standardised `code` values defined in `ApiSuccessCode` and `ApiErrorCode`.
 
