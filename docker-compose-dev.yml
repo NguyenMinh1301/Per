@@ -4,7 +4,11 @@
 services:
   app:
     container_name: per
-    image: nguyenminh1301/per:0.0.1
+    # Build from local
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: per-dev
     restart: unless-stopped
 
     environment:
