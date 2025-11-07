@@ -5,5 +5,7 @@ public enum Seasonality {
     SUMMER,
     FALL,
     WINTER,
-    ALL_SEASONS
+    ALL_SEASONS,
+    SPRING_SUMMER,
+    FALL_WINTER
 }
