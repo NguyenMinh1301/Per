@@ -8,6 +8,254 @@
 	},
 	"item": [
 		{
+			"name": "!",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"minhng\",\r\n  \"email\": \"nguyenminh1301.dev@gmail.com\",\r\n  \"password\": \"secret123\",\r\n  \"firstName\": \"Minh\",\r\n  \"lastName\": \"Nguyen\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"username\": \"minhng\",\r\n  \"password\": \"secret123\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiUkVGUkVTSCIsInVzZXJJZCI6ImU5MTM5OTAyLTMwYTgtNDg4Yi1iYzM4LTgwMmUwM2VkZjIzNiIsImp0aSI6IjI0OWZhMWU5LTEzMjctNDc3ZC1iMjA1LTRkY2QwODQzZjllOSIsInJvbGVzIjpbIkFETUlOIl0sInN1YiI6Im1pbmhuZyIsImlzcyI6ImF1dGgtc2VydmljZSIsImlhdCI6MTc2MjE1ODEwMCwiZXhwIjoxNzY0NzUwMTAwfQ.CIqVS-8XpGu2_kGgntAP-xEhFQzd5UlIyH_ULRMRPT4\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"refresh"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiQUNDRVNTIiwidXNlcklkIjoiZTkxMzk5MDItMzBhOC00ODhiLWJjMzgtODAyZTAzZWRmMjM2Iiwicm9sZXMiOlsiQURNSU4iXSwic3ViIjoibWluaG5nIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzYyMTU4MTE3LCJleHAiOjE3NjIxNTkwMTd9.v8i44w-IR9tZrobGE-su7Dqx2MFE4uE_qhQAbJWqklk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9.eyJ0eXBlIjoiUkVGUkVTSCIsInVzZXJJZCI6ImU5MTM5OTAyLTMwYTgtNDg4Yi1iYzM4LTgwMmUwM2VkZjIzNiIsImp0aSI6IjhiZGQ5OWM3LWJhNzUtNDA0Yi1iYjViLWFkZjVkNDNhMjUzZiIsInJvbGVzIjpbIkFETUlOIl0sInN1YiI6Im1pbmhuZyIsImlzcyI6ImF1dGgtc2VydmljZSIsImlhdCI6MTc2MjE1ODExNywiZXhwIjoxNzY0NzUwMTE3fQ.1xJ7rnmlPqLC3fVOOYMj6sr3EmQhIVkZPKq1YnFyKdw\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verify email",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"token\": \"EMAIL_VERIFICATION_TOKEN\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/verify-email",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"verify-email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Forgot password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"nguyenminh1301.dev@gmail.com\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"forgot-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Reset password",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"token\": \"107f396e-9755-42be-934c-9d50a5ad3306\",\r\n  \"newPassword\": \"newSecret456\"\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"reset-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Me",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJyb2xlcyI6WyJBRE1JTiJdLCJ0eXBlIjoiQUNDRVNTIiwidXNlcklkIjoiNjdlZGI3YzctYTczZS00OTk3LWI4NmQtZTE2ZGRmM2ZhYmQ4Iiwic3ViIjoibWluaG5nIiwiaXNzIjoiYXV0aC1zZXJ2aWNlIiwiaWF0IjoxNzYyNjA5NzA1LCJleHAiOjE3NjI2MTA2MDV9.53LKkov41bXtdIOBBjVwRp2tyE80-9PPZjk7Ra7f_T0",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"auth",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Auth",
 			"item": [
 				{
@@ -633,7 +881,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products?q=&pageable=",
+							"raw": "{{baseUrl}}/api/v1/products",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -645,11 +893,13 @@
 							"query": [
 								{
 									"key": "q",
-									"value": ""
+									"value": "",
+									"disabled": true
 								},
 								{
 									"key": "pageable",
-									"value": ""
+									"value": "",
+									"disabled": true
 								}
 							]
 						}
