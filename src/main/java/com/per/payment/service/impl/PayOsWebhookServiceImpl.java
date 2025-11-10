@@ -16,7 +16,7 @@ import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.order.entity.Order;
 import com.per.order.enums.OrderStatus;
-import com.per.order.repository.OrderRepository;
+import com.per.order.service.OrderInventoryService;
 import com.per.payment.entity.Payment;
 import com.per.payment.entity.PaymentTransaction;
 import com.per.payment.enums.PaymentStatus;
@@ -37,37 +37,38 @@ public class PayOsWebhookServiceImpl implements PayOsWebhookService {
 
     private final PayOS payOS;
     private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
     private final PaymentTransactionRepository paymentTransactionRepository;
+    private final OrderInventoryService orderInventoryService;
     private final ObjectMapper objectMapper;
 
     @Override
     public void handleWebhook(Webhook payload) {
         WebhookData data = verifyPayload(payload);
 
-        Payment payment =
-                paymentRepository
-                        .findByOrderCode(data.getOrderCode())
-                        .orElseThrow(
-                                () ->
-                                        new ApiException(
-                                                ApiErrorCode.PAYMENT_NOT_FOUND,
-                                                "Payment not found for order code "
-                                                        + data.getOrderCode()));
-
-        boolean success = "00".equalsIgnoreCase(data.getCode());
-        PaymentStatus targetStatus = success ? PaymentStatus.PAID : PaymentStatus.FAILED;
-
-        if (payment.getStatus() == PaymentStatus.PAID && !success) {
+        Payment payment = paymentRepository.findByOrderCode(data.getOrderCode()).orElse(null);
+        if (payment == null) {
             return;
         }
 
-        payment.setStatus(targetStatus);
-        paymentRepository.save(payment);
+        boolean success =
+                payload.getSuccess() != null
+                        ? payload.getSuccess()
+                        : "00".equalsIgnoreCase(data.getCode());
+        PaymentStatus targetStatus = success ? PaymentStatus.PAID : PaymentStatus.CANCELLED;
+
+        if (!success && payment.getStatus() == PaymentStatus.PAID) {
+            return;
+        }
+
+        payment.setStatus(success ? PaymentStatus.PAID : targetStatus);
 
         Order order = payment.getOrder();
-        order.setStatus(success ? OrderStatus.PAID : OrderStatus.FAILED);
-        orderRepository.save(order);
+        if (success) {
+            order.setStatus(OrderStatus.PAID);
+        } else if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
+            orderInventoryService.restoreStock(order);
+            order.setStatus(OrderStatus.CANCELLED);
+        }
 
         persistTransactionIfNeeded(payment, data, success);
     }

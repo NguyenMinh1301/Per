@@ -50,7 +50,8 @@ public class SecurityConfig {
         "/swagger-ui/**",
 
         // Payment (PayOS)
-        "/api/v1/payments/payos/webhook"
+        "/api/v1/payments/payos/webhook",
+        "/payments/payos/return"
     };
 
     @Bean
