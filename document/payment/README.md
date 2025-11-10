@@ -42,17 +42,25 @@ Workflow
      }
      ```
 
-2. **PayOS Return (`GET /api/v1/payments/payos/return?orderCode=...`)**
-   * Used by the UI after PayOS redirects back.
-   * Looks up the order and payment by `orderCode`, returning their latest statuses so the client can display success/failure messages.
+2. **PayOS Return (`GET /payments/payos/return`)**
+   * PayOS redirects the shopper here whether they paid or cancelled.
+   * Query params contain `orderCode`, `code`, `cancel`.
+   * Controller returns the latest `orderStatus`/`paymentStatus` to the UI **and**:
+     - If `cancel=true` or `code != "00"`, mark payment/order `CANCELLED` and restock via `OrderInventoryService`.
+     - If `code="00"`, statuses remain untouched (webhook will set them to `PAID`).
 
 3. **PayOS Webhook (`POST /api/v1/payments/payos/webhook`)**
    * Receives PayOS webhook JSON; the SDK verifies the signature.
    * The corresponding `Payment` is located via `orderCode`. Depending on `code` (PayOS success code `"00"`), the payment status becomes `PAID` or `FAILED`.
-   * The linked `Order.status` is updated (`PAID`/`FAILED`).
+   * The linked `Order.status` is updated (`PAID`, `CANCELLED`, or `FAILED`). On non-success, inventory is restored.
    * A `PaymentTransaction` record is inserted for the webhook (idempotent by reference).
+   * PayOS sometimes sends “test pings” with dummy order codes; we now ignore those instead of throwing exceptions.
 
-4. **Maintenance**
+4. **Expiration Scheduler**
+   * Runs every minute (`payment.expiration-check-interval`).
+   * Finds pending payments with `expired_at < now`, marks them `FAILED`, sets order `FAILED`, and restores stock.
+
+5. **Maintenance**
    * `PaymentStatus` enum includes `PENDING`, `PAID`, `FAILED`, `CANCELLED`, `EXPIRED`.
    * `PaymentTransactionStatus` tracks `SUCCEEDED`, `FAILED`, `PENDING`.
    * When adding new PayOS fields, update both the entity and `V9__create_payment_tables.sql` with a new Flyway migration.
@@ -101,9 +109,9 @@ No auth is added by default; if exposing publicly, secure this endpoint (IP whit
 
 ### 3. PayOS Return
 ```
-GET /api/v1/payments/payos/return?orderCode=123456789
+GET /payments/payos/return?orderCode=123456789&cancel=true
 ```
-Useful for the UI to display the latest `orderStatus` / `paymentStatus`.
+Response body contains the latest `orderStatus`/`paymentStatus`. On cancel/failure this endpoint also persists the state and restocks inventory.
 
 Operational Notes
 -----------------
@@ -117,7 +125,7 @@ Operational Notes
 * When debugging payment issues:
   1. Check `payment` table for `status` and `checkout_url`.
   2. Inspect `payment_transaction` for webhook idempotency.
-  3. Verify `order` status equals payment status; the webhook handler updates both.
+  3. Verify `order` status mirrors payment status; return/webhook/scheduler all update both sides.
 
 Extending the Module
 --------------------

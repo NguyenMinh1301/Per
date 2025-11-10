@@ -1,62 +1,73 @@
 Order Module Overview
 =====================
 
-The order module captures every checkout snapshot so payments can be reconciled independently of the cart. It stores the shopper, shipping contact, monetary totals, and immutable line items (product + variant references with the price at the time of purchase).
+The order module snapshots everything that leaves the cart: customer, shipping info, economic totals, and the exact product/variant/quantity/price being purchased. Payments, fulfilment, and refunds all depend on the data frozen here.
 
 Responsibilities
 ----------------
 
-* Persist orders generated from checkout (currently via `CheckoutServiceImpl`).
-* Keep a full snapshot of receiver information, totals, and each variant being purchased.
-* Provide relational hooks for payments (`payment.order_id` FK) and inventory (each line item links back to `product`/`product_variant`).
-* Serve as the single source of truth when reconciling PayOS webhooks or fulfilling shipments.
+* Persist checkout snapshots (`Order` + `OrderItem`) before hitting the payment gateway.
+* Store an immutable copy of the price, SKU, and quantity at checkout. Later adjustments should create compensating records (credit notes) rather than updating these rows.
+* Provide hooks for:
+  * `payment.order_id` – payments reconcile against orders.
+  * Inventory rollback – if a payment fails, we know exactly which variants to restock.
+  * Future fulfilment modules (shipping labels, invoices).
 
-Database Mapping
-----------------
+Schema Mapping
+--------------
 
-* `order`
-  * Columns mirror `com.per.order.entity.Order` (totals, receiver fields, status, timestamps).
-  * `order_code` is a random 9-digit long generated via `OrderCodeGenerator`.
-  * `status` uses `OrderStatus` enum (`PENDING_PAYMENT`, `PAID`, `FAILED`, `CANCELLED`).
-* `order_item`
+* **Order (`public."order"`)**
+  * Mirrors `com.per.order.entity.Order`.
+  * Fields: `order_code` (9-digit random), totals (`subtotal_amount`, `discount_amount`, `shipping_fee`, `grand_total`), receiver details, `currency_code`, and timestamps.
+  * Status comes from `OrderStatus`:
+    * `PENDING_PAYMENT` – just created; waiting for payment.
+    * `PAID` – payment succeeded.
+    * `CANCELLED` – user cancelled before paying (either via return URL or webhook).
+    * `FAILED` – expired/no payment received and scheduler marked it as failed.
+* **OrderItem (`public.order_item`)**
   * Mirrors `com.per.order.entity.OrderItem`.
-  * Keeps foreign keys to `product` and `product_variant` so the back office can trace SKUs.
-  * Stores `product_name`, `variant_sku`, `quantity`, and `unit_price` at checkout time.
+  * Contains FK to `order`, `product`, and `product_variant`.
+  * Stored columns include `product_name`, `variant_sku`, `quantity`, `unit_price`, `sub_total_amount` – all immutable once saved.
 
-Flow Summary
-------------
+Lifecycle
+---------
 
-1. **Checkout (Payment module)**
-   * Cart items selected by the shopper are validated, stock is locked by decrementing variant inventory, and `Order` + `OrderItem` rows are inserted.
-   * Order totals are recomputed from the cart snapshot and saved atomically with the items.
-2. **Payment**
-   * `Payment` references the `Order` via `order_id`.
-   * PayOS returns update both the `Payment` and the associated `Order.status`.
-3. **Fulfilment**
-   * Future features can attach shipping or invoice data by adding tables keyed by `order.id`.
+1. **Checkout** (`CheckoutServiceImpl`)
+   * Validates cart items, checks stock, decrements `product_variant.stockQuantity`.
+   * Creates an `Order` with `OrderItem` records and `PENDING_PAYMENT` status.
+2. **Payment** (PayOS)
+   * `Payment` references the order via `order_id`.
+   * Webhook/return endpoint updates both payment and order status; on failure/cancel it also calls `OrderInventoryService.restoreStock`.
+3. **Expiration** (`ExpiredPaymentScheduler`)
+   * Runs every minute: finds `Payment` rows with `status=PENDING` and `expired_at < now`, marks order/payment as `FAILED`, and restores stock.
+4. **Fulfilment (future)**
+   * Build additional tables keyed by `order.id` when you introduce shipping, invoices, etc.
 
 Maintenance Guidelines
 ----------------------
 
-* Never mutate historical line item fields (name, price, quantity). If a correction is required, write a compensating record or create a new order.
-* When adding new order-level fields (e.g., coupon, shipping method), update:
-  1. `Order` entity + builder defaults.
-  2. `V8__create_order_tables.sql` (and create a new migration for production environments).
-  3. The checkout workflow that populates the entity.
-* Use `OrderRepository` for transactional operations; avoid loading eager relationships unless necessary (items are LAZY by default).
-* If you introduce APIs for retrieving orders, enforce authorization (user scopes) and paging to avoid returning large item lists at once.
+* Never mutate unit prices or quantities on existing `OrderItem` rows. Create adjustments/refunds separately.
+* Any new columns require:
+  1. Updating the entity builder defaults.
+  2. Adding a Flyway migration (don’t edit V8 in production).
+  3. Populating the value in checkout logic.
+* Use `OrderInventoryService` whenever you need to restore stock; do not hand-roll variant updates outside it to avoid inconsistencies.
+* When adding order APIs later, always filter by authenticated user (unless admin) and paginate results.
 
-Testing Tips
-------------
+Testing
+-------
 
-* When unit testing checkout logic, mock `OrderRepository` and assert that `Order` snapshots include the expected totals.
-* Integration tests should verify that stock decrements happen before order persistence to avoid overselling.
+* Unit tests can mock `OrderRepository` and `ProductVariantRepository` to verify that totals and inventory adjustments happen in turn.
+* Integration tests should cover:
+  * Checkout success (order → payOS link).
+  * Webhook success (order state → `PAID`).
+  * Cancel/expiry (order state → `CANCELLED`/`FAILED` and inventory restored).
 
-API Readiness
--------------
+API Surface
+-----------
 
-Currently there are no public REST endpoints for orders. When you add them:
+Orders currently don’t expose public REST endpoints. If you need them:
 
-* Namespace under `/api/v1/orders`.
-* Prefer read-only projections (summary list, detail by code) that do not expose internal IDs.
-* Use `OrderStatus` in responses so the front end can display payment state without querying the payment module.
+* Use `/api/v1/orders` (GET list, GET detail by `orderCode`).
+* Always return the `OrderStatus` and `PaymentStatus` so clients don’t need to cross-check elsewhere.
+* For admin dashboards, include filters (`status`, `date range`, `user`) and pagination.
