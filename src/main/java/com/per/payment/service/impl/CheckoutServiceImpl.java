@@ -49,6 +49,8 @@ import vn.payos.type.PaymentData;
 @Transactional
 public class CheckoutServiceImpl implements CheckoutService {
 
+    private static final int PAYOS_DESCRIPTION_LIMIT = 25;
+
     private final CartHelper cartHelper;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
@@ -151,6 +153,8 @@ public class CheckoutServiceImpl implements CheckoutService {
 
         removeItemsFromCart(cart, selectedItems);
 
+        String description = buildPayOsDescription(order.getOrderCode());
+
         Payment payment =
                 Payment.builder()
                         .order(order)
@@ -158,19 +162,18 @@ public class CheckoutServiceImpl implements CheckoutService {
                         .orderCode(order.getOrderCode())
                         .amount(order.getGrandTotal())
                         .currencyCode(order.getCurrencyCode())
-                        .description("Thanh toán đơn hàng #" + order.getOrderCode())
+                        .description(description)
                         .status(PaymentStatus.PENDING)
                         .build();
-        payment = paymentRepository.save(payment);
 
-        CheckoutResponseData payOsResponse = createPaymentLink(order, request);
+        CheckoutResponseData payOsResponse = createPaymentLink(order, request, description);
         payment.setPaymentLinkId(payOsResponse.getPaymentLinkId());
         payment.setCheckoutUrl(payOsResponse.getCheckoutUrl());
         payment.setAmount(BigDecimal.valueOf(payOsResponse.getAmount()));
         if (payOsResponse.getExpiredAt() != null) {
             payment.setExpiredAt(Instant.ofEpochSecond(payOsResponse.getExpiredAt()));
         }
-        paymentRepository.save(payment);
+        payment = paymentRepository.save(payment);
 
         return CheckoutResponse.builder()
                 .orderId(order.getId())
@@ -184,13 +187,14 @@ public class CheckoutServiceImpl implements CheckoutService {
                 .build();
     }
 
-    private CheckoutResponseData createPaymentLink(Order order, CheckoutRequest checkoutRequest) {
+    private CheckoutResponseData createPaymentLink(
+            Order order, CheckoutRequest checkoutRequest, String description) {
         try {
             PaymentData.PaymentDataBuilder builder =
                     PaymentData.builder()
                             .orderCode(order.getOrderCode())
                             .amount(toPayOsAmount(order.getGrandTotal()))
-                            .description("Thanh toán đơn hàng #" + order.getOrderCode())
+                            .description(description)
                             .returnUrl(
                                     buildCallbackUrl(
                                             payOsProperties.getReturnPath(), order.getOrderCode()))
@@ -259,5 +263,13 @@ public class CheckoutServiceImpl implements CheckoutService {
     private int toPayOsAmount(BigDecimal amount) {
         long value = amount.setScale(0, RoundingMode.HALF_UP).longValueExact();
         return Math.toIntExact(value);
+    }
+
+    private String buildPayOsDescription(Long orderCode) {
+        String base = "Order #" + orderCode;
+        if (base.length() > PAYOS_DESCRIPTION_LIMIT) {
+            return base.substring(0, PAYOS_DESCRIPTION_LIMIT);
+        }
+        return base;
     }
 }
