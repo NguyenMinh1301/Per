@@ -1,5 +1,6 @@
-# docker-compose-prod.yml
-# RUN: docker compose -f docker-compose-prod.yml up -d
+# RUN:    docker compose -f docker-compose-prod.yml up -d
+# BUILD:  docker build -t nguyenminh1301/per:<tagname>
+# PUSH:   docker push nguyenminh1301/per:<tagname>
 
 services:
   app:
