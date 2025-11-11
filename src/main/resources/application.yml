@@ -1,8 +1,13 @@
 #debug: true
 
 spring:
+  application:
+    name: per
   config:
     import: optional:file:.env[.properties]   # link .env
+  threads:
+    virtual:
+      enabled: true
   datasource:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USERNAME}
@@ -41,7 +46,7 @@ security:
     secret: ${JWT_SECRET}                   # base64 256-bit+
     access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 15 minutes (ISO-8601)
     refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
-    issuer: ${JWT_ISSUER:auth-service}
+    issuer: ${JWT_ISSUER:per-auth-service}
 
 app:
   base-url: ${APP_BASE_URL:http://localhost:8080}
