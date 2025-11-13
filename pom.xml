@@ -8,11 +8,11 @@
 		<version>3.5.6</version>
 		<relativePath/>
 	</parent>
-	<groupId>com.auth</groupId>
-	<artifactId>auth</artifactId>
+	<groupId>com.per</groupId>
+	<artifactId>per</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>auth</name>
-	<description>auth</description>
+	<name>per</name>
+	<description>per</description>
 	<url/>
 	<licenses>
 		<license/>
