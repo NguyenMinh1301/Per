@@ -783,6 +783,42 @@
 			"name": "Product",
 			"item": [
 				{
+					"name": "GET /api/v1/products",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "Temp Tester",
+									"disabled": true
+								},
+								{
+									"key": "pageable",
+									"value": "",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "GET /api/v1/products/{id}",
 					"request": {
 						"method": "GET",
@@ -865,42 +901,6 @@
 								"v1",
 								"products",
 								"{{id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "GET /api/v1/products",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Accept",
-								"value": "application/json"
-							}
-						],
-						"url": {
-							"raw": "{{baseUrl}}/api/v1/products",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"api",
-								"v1",
-								"products"
-							],
-							"query": [
-								{
-									"key": "q",
-									"value": "",
-									"disabled": true
-								},
-								{
-									"key": "pageable",
-									"value": "",
-									"disabled": true
-								}
 							]
 						}
 					},
@@ -1672,7 +1672,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{}",
+							"raw": "{\r\n    \"variantId\":\"c01ba173-f002-4db6-9f9a-1c7b13ce3d50\",\r\n    \"quantity\":\"1\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1805,7 +1805,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{}",
+							"raw": "{\r\n  \"cartItemIds\": [\r\n    \"c4a5c0f2-f381-422d-9609-c3975071c6ca\"\r\n  ],\r\n  \"receiverName\": \"John Doe\",\r\n  \"receiverPhone\": \"0988999999\",\r\n  \"shippingAddress\": \"Viet Nam\",\r\n  \"note\": \"Office hours\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
