@@ -203,6 +203,6 @@ public class AuthServiceImpl implements AuthService {
         }
         return userRepository
                 .findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid username or password"));
+                .orElseThrow(() -> new IllegalArgumentException("Refresh token is invalid"));
     }
 }
