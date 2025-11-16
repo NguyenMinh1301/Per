@@ -4,6 +4,7 @@ This document explains the internals of the authentication module so future main
 
 ## 1. Responsibilities
 - Provide JWT-based authentication (access and refresh tokens).
+- Offer a lightweight token introspection API that only reports whether an access token is active.
 - Manage registration, login, logout, email verification, forgot/reset password flows.
 - Persist refresh tokens in Redis and verification/reset tokens in PostgreSQL.
 - Deliver emails for verification and password reset through SMTP.
@@ -33,21 +34,26 @@ This document explains the internals of the authentication module so future main
    - Validates refresh JWT and Redis entry via `RefreshTokenService`.
    - Revokes supplied refresh token and issues a new pair (`AuthTokenResponse`).
 
-4. **Logout (`POST /api/v1/auth/logout`)**
+4. **Introspect (`POST /api/v1/auth/introspect`)**
+   - Accepts `IntrospectRequest { "accessToken": "<token>" }`.
+   - `AuthService.introspect` verifies signature, token type, user status, and expiration.
+   - Response data is a simple `{ "introspect": true|false }` while the message explains the result.
+
+5. **Logout (`POST /api/v1/auth/logout`)**
    - Access token identifies the principal.
    - Refresh token is removed from Redis if present.
 
-5. **Email Verification**
+6. **Email Verification**
    - `UserTokenService.create` issues token type `EMAIL_VERIFICATION` (24h TTL).
    - `MailServiceImpl.sendVerificationEmail` builds link: `APP_BASE_URL + /verify-email?token=`.
    - `AuthService.verifyEmail` consumes token, marks `emailVerified = true`.
 
-6. **Forgot/Reset Password**
+7. **Forgot/Reset Password**
    - `forgotPassword`: optionally creates `PASSWORD_RESET` token (15m TTL) and sends email.
    - `GET /reset-password?token=` validates token for client UI.
    - `resetPassword`: consumes token and updates BCrypt password.
 
-7. **Current Profile (`GET /api/v1/auth/me`)**
+8. **Current Profile (`GET /api/v1/auth/me`)**
    - `MeServiceImpl` loads user by username from security context and maps to `MeResponse`.
 
 ## 4. Token Lifecycles
