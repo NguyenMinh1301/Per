@@ -1,6 +1,7 @@
 package com.per.auth.service;
 
 import com.per.auth.dto.request.ForgotPasswordRequest;
+import com.per.auth.dto.request.IntrospectRequest;
 import com.per.auth.dto.request.LogoutRequest;
 import com.per.auth.dto.request.RefreshTokenRequest;
 import com.per.auth.dto.request.ResetPasswordRequest;
@@ -8,6 +9,7 @@ import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
 import com.per.auth.dto.response.AuthTokenResponse;
+import com.per.auth.dto.response.IntrospectResponse;
 
 public interface AuthService {
     void register(SignupRequest request);
@@ -25,4 +27,6 @@ public interface AuthService {
     void resetPassword(ResetPasswordRequest request);
 
     void validateResetToken(String token);
+
+    IntrospectResponse introspect(IntrospectRequest request);
 }

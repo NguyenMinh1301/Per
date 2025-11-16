@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.per.auth.configuration.JwtProperties;
 import com.per.auth.dto.request.ForgotPasswordRequest;
+import com.per.auth.dto.request.IntrospectRequest;
 import com.per.auth.dto.request.LogoutRequest;
 import com.per.auth.dto.request.RefreshTokenRequest;
 import com.per.auth.dto.request.ResetPasswordRequest;
@@ -24,6 +25,7 @@ import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
 import com.per.auth.dto.response.AuthTokenResponse;
+import com.per.auth.dto.response.IntrospectResponse;
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.entity.TokenType;
@@ -39,6 +41,8 @@ import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
 import com.per.user.entity.User;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -181,6 +185,37 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public void validateResetToken(String token) {
         userTokenService.validate(token, TokenType.PASSWORD_RESET);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public IntrospectResponse introspect(IntrospectRequest request) {
+        String token = request.getAccessToken();
+
+        try {
+            Claims claims = jwtService.extractAllClaims(token);
+            String tokenType = claims.get("type", String.class);
+
+            if (!JwtTokenType.ACCESS.name().equals(tokenType)) {
+                return IntrospectResponse.inactive();
+            }
+
+            String username = claims.getSubject();
+            User user = resolveUser(username);
+
+            boolean active =
+                    user.isActive()
+                            && jwtService.isTokenValid(
+                                    token, UserPrincipal.from(user), JwtTokenType.ACCESS);
+
+            if (!active) {
+                return IntrospectResponse.inactive();
+            }
+
+            return IntrospectResponse.active();
+        } catch (IllegalArgumentException | JwtException ex) {
+            return IntrospectResponse.inactive();
+        }
     }
 
     private AuthTokenResponse buildAuthTokenResponse(User user) {

@@ -13,6 +13,7 @@ public final class ApiConstants {
         public static final String LOGIN = "/login";
         public static final String LOGOUT = "/logout";
         public static final String REFRESH = "/refresh";
+        public static final String INTROSPECT = "/introspect";
         public static final String VERIFY_EMAIL = "/verify-email";
         public static final String FORGOT_PASSWORD = "/forgot-password";
         public static final String RESET_PASSWORD = "/reset-password";

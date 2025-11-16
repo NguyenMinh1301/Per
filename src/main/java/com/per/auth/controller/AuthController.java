@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.per.auth.dto.request.ForgotPasswordRequest;
+import com.per.auth.dto.request.IntrospectRequest;
 import com.per.auth.dto.request.LogoutRequest;
 import com.per.auth.dto.request.RefreshTokenRequest;
 import com.per.auth.dto.request.ResetPasswordRequest;
@@ -21,6 +22,7 @@ import com.per.auth.dto.request.SigninRequest;
 import com.per.auth.dto.request.SignupRequest;
 import com.per.auth.dto.request.VerifyEmailRequest;
 import com.per.auth.dto.response.AuthTokenResponse;
+import com.per.auth.dto.response.IntrospectResponse;
 import com.per.auth.dto.response.ResetTokenValidationResponse;
 import com.per.auth.dto.response.user.MeResponse;
 import com.per.auth.service.AuthService;
@@ -59,6 +61,14 @@ public class AuthController {
         AuthTokenResponse response = authService.refreshToken(request);
         return ResponseEntity.ok(
                 ApiResponse.success(ApiSuccessCode.AUTH_REFRESH_SUCCESS, response));
+    }
+
+    @PostMapping(ApiConstants.Auth.INTROSPECT)
+    public ResponseEntity<ApiResponse<IntrospectResponse>> introspect(
+            @Valid @RequestBody IntrospectRequest request) {
+        IntrospectResponse response = authService.introspect(request);
+        return ResponseEntity.ok(
+                ApiResponse.success(ApiSuccessCode.AUTH_INTROSPECT_SUCCESS, response));
     }
 
     @PostMapping(ApiConstants.Auth.LOGOUT)
