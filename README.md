@@ -3,8 +3,12 @@
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.6-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-Latest-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![JWT](https://img.shields.io/badge/JWT-Security-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
+![Flyway](https://img.shields.io/badge/Flyway-11.10-CC0200?style=for-the-badge&logo=flyway&logoColor=white)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-1.39-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-2.8-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
+![PayOS](https://img.shields.io/badge/PayOS-1.0-5D5FEF?style=for-the-badge&logo=credit-card&logoColor=white)
 
 ## Introduction
 
