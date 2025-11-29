@@ -25,7 +25,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"raw": "{{baseUrl}}/auth/register",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -54,7 +54,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"raw": "{{baseUrl}}/auth/login",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -83,7 +83,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"raw": "{{baseUrl}}/auth/refresh",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -122,7 +122,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"raw": "{{baseUrl}}/auth/logout",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -151,7 +151,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/verify-email",
+							"raw": "{{baseUrl}}/auth/verify-email",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -180,7 +180,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+							"raw": "{{baseUrl}}/auth/forgot-password",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -209,7 +209,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
+							"raw": "{{baseUrl}}/auth/reset-password",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -239,7 +239,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"raw": "{{baseUrl}}/auth/me",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -259,7 +259,7 @@
 			"name": "Auth",
 			"item": [
 				{
-					"name": "GET /api/v1/auth/verify-email",
+					"name": "GET /auth/verify-email",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -269,7 +269,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/verify-email?token=",
+							"raw": "{{baseUrl}}/auth/verify-email?token=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -290,7 +290,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/verify-email",
+					"name": "POST /auth/verify-email",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -313,7 +313,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/verify-email",
+							"raw": "{{baseUrl}}/auth/verify-email",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -328,7 +328,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/auth/reset-password",
+					"name": "GET /auth/reset-password",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -338,7 +338,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/reset-password?token=",
+							"raw": "{{baseUrl}}/auth/reset-password?token=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -359,7 +359,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/reset-password",
+					"name": "POST /auth/reset-password",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -382,7 +382,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/reset-password",
+							"raw": "{{baseUrl}}/auth/reset-password",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -397,7 +397,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/register",
+					"name": "POST /auth/register",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -420,7 +420,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/register",
+							"raw": "{{baseUrl}}/auth/register",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -435,7 +435,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/refresh",
+					"name": "POST /auth/refresh",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -458,7 +458,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/refresh",
+							"raw": "{{baseUrl}}/auth/refresh",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -473,7 +473,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/logout",
+					"name": "POST /auth/logout",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -496,7 +496,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/logout",
+							"raw": "{{baseUrl}}/auth/logout",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -511,7 +511,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/login",
+					"name": "POST /auth/login",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -534,7 +534,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/login",
+							"raw": "{{baseUrl}}/auth/login",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -549,7 +549,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/auth/forgot-password",
+					"name": "POST /auth/forgot-password",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -572,7 +572,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/forgot-password",
+							"raw": "{{baseUrl}}/auth/forgot-password",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -587,7 +587,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/auth/me",
+					"name": "GET /auth/me",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -597,7 +597,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/auth/me",
+							"raw": "{{baseUrl}}/auth/me",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -617,7 +617,7 @@
 			"name": "User",
 			"item": [
 				{
-					"name": "GET /api/v1/users/{id}",
+					"name": "GET /users/{id}",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -627,7 +627,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/{{id}}",
+							"raw": "{{baseUrl}}/users/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -642,7 +642,7 @@
 					"response": []
 				},
 				{
-					"name": "PUT /api/v1/users/{id}",
+					"name": "PUT /users/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -665,7 +665,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/{{id}}",
+							"raw": "{{baseUrl}}/users/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -680,7 +680,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/users/{id}",
+					"name": "DELETE /users/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -690,7 +690,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/{{id}}",
+							"raw": "{{baseUrl}}/users/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -705,7 +705,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/users/create",
+					"name": "POST /users/create",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -728,7 +728,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/create",
+							"raw": "{{baseUrl}}/users/create",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -743,7 +743,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/users/search",
+					"name": "GET /users/search",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -753,7 +753,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/users/search?q=&pageable=",
+							"raw": "{{baseUrl}}/users/search?q=&pageable=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -783,7 +783,7 @@
 			"name": "Product",
 			"item": [
 				{
-					"name": "GET /api/v1/products",
+					"name": "GET /products",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -793,7 +793,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products",
+							"raw": "{{baseUrl}}/products",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -819,7 +819,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/products/{id}",
+					"name": "GET /products/{id}",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -829,7 +829,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{id}}",
+							"raw": "{{baseUrl}}/products/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -844,7 +844,7 @@
 					"response": []
 				},
 				{
-					"name": "PUT /api/v1/products/{id}",
+					"name": "PUT /products/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -867,7 +867,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{id}}",
+							"raw": "{{baseUrl}}/products/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -882,7 +882,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/products/{id}",
+					"name": "DELETE /products/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -892,7 +892,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{id}}",
+							"raw": "{{baseUrl}}/products/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -907,7 +907,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/products",
+					"name": "POST /products",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -930,7 +930,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products",
+							"raw": "{{baseUrl}}/products",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -949,7 +949,7 @@
 			"name": "Product variant",
 			"item": [
 				{
-					"name": "PUT /api/v1/products/{productId}/variants/{id}",
+					"name": "PUT /products/{productId}/variants/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -972,7 +972,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{productId}}/variants/{{id}}",
+							"raw": "{{baseUrl}}/products/{{productId}}/variants/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -989,7 +989,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/products/{productId}/variants/{id}",
+					"name": "DELETE /products/{productId}/variants/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -999,7 +999,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{productId}}/variants/{{id}}",
+							"raw": "{{baseUrl}}/products/{{productId}}/variants/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1016,7 +1016,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/products/{productId}/variants",
+					"name": "POST /products/{productId}/variants",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1039,7 +1039,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/products/{{productId}}/variants",
+							"raw": "{{baseUrl}}/products/{{productId}}/variants",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1060,7 +1060,7 @@
 			"name": "Made in",
 			"item": [
 				{
-					"name": "GET /api/v1/made-in/{id}",
+					"name": "GET /made-in/{id}",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1070,7 +1070,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/made-in/{{id}}",
+							"raw": "{{baseUrl}}/made-in/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1085,7 +1085,7 @@
 					"response": []
 				},
 				{
-					"name": "PUT /api/v1/made-in/{id}",
+					"name": "PUT /made-in/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1108,7 +1108,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/made-in/{{id}}",
+							"raw": "{{baseUrl}}/made-in/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1123,7 +1123,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/made-in/{id}",
+					"name": "DELETE /made-in/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1133,7 +1133,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/made-in/{{id}}",
+							"raw": "{{baseUrl}}/made-in/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1148,7 +1148,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/made-in",
+					"name": "GET /made-in",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1158,7 +1158,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/made-in?query=&pageable=",
+							"raw": "{{baseUrl}}/made-in?query=&pageable=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1182,7 +1182,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/made-in",
+					"name": "POST /made-in",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1205,7 +1205,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/made-in",
+							"raw": "{{baseUrl}}/made-in",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1224,7 +1224,7 @@
 			"name": "Category",
 			"item": [
 				{
-					"name": "GET /api/v1/categories/{id}",
+					"name": "GET /categories/{id}",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1234,7 +1234,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories/{{id}}",
+							"raw": "{{baseUrl}}/categories/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1249,7 +1249,7 @@
 					"response": []
 				},
 				{
-					"name": "PUT /api/v1/categories/{id}",
+					"name": "PUT /categories/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1272,7 +1272,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories/{{id}}",
+							"raw": "{{baseUrl}}/categories/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1287,7 +1287,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/categories/{id}",
+					"name": "DELETE /categories/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1297,7 +1297,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories/{{id}}",
+							"raw": "{{baseUrl}}/categories/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1312,7 +1312,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/categories",
+					"name": "GET /categories",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1322,7 +1322,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories?query=&pageable=",
+							"raw": "{{baseUrl}}/categories?query=&pageable=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1346,7 +1346,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/categories",
+					"name": "POST /categories",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1369,7 +1369,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/categories",
+							"raw": "{{baseUrl}}/categories",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1388,7 +1388,7 @@
 			"name": "Media",
 			"item": [
 				{
-					"name": "POST /api/v1/media/upload",
+					"name": "POST /media/upload",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1408,7 +1408,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/media/upload",
+							"raw": "{{baseUrl}}/media/upload",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1423,7 +1423,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/media/upload/batch",
+					"name": "POST /media/upload/batch",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1443,7 +1443,7 @@
 							]
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/media/upload/batch",
+							"raw": "{{baseUrl}}/media/upload/batch",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1464,7 +1464,7 @@
 			"name": "Brand",
 			"item": [
 				{
-					"name": "GET /api/v1/brands/{id}",
+					"name": "GET /brands/{id}",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1474,7 +1474,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/brands/{{id}}",
+							"raw": "{{baseUrl}}/brands/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1489,7 +1489,7 @@
 					"response": []
 				},
 				{
-					"name": "PUT /api/v1/brands/{id}",
+					"name": "PUT /brands/{id}",
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -1512,7 +1512,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/brands/{{id}}",
+							"raw": "{{baseUrl}}/brands/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1527,7 +1527,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/brands/{id}",
+					"name": "DELETE /brands/{id}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1537,7 +1537,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/brands/{{id}}",
+							"raw": "{{baseUrl}}/brands/{{id}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1552,7 +1552,7 @@
 					"response": []
 				},
 				{
-					"name": "GET /api/v1/brands",
+					"name": "GET /brands",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1562,7 +1562,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/brands?query=&pageable=",
+							"raw": "{{baseUrl}}/brands?query=&pageable=",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1586,7 +1586,7 @@
 					"response": []
 				},
 				{
-					"name": "POST /api/v1/brands",
+					"name": "POST /brands",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1609,7 +1609,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/brands",
+							"raw": "{{baseUrl}}/brands",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1628,7 +1628,7 @@
 			"name": "Cart",
 			"item": [
 				{
-					"name": "GET /api/v1/cart",
+					"name": "GET /cart",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -1638,7 +1638,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/cart",
+							"raw": "{{baseUrl}}/cart",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1657,7 +1657,7 @@
 			"name": "Cart item",
 			"item": [
 				{
-					"name": "POST /api/v1/cart/items",
+					"name": "POST /cart/items",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1680,7 +1680,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/cart/items",
+							"raw": "{{baseUrl}}/cart/items",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1695,7 +1695,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/cart/items",
+					"name": "DELETE /cart/items",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1705,7 +1705,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/cart/items",
+							"raw": "{{baseUrl}}/cart/items",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1720,7 +1720,7 @@
 					"response": []
 				},
 				{
-					"name": "DELETE /api/v1/cart/items/{itemId}",
+					"name": "DELETE /cart/items/{itemId}",
 					"request": {
 						"method": "DELETE",
 						"header": [
@@ -1730,7 +1730,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/cart/items/{{itemId}}",
+							"raw": "{{baseUrl}}/cart/items/{{itemId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1746,7 +1746,7 @@
 					"response": []
 				},
 				{
-					"name": "PATCH /api/v1/cart/items/{itemId}",
+					"name": "PATCH /cart/items/{itemId}",
 					"request": {
 						"method": "PATCH",
 						"header": [
@@ -1769,7 +1769,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/cart/items/{{itemId}}",
+							"raw": "{{baseUrl}}/cart/items/{{itemId}}",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1790,7 +1790,7 @@
 			"name": "Payment",
 			"item": [
 				{
-					"name": "POST /api/v1/payments/checkout",
+					"name": "POST /payments/checkout",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1813,7 +1813,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/checkout",
+							"raw": "{{baseUrl}}/payments/checkout",
 							"host": [
 								"{{baseUrl}}"
 							],
@@ -1833,7 +1833,7 @@
 			"name": "PayOS (Webhook)",
 			"item": [
 				{
-					"name": "POST /api/v1/payments/payos/webhook",
+					"name": "POST /payments/payos/webhook",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -1856,7 +1856,7 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/api/v1/payments/payos/webhook",
+							"raw": "{{baseUrl}}/payments/payos/webhook",
 							"host": [
 								"{{baseUrl}}"
 							],

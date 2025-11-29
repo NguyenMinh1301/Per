@@ -37,13 +37,13 @@ public class SecurityConfig {
 
     private static final String[] publicEndpoint = {
         // Auth
-        "/api/v1/auth/register",
-        "/api/v1/auth/login",
-        "/api/v1/auth/refresh",
-        "/api/v1/auth/introspect",
-        "/api/v1/auth/verify-email",
-        "/api/v1/auth/forgot-password",
-        "/api/v1/auth/reset-password",
+        "/auth/register",
+        "/auth/login",
+        "/auth/refresh",
+        "/auth/introspect",
+        "/auth/verify-email",
+        "/auth/forgot-password",
+        "/auth/reset-password",
 
         // Swagger
         "/v3/api-docs/**",
@@ -51,7 +51,7 @@ public class SecurityConfig {
         "/swagger-ui/**",
 
         // Payment (PayOS)
-        "/api/v1/payments/payos/webhook",
+        "/payments/payos/webhook",
         "/payments/payos/return"
     };
 
