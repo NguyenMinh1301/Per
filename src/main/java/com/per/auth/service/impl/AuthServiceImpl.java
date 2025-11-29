@@ -8,6 +8,7 @@ import java.util.Optional;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -101,7 +102,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthTokenResponse login(SigninRequest request) {
-        User user = resolveUser(request.getUsername());
+        User user =
+                resolveUser(request.getUsername())
+                        .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");
         }
@@ -122,7 +126,10 @@ public class AuthServiceImpl implements AuthService {
     public AuthTokenResponse refreshToken(RefreshTokenRequest request) {
         String token = request.getRefreshToken();
         String username = jwtService.extractUsername(token);
-        User user = resolveUser(username);
+        User user =
+                resolveUser(username)
+                        .orElseThrow(() -> new IllegalArgumentException("Refresh token is invalid"));
+
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");
         }
@@ -201,7 +208,13 @@ public class AuthServiceImpl implements AuthService {
             }
 
             String username = claims.getSubject();
-            User user = resolveUser(username);
+            Optional<User> userOptional = resolveUser(username);
+
+            if (userOptional.isEmpty()) {
+                return IntrospectResponse.inactive();
+            }
+
+            User user = userOptional.get();
 
             boolean active =
                     user.isActive()
@@ -231,13 +244,11 @@ public class AuthServiceImpl implements AuthService {
         return AuthTokenResponse.bearer(accessToken, refreshToken, expiresIn);
     }
 
-    private User resolveUser(String username) {
+    private Optional<User> resolveUser(String username) {
         Optional<User> byUsername = userRepository.findByUsername(username);
         if (byUsername.isPresent()) {
-            return byUsername.get();
+            return byUsername;
         }
-        return userRepository
-                .findByEmail(username)
-                .orElseThrow(() -> new IllegalArgumentException("Refresh token is invalid"));
+        return userRepository.findByEmail(username);
     }
 }

@@ -30,11 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidation(
             MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult()
-                .getFieldErrors()
-                .forEach(error -> errors.put(error.getField(), error.getDefaultMessage()));
-        return buildErrorResponse(ApiErrorCode.VALIDATION_ERROR, ex.getMessage(), errors);
+        String message = ex.getMessage();
+        if (ex.getBindingResult().hasErrors()) {
+            message = ex.getBindingResult().getAllErrors().get(0).getDefaultMessage();
+        }
+        return buildErrorResponse(ApiErrorCode.VALIDATION_ERROR, message, null);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
