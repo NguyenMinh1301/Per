@@ -3,7 +3,7 @@
 services:
   app:
     container_name: per
-    image: nguyenminh1301/per:0.0.3
+    image: nguyenminh1301/per:1.0.0
     restart: unless-stopped
 
     environment:
