@@ -66,11 +66,11 @@ services:
     container_name: postgres
     restart: unless-stopped
     environment:
-      - POSTGRES_DB=${POSTGRES_DB}       # đặt trong .env nếu muốn đổi
-      - POSTGRES_USER=${POSTGRES_USERNAME}        # map từ .env của bạn
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    ports: [ "5432:5432" ]
-    volumes: [ "db:/var/lib/postgresql/data" ]
+    ports: ["5432:5432"]
+    volumes: ["db:/var/lib/postgresql/data"]
 
   redis:
     image: redis:7-alpine
@@ -84,8 +84,8 @@ services:
     container_name: mailhog
     restart: unless-stopped
     ports:
-      - "1025:1025"  # SMTP
-      - "8025:8025"  # Web UI -> http://localhost:8025
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   db:

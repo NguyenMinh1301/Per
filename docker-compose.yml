@@ -6,8 +6,8 @@ services:
       POSTGRES_DB: postgres
       POSTGRES_USER: ${POSTGRES_USERNAME}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports: [ "5432:5432" ]
-    volumes: [ "db:/var/lib/postgresql/data" ]
+    ports: ["5432:5432"]
+    volumes: ["db:/var/lib/postgresql/data"]
 
   redis:
     image: redis:latest
@@ -20,9 +20,8 @@ services:
     image: mailhog/mailhog:v1.0.1
     container_name: mailhog
     ports:
-      - "1025:1025" # SMTP
-      - "8025:8025" # Web UI (http://localhost:8025)
-    # SMTP 1025/UI 8025 theo docs :contentReference[oaicite:25]{index=25}
+      - "1025:1025"
+      - "8025:8025"
 
 volumes:
   db:
