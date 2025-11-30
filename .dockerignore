@@ -1,9 +1,17 @@
 target
+/postman
+/database
+/document
 .git
 .gitignore
 README.md
 Dockerfile
 docker-compose.yml
+docker-compose-dev.yml
+docker-compose-prod.yml
 .env
 **/*.iml
 .idea
+.vscode
+LICENSE
+
