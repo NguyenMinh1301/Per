@@ -27,7 +27,8 @@ public class OpenApiConfig {
                                 .license(
                                         new License()
                                                 .name("API license")
-                                                .url("https://github.com/NguyenMinh1301/Per/blob/master/LICENSE")))
+                                                .url(
+                                                        "https://github.com/NguyenMinh1301/Per/blob/master/LICENSE")))
                 .components(
                         new Components()
                                 .addSecuritySchemes(
@@ -120,5 +121,4 @@ public class OpenApiConfig {
                 .pathsToMatch("/**")
                 .build();
     }
-
 }

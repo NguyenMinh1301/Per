@@ -104,7 +104,8 @@ public class AuthServiceImpl implements AuthService {
     public AuthTokenResponse login(SigninRequest request) {
         User user =
                 resolveUser(request.getUsername())
-                        .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
+                        .orElseThrow(
+                                () -> new BadCredentialsException("Invalid username or password"));
 
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");
@@ -128,7 +129,8 @@ public class AuthServiceImpl implements AuthService {
         String username = jwtService.extractUsername(token);
         User user =
                 resolveUser(username)
-                        .orElseThrow(() -> new IllegalArgumentException("Refresh token is invalid"));
+                        .orElseThrow(
+                                () -> new IllegalArgumentException("Refresh token is invalid"));
 
         if (!user.isActive()) {
             throw new IllegalStateException("Account has been locked");

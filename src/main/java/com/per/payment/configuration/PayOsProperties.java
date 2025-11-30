@@ -1,10 +1,11 @@
 package com.per.payment.configuration;
 
-import com.per.common.ApiConstants;
 import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
+
+import com.per.common.ApiConstants;
 
 import lombok.Getter;
 import lombok.Setter;
