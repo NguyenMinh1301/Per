@@ -16,11 +16,13 @@ import com.per.payment.dto.request.CheckoutRequest;
 import com.per.payment.dto.response.CheckoutResponse;
 import com.per.payment.service.CheckoutService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Payment.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "Payment Management APIs")
 public class PaymentController {
 
     private final CheckoutService checkoutService;

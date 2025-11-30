@@ -29,12 +29,14 @@ import com.per.user.dto.request.UserUpdateRequest;
 import com.per.user.dto.response.UserResponse;
 import com.per.user.service.UserService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.User.ROOT)
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
+@Tag(name = "User", description = "User Management APIs")
 public class UserController {
 
     private final UserService userService;

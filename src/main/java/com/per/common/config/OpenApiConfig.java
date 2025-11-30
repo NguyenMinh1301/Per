@@ -20,13 +20,13 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Open API Documentation")
-                                .version("1.0")
-                                .description("Open API Documentation")
+                                .title("Per - Api docs")
+                                .version("3.0")
+                                .description("Per API Documentation")
                                 .license(
                                         new License()
                                                 .name("API license")
-                                                .url("https://www.google.com")))
+                                                .url("https://github.com/NguyenMinh1301/Per/blob/master/LICENSE")))
                 .components(
                         new Components()
                                 .addSecuritySchemes(

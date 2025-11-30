@@ -31,11 +31,13 @@ import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Auth.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Auth", description = "Authentication APIs")
 public class AuthController {
 
     private final AuthService authService;

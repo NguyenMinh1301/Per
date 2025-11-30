@@ -29,11 +29,13 @@ import com.per.product.dto.response.ProductDetailResponse;
 import com.per.product.dto.response.ProductResponse;
 import com.per.product.service.ProductService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Product.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Product", description = "Product Management APIs")
 public class ProductController {
 
     private final ProductService productService;

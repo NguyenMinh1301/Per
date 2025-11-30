@@ -22,11 +22,13 @@ import com.per.product.dto.request.ProductVariantUpdateRequest;
 import com.per.product.dto.response.ProductVariantResponse;
 import com.per.product.service.ProductService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.ProductVariant.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Product", description = "Product Management APIs")
 public class ProductVariantController {
 
     private final ProductService productService;

@@ -20,11 +20,13 @@ import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Category.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Category", description = "Category Management APIs")
 public class CategoryController {
 
     private final CategoryService categoryService;

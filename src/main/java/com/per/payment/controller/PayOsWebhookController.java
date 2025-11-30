@@ -9,11 +9,13 @@ import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.payment.service.PayOsWebhookService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import vn.payos.type.Webhook;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "Payment Management APIs")
 public class PayOsWebhookController {
 
     private final PayOsWebhookService webhookService;

@@ -11,11 +11,13 @@ import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Cart.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Cart", description = "Shopping Cart APIs")
 public class CartController {
 
     private final CartService cartService;

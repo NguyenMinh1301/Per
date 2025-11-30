@@ -17,11 +17,13 @@ import com.per.common.response.ApiSuccessCode;
 import com.per.media.dto.response.MediaUploadResponse;
 import com.per.media.service.MediaService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Media.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Media", description = "Media Upload APIs")
 public class MediaController {
 
     private final MediaService mediaService;

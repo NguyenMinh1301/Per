@@ -28,11 +28,13 @@ import com.per.common.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.Brand.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Brand", description = "Brand Management APIs")
 public class BrandController {
 
     private final BrandService brandService;

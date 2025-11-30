@@ -20,11 +20,13 @@ import com.per.made_in.dto.request.MadeInUpdateRequest;
 import com.per.made_in.dto.response.MadeInResponse;
 import com.per.made_in.service.MadeInService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping(ApiConstants.MadeIn.ROOT)
 @RequiredArgsConstructor
+@Tag(name = "Made In", description = "Made In Origin APIs")
 public class MadeInController {
 
     private final MadeInService madeInService;

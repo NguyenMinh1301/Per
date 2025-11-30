@@ -17,10 +17,12 @@ import com.per.payment.entity.Payment;
 import com.per.payment.enums.PaymentStatus;
 import com.per.payment.repository.PaymentRepository;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Payment", description = "Payment Management APIs")
 public class PayOsReturnController {
 
     private final OrderRepository orderRepository;
