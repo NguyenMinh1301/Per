@@ -76,5 +76,6 @@ payment:
 springdoc:
   swagger-ui:
     path: /per/swagger-ui.html
+    title: Per - Api docs
   api-docs:
     path: /per/v3/api-docs
