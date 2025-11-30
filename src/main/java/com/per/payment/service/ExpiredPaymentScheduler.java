@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public class ExpiredPaymentScheduler {
     @Value("${payment.expiration-check-batch-size:50}")
     private int batchSize;
 
-    @Scheduled(fixedDelayString = "${payment.expiration-check-interval:PT1M}")
+    // @Scheduled(fixedDelayString = "${payment.expiration-check-interval:PT1M}")
     @Transactional
     public void markExpiredPayments() {
         Instant now = Instant.now();

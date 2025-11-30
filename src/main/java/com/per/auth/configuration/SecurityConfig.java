@@ -37,22 +37,22 @@ public class SecurityConfig {
 
     private static final String[] publicEndpoint = {
         // Auth
-        "/auth/register",
-        "/auth/login",
-        "/auth/refresh",
-        "/auth/introspect",
-        "/auth/verify-email",
-        "/auth/forgot-password",
-        "/auth/reset-password",
+        "/per/auth/register",
+        "/per/auth/login",
+        "/per/auth/refresh",
+        "/per/auth/introspect",
+        "/per/auth/verify-email",
+        "/per/auth/forgot-password",
+        "/per/auth/reset-password",
 
         // Swagger
-        "/v3/api-docs/**",
-        "/swagger-ui.html",
-        "/swagger-ui/**",
+        "/per/v3/api-docs/**",
+        "/per/swagger-ui.html",
+        "/per/swagger-ui/**",
 
         // Payment (PayOS)
-        "/payments/payos/webhook",
-        "/payments/payos/return"
+        "/per/payments/payos/webhook",
+        "/per/payments/payos/return"
     };
 
     @Bean

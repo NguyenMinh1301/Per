@@ -1,10 +1,10 @@
-#debug: true
+debug: true
 
 spring:
   application:
     name: per
   config:
-    import: optional:file:.env[.properties]   # link .env
+    import: optional:file:.env[.properties] # link .env
   threads:
     virtual:
       enabled: true
@@ -43,9 +43,9 @@ server:
 
 security:
   jwt:
-    secret: ${JWT_SECRET}                   # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 15 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
+    secret: ${JWT_SECRET} # base64 256-bit+
+    access-ttl: ${ACCESS_TOKEN_TTL:PT15M} # 15 minutes (ISO-8601)
+    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D} # 30 days (ISO-8601)
     issuer: ${JWT_ISSUER:per-auth-service}
 
 app:
@@ -72,3 +72,9 @@ payos:
 payment:
   expiration-check-interval: PT1M
   expiration-check-batch-size: 50
+
+springdoc:
+  swagger-ui:
+    path: /per/swagger-ui.html
+  api-docs:
+    path: /per/v3/api-docs
