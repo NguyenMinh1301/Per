@@ -2,6 +2,7 @@ package com.per.common.config;
 
 import java.util.List;
 
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,8 +21,8 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(
                         new Info()
-                                .title("Per - Api docs")
-                                .version("3.0")
+                                .title("Per API")
+                                .version("1.0")
                                 .description("Per API Documentation")
                                 .license(
                                         new License()
@@ -38,4 +39,86 @@ public class OpenApiConfig {
                                                 .bearerFormat("JWT")))
                 .security(List.of(new SecurityRequirement().addList("bearerAuth")));
     }
+
+    @Bean
+    public GroupedOpenApi auth() {
+        return GroupedOpenApi.builder()
+                .group("Auth")
+                .packagesToScan("com.per.auth")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi user() {
+        return GroupedOpenApi.builder()
+                .group("User")
+                .packagesToScan("com.per.user")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi product() {
+        return GroupedOpenApi.builder()
+                .group("Product")
+                .packagesToScan("com.per.product")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi brand() {
+        return GroupedOpenApi.builder()
+                .group("Brand")
+                .packagesToScan("com.per.brand")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi category() {
+        return GroupedOpenApi.builder()
+                .group("Category")
+                .packagesToScan("com.per.category")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi made_in() {
+        return GroupedOpenApi.builder()
+                .group("Made_in")
+                .packagesToScan("com.per.made_in")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi media() {
+        return GroupedOpenApi.builder()
+                .group("Media")
+                .packagesToScan("com.per.media")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi cart() {
+        return GroupedOpenApi.builder()
+                .group("Cart")
+                .packagesToScan("com.per.cart")
+                .pathsToMatch("/per/**")
+                .build();
+    }
+
+    @Bean
+    public GroupedOpenApi payment() {
+        return GroupedOpenApi.builder()
+                .group("Payment")
+                .packagesToScan("com.per.payment")
+                .pathsToMatch("/**")
+                .build();
+    }
+
 }

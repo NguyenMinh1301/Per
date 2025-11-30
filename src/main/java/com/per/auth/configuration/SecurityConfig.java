@@ -46,9 +46,10 @@ public class SecurityConfig {
         "/per/auth/reset-password",
 
         // Swagger
-        "/per/v3/api-docs/**",
+        "/per/v1/api-docs/**",
         "/per/swagger-ui.html",
         "/per/swagger-ui/**",
+        "/per/api-docs",
 
         // Payment (PayOS)
         "/per/payments/payos/webhook",

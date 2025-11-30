@@ -65,7 +65,7 @@ payos:
   client-id: ${PAY_OS_CLIENT_ID}
   api-key: ${PAY_OS_API_KEY}
   checksum-key: ${PAY_OS_CHECKSUM_KEY}
-  webhook-path: /api/v1/payments/payos/webhook
+  webhook-path: /per/payments/payos/webhook
   return-path: /payments/payos/return
   cancel-path: /payments/payos/return
 
@@ -75,7 +75,6 @@ payment:
 
 springdoc:
   swagger-ui:
-    path: /per/swagger-ui.html
-    title: Per - Api docs
+    path: /per/api-docs
   api-docs:
-    path: /per/v3/api-docs
+    path: /per/v1/api-docs
