@@ -2,6 +2,7 @@ package com.per.common.config;
 
 import java.util.List;
 
+import io.swagger.v3.oas.models.servers.Server;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,13 +23,14 @@ public class OpenApiConfig {
                 .info(
                         new Info()
                                 .title("Per API")
-                                .version("1.0")
+                                .version("3.0")
                                 .description("Per API Documentation")
                                 .license(
                                         new License()
                                                 .name("API license")
                                                 .url(
                                                         "https://github.com/NguyenMinh1301/Per/blob/master/LICENSE")))
+                .servers(List.of(new Server().url("https://nguyenminh.space")))
                 .components(
                         new Components()
                                 .addSecuritySchemes(

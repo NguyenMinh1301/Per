@@ -62,6 +62,7 @@ public class MailServiceImpl implements MailService {
 
     private String buildVerificationLink(String token) {
         return applicationProperties.getBaseUrl()
+                + ApiConstants.Auth.ROOT
                 + ApiConstants.Auth.VERIFY_EMAIL
                 + "?token="
                 + token;
@@ -69,6 +70,7 @@ public class MailServiceImpl implements MailService {
 
     private String buildResetLink(String token) {
         return applicationProperties.getBaseUrl()
+                + ApiConstants.Auth.ROOT
                 + ApiConstants.Auth.RESET_PASSWORD
                 + "?token="
                 + token;

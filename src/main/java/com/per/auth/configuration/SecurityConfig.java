@@ -46,7 +46,7 @@ public class SecurityConfig {
         "/per/auth/reset-password",
 
         // Swagger
-        "/per/v1/api-docs/**",
+        "/per/v3/api-docs/**",
         "/per/swagger-ui.html",
         "/per/swagger-ui/**",
         "/per/api-docs",
