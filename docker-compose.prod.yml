@@ -2,7 +2,7 @@
 
 services:
   app:
-    container_name: ${DOCKER_APP}
+    container_name: per
     image: ${DOCKER_USERNAME}/${DOCKER_APP}:${DOCKER_APP_VERSION}
     restart: unless-stopped
 
