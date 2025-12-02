@@ -3,6 +3,8 @@ debug: true
 spring:
   application:
     name: per
+  profiles:
+    active: dev
   config:
     import: optional:file:.env[.properties] # link .env
   threads:
@@ -40,44 +42,3 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
-
-security:
-  jwt:
-    secret: ${JWT_SECRET} # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL:PT15M} # 15 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D} # 30 days (ISO-8601)
-    issuer: ${JWT_ISSUER:per-auth-service}
-
-app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}
-  cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://nguyenminh.space,https://www.nguyenminh.space}
-  mail:
-    from: ${MAIL_FROM}
-
-cloudinary:
-  cloud-name: ${CLOUDINARY_CLOUD_NAME}
-  api-key: ${CLOUDINARY_API_KEY}
-  api-secret: ${CLOUDINARY_API_SECRET}
-  folder: ${CLOUDINARY_FOLDER:per/uploads}
-
-payos:
-  client-id: ${PAY_OS_CLIENT_ID}
-  api-key: ${PAY_OS_API_KEY}
-  checksum-key: ${PAY_OS_CHECKSUM_KEY}
-  webhook-path: /per/payments/payos/webhook
-  return-path: /payments/payos/return
-  cancel-path: /payments/payos/return
-
-payment:
-  expiration-check-interval: PT1M
-  expiration-check-batch-size: 50
-
-springdoc:
-  swagger-ui:
-    path: /per/api-docs
-    config-url: /per/v3/api-docs/swagger-config
-    url: /per/v3/api-docs
-  api-docs:
-    path: /per/v3/api-docs
-  server-url: ${APP_BASE_URL:http://localhost:8080}
