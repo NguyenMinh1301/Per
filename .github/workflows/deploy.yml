@@ -152,19 +152,19 @@ jobs:
             DOCKER_APP_VERSION=${DOCKER_APP_VERSION}
             EOF
             
-            # Download docker-compose.dev.yml if it doesn't exist
-            if [ ! -f docker-compose.dev.yml ]; then
-              curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o docker-compose.dev.yml https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.dev.yml
+            # Download docker-compose.prod.yml if it doesn't exist
+            if [ ! -f docker-compose.prod.yml ]; then
+              curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o docker-compose.prod.yml https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.prod.yml
             fi
             
             # Pull latest images
-            docker compose -f docker-compose.dev.yml --env-file .env pull
+            docker compose -f docker-compose.prod.yml --env-file .env pull
             
             # Stop and rm container
-            docker compose -f docker-compose.dev.yml --env-file .env down
+            docker compose -f docker-compose.prod.yml --env-file .env down
             
             # Start new container
-            docker compose -f docker-compose.dev.yml --env-file .env up -d
+            docker compose -f docker-compose.prod.yml --env-file .env up -d
             
 
 
