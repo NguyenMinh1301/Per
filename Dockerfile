@@ -14,9 +14,17 @@ RUN mvn -q -B clean package -Dspotless.check.skip=true -DskipTests
 # Start with Amazon Correto JDK 21
 FROM amazoncorretto:21.0.9
 
+ARG PROFILE=dev
+ARG APP_VERSION=1.1.0
+
 # Set working folder to App and copy complied file from above step
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+
+ENV ACTIVE_PROFILE=${PROFILE}
+ENV JAR_VERSION=${APP_VERSION}
+
+CMD java -jar -Dspring.profiles.active=${ACTIVE_PROFILE} per-${JAR_VERSION}.jar
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
