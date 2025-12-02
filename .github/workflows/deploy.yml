@@ -73,7 +73,7 @@ jobs:
           echo "VERSION=$(./mvn -q -Dexec.executable='echo' -Dexec-args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
           
       - name: Build application
-        run: ./mvn -q -B clean package -Dspotless.check.skip=true -DskipTests
+        run: mvn -q -B clean package -Dspotless.check.skip=true -DskipTests
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
