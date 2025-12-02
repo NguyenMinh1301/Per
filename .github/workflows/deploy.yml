@@ -90,7 +90,7 @@ jobs:
           context: .
           pull: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_APP }}:${{ env.DOCKER_APP_VERSION }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_APP }}:${{ secrets.DOCKER_APP_VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=mas
           build-args: |
