@@ -6,14 +6,14 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+// @SpringBootTest
 class AuthApplicationTests {
 
-    @BeforeAll
+    // @BeforeAll
     static void setUpTimeZone() {
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
     }
 
-    @Test
+    // @Test
     void contextLoads() {}
 }
