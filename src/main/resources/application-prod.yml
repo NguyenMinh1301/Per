@@ -1,14 +1,19 @@
+jpa:
+  hibernate:
+    ddl-auto: validate
+  show-sql: true
+
 security:
   jwt:
-    secret: ${JWT_SECRET} # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL:PT15M} # 15 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D} # 30 days (ISO-8601)
+    secret: ${JWT_SECRET}                   # base64 256-bit+
+    access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 15 minutes (ISO-8601)
+    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
     issuer: ${JWT_ISSUER:per-auth-service}
 
 app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}
+  base-url: ${APP_BASE_URL}
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173,https://nguyenminh.space,https://www.nguyenminh.space}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
   mail:
     from: ${MAIL_FROM}
 
@@ -37,4 +42,4 @@ springdoc:
     url: /per/v3/api-docs
   api-docs:
     path: /per/v3/api-docs
-  server-url: ${APP_BASE_URL:http://localhost:8080}
+  server-url: ${APP_BASE_URL}
