@@ -1,0 +1,166 @@
+name: Task Flows Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  APP_NAME: task-flows-app
+
+jobs:
+  tests:
+    env:
+      TZ: Asia/Ho_Chi_Minh
+    runs-on: ubuntu-24.04
+    name: Tests
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{hashFiles('**/pom.xml')}}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Make mvnw executable
+        run: |
+          chmod +x mvnw
+
+      - name: Running Unit Tests
+        run: |
+          ./mvnw clean test
+
+#  build-and-deploy:
+#    runs-on: ubuntu-24.04
+#    name: Build & Deploy
+#    needs: tests
+#    if: github.ref == 'refs/heads/main'
+#    steps:
+#      - name: Checkout code
+#        uses: actions/checkout@v4
+#
+#      - name: Setup JDK
+#        uses: actions/setup-java@v4
+#        with:
+#          java-version: '21'
+#          distribution: 'corretto'
+#
+#      - name: Cache Maven dependencies
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.m2
+#          key: ${{ runner.os }}-m2-${{hashFiles('**/pom.xml')}}
+#          restore-keys: ${{ runner.os }}-m2
+#
+#      - name: Extract project version
+#        id: extract_version
+#        run: |
+#          echo "VERSION=$(./mvn -q -Dexec.executable='echo' -Dexec-args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
+#
+#      - name: Build application
+#        run: mvn -q -B clean package -Dspotless.check.skip=true -DskipTests
+#
+#      - name: Setup Docker Buildx
+#        uses: docker/setup-buildx-action@v3
+#
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v3
+#        with:
+#          username: ${{ secrets.DOCKER_USERNAME }}
+#          password: ${{ secrets.DOCKER_PASSWORD }}
+#
+#      - name: Build and push Docker image
+#        uses: docker/build-push-action@v5
+#        with:
+#          context: .
+#          pull: true
+#          tags: |
+#            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_APP }}:${{ secrets.DOCKER_APP_VERSION }}
+#          cache-from: type=gha
+#          cache-to: type=gha,mode=mas
+#          build-args: |
+#            PROFILE=dev
+#            APP_VERSION=${{ steps.extract_version.outputs.VERSION }}
+#
+#      - name: Deploy to VPS
+#        uses: appleboy/ssh-action@v1.0.0
+#        with:
+#          host: ${{ secrets.VPS_HOST }}
+#          username: ${{ secrets.VPS_USERNAME }}
+#          key: ${{ secrets.VPS_SSH_KEY }}
+#          port: ${{ secrets.VPS_PORT }}
+#          passphrase: ${{ secrets.VPS_SSH_KEY_PASSPHRASE }}
+#          script: |
+#            # Navigate to app dir
+#            cd /home/${{ env.DOCKER_APP }} || mkdir -p /home/${{ env.DOCKER_APP }} && cd /home/${{ env.DOCKER_APP }}
+#
+#            # Create .env file from secrets
+#            cat > .env << EOF
+#            SPRING_PROFILES_ACTIVE=prod
+#            SERVER_PORT=${SERVER_PORT}
+#
+#            POSTGRES_URL=${POSTGRES_URL}
+#            POSTGRES_USERNAME=${POSTGRES_USERNAME}
+#            POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+#
+#            REDIS_HOST=${REDIS_HOST}
+#            REDIS_PORT=${REDIS_PORT}
+#
+#            JWT_SECRET=${JWT_SECRET}
+#            ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL}
+#            REFRESH_TOKEN_TTL=${REFRESH_TOKEN_TTL}
+#            JWT_ISSUER=${JWT_ISSUER}
+#
+#            CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME}
+#            CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY}
+#            CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET}
+#            CLOUDINARY_FOLDER=${CLOUDINARY_FOLDER}
+#
+#            MAIL_USERNAME=${MAIL_USERNAME}
+#            MAIL_PASSWORD=${MAIL_PASSWORD}
+#            MAIL_FROM=${MAIL_FROM}
+#            MAIL_SMTP_CONNECTION_TIMEOUT=${MAIL_SMTP_CONNECTION_TIMEOUT}
+#            MAIL_SMTP_TIMEOUT=${MAIL_SMTP_TIMEOUT}
+#            MAIL_SMTP_WRITETIMEOUT=${MAIL_SMTP_WRITETIMEOUT}
+#            MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+#            MAIL_SMTP_STARTTLS=${MAIL_SMTP_STARTTLS}
+#
+#            CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS}
+#            APP_BASE_URL=${APP_BASE_URL}
+#
+#            PAY_OS_CLIENT_ID=${PAY_OS_CLIENT_ID}
+#            PAY_OS_API_KEY=${PAY_OS_API_KEY}
+#            PAY_OS_CHECKSUM_KEY=${PAY_OS_CHECKSUM_KEY}
+#
+#            DOCKER_USERNAME=${DOCKER_USERNAME}
+#            DOCKER_APP=${DOCKER_APP}
+#            DOCKER_APP_VERSION=${DOCKER_APP_VERSION}
+#            EOF
+#
+#            # Download docker-compose.prod.yml if it doesn't exist
+#            if [ ! -f docker-compose.prod.yml ]; then
+#              curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o docker-compose.prod.yml https://raw.githubusercontent.com/${{ github.repository }}/refs/heads/main/docker-compose.prod.yml
+#            fi
+#
+#            # Pull latest images
+#            docker compose -f docker-compose.prod.yml --env-file .env pull
+#
+#            # Stop and rm container
+#            docker compose -f docker-compose.prod.yml --env-file .env down
+#
+#            # Start new container
+#            docker compose -f docker-compose.prod.yml --env-file .env up -d
