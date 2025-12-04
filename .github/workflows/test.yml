@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - release
   pull_request:
     branches:
       - main
+      - release
 
 env:
   APP_NAME: task-flows-app
