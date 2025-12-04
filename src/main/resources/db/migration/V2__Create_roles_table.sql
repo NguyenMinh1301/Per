@@ -7,3 +7,6 @@ CREATE TABLE roles (
 	CONSTRAINT roles_name_key UNIQUE (name),
 	CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
+
+INSERT INTO roles (name, description) VALUES ('ADMIN', 'Administrator role');
+INSERT INTO roles (name, description) VALUES ('USER', 'User role');
