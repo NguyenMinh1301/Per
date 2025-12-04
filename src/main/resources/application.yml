@@ -4,7 +4,7 @@ spring:
   application:
     name: per
   profiles:
-    active: dev
+    active: dev   # profile
   config:
     import: optional:file:.env[.properties] # link .env
   threads:
@@ -14,10 +14,6 @@ spring:
     url: ${POSTGRES_URL}
     username: ${POSTGRES_USERNAME}
     password: ${POSTGRES_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: true
   flyway:
     enabled: true
   data:
