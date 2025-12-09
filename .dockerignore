@@ -2,6 +2,7 @@ target
 /postman
 /database
 /document
+/scirpt
 .git
 .gitignore
 README.md
