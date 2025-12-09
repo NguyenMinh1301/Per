@@ -55,6 +55,9 @@ services:
       - PAY_OS_CLIENT_ID=${PAY_OS_CLIENT_ID}
       - PAY_OS_API_KEY=${PAY_OS_API_KEY}
       - PAY_OS_CHECKSUM_KEY=${PAY_OS_CHECKSUM_KEY}
+
+      # --- Kafka ---
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
     ports:
       - "8080:8080"
     depends_on:
@@ -62,7 +65,7 @@ services:
       - redis
 
   db:
-    image: postgres:16
+    image: postgres:16-alpine
     container_name: postgres
     restart: unless-stopped
     environment:
@@ -78,14 +81,6 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
-
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    container_name: mailhog
-    restart: unless-stopped
-    ports:
-      - "1025:1025"
-      - "8025:8025"
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
