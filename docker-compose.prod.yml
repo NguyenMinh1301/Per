@@ -11,7 +11,7 @@ services:
       - SERVER_PORT=${SERVER_PORT}
 
       - POSTGRES_URL=${POSTGRES_URL}
-      - POSTGRES_USERNAME=${POSTGRES_USERNAME}
+      - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
 
       - REDIS_HOST=${REDIS_HOST}
@@ -54,7 +54,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports: ["5432:5432"]
     volumes: ["db:/var/lib/postgresql/data"]
