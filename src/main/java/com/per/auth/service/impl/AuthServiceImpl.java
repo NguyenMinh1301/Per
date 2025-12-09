@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.per.auth.configuration.ApplicationProperties;
 import com.per.auth.configuration.JwtProperties;
 import com.per.auth.dto.request.ForgotPasswordRequest;
 import com.per.auth.dto.request.IntrospectRequest;
@@ -37,9 +39,10 @@ import com.per.auth.security.jwt.JwtService;
 import com.per.auth.security.jwt.JwtTokenType;
 import com.per.auth.security.principal.UserPrincipal;
 import com.per.auth.service.AuthService;
-import com.per.auth.service.MailService;
 import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
+import com.per.common.ApiConstants;
+import com.per.common.event.EmailEvent;
 import com.per.user.entity.User;
 
 import io.jsonwebtoken.Claims;
@@ -62,7 +65,8 @@ public class AuthServiceImpl implements AuthService {
     private final JwtProperties jwtProperties;
     private final RefreshTokenService refreshTokenService;
     private final UserTokenService userTokenService;
-    private final MailService mailService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final ApplicationProperties applicationProperties;
     private final Clock clock;
 
     @Override
@@ -97,7 +101,8 @@ public class AuthServiceImpl implements AuthService {
 
         UserToken verificationToken =
                 userTokenService.create(user, TokenType.EMAIL_VERIFICATION, EMAIL_VERIFY_TTL);
-        mailService.sendVerificationEmail(user, verificationToken.getToken());
+
+        sendVerificationEmail(user, verificationToken.getToken());
     }
 
     @Override
@@ -178,7 +183,7 @@ public class AuthServiceImpl implements AuthService {
                             UserToken token =
                                     userTokenService.create(
                                             user, TokenType.PASSWORD_RESET, PASSWORD_RESET_TTL);
-                            mailService.sendPasswordResetEmail(user, token.getToken());
+                            sendPasswordResetEmail(user, token.getToken());
                         });
     }
 
@@ -252,5 +257,58 @@ public class AuthServiceImpl implements AuthService {
             return byUsername;
         }
         return userRepository.findByEmail(username);
+    }
+
+    private void sendVerificationEmail(User user, String token) {
+        String displayName = resolveDisplayName(user);
+        String subject = "Verify your email address";
+        String content =
+                "Hello "
+                        + displayName
+                        + ",\n\n"
+                        + "Please verify your email address by visiting the following link within 24 hours:\n"
+                        + buildVerificationLink(token)
+                        + "\n\n"
+                        + "Thank you.";
+
+        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
+    }
+
+    private void sendPasswordResetEmail(User user, String token) {
+        String displayName = resolveDisplayName(user);
+        String subject = "Password reset request";
+        String content =
+                "Hello "
+                        + displayName
+                        + ",\n\n"
+                        + "A password reset was requested for your account. Please use the link below within 15 minutes:\n"
+                        + buildResetLink(token)
+                        + "\n\n"
+                        + "If you did not initiate this request, you can safely ignore this email.";
+
+        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
+    }
+
+    private String buildVerificationLink(String token) {
+        return applicationProperties.getBaseUrl()
+                + ApiConstants.Auth.ROOT
+                + ApiConstants.Auth.VERIFY_EMAIL
+                + "?token="
+                + token;
+    }
+
+    private String buildResetLink(String token) {
+        return applicationProperties.getBaseUrl()
+                + ApiConstants.Auth.ROOT
+                + ApiConstants.Auth.RESET_PASSWORD
+                + "?token="
+                + token;
+    }
+
+    private String resolveDisplayName(User user) {
+        if (user.getFirstName() != null && !user.getFirstName().isBlank()) {
+            return user.getFirstName();
+        }
+        return user.getUsername();
     }
 }
