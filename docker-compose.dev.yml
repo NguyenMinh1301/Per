@@ -1,5 +1,5 @@
 # RUN:    docker compose -f docker-compose.dev.yml up -d
-# BUILD:  docker build -t nguyenminh1301/per:<tagname> .
+# BUILD:  docker build . -t nguyenminh1301/per:latest -t nguyenminh1301/per:<tagname>
 # PUSH:   docker push nguyenminh1301/per:<tagname>
 
 services:
@@ -84,6 +84,7 @@ services:
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
+    container_name: zookeeper
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -92,6 +93,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
+    container_name: kafka
     depends_on:
       - zookeeper
     ports:
