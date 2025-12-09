@@ -28,7 +28,7 @@
 - **Database Migrations**: Automated schema management using **Flyway** ensures consistent database states across environments.
 - **Payment Integration**: Seamless payment processing via **PayOS**.
 - **Media Management**: Cloud-based asset storage and optimization using **Cloudinary**.
-- **Email Services**: Asynchronous email delivery system with **MailHog** support for local development testing.
+- **Email Services**: Asynchronous email delivery system using **Kafka** and **SMTP**.
 - **API Documentation**: Auto-generated, interactive API documentation with **OpenAPI/Swagger**.
 
 ## Technology Stack
@@ -46,6 +46,7 @@
 - **Caching**: Redis (Lettuce Client)
 - **Migration**: Flyway 11.10.0
 - **Cloud Storage**: Cloudinary
+- **Message Broker**: Kafka (Confluent) & Zookeeper
 
 ### DevOps & Tools
 
@@ -99,7 +100,7 @@ Ensure you have the following installed on your local machine:
     _Ensure you configure your PostgreSQL, Redis, Mail, and Cloudinary credentials in the `.env` file._
 
 3.  **Start Infrastructure**
-    Use Docker Compose to spin up the required services (PostgreSQL, Redis, MailHog).
+    Use Docker Compose to spin up the required services (PostgreSQL, Redis, Kafka, Zookeeper).
 
     ```bash
     docker-compose up -d
@@ -119,7 +120,6 @@ Ensure you have the following installed on your local machine:
 
 - **API Base URL**: `http://localhost:8080/api/v1`
 - **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
-- **MailHog UI**: `http://localhost:8025` (For viewing test emails)
 
 ## Development Workflow
 
