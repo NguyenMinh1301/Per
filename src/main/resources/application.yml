@@ -4,7 +4,7 @@ spring:
   application:
     name: per
   profiles:
-    active: dev   # profile
+    active: dev # profile
   config:
     import: optional:file:.env[.properties] # link .env
   threads:
@@ -12,8 +12,10 @@ spring:
       enabled: true
   datasource:
     url: ${POSTGRES_URL}
-    username: ${POSTGRES_USERNAME}
+    username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
   flyway:
     enabled: true
   data:

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,6 +36,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.per.auth.configuration.ApplicationProperties;
 import com.per.auth.configuration.JwtProperties;
 import com.per.auth.dto.request.ForgotPasswordRequest;
 import com.per.auth.dto.request.LogoutRequest;
@@ -53,9 +55,9 @@ import com.per.auth.repository.UserRepository;
 import com.per.auth.security.jwt.JwtService;
 import com.per.auth.security.jwt.JwtTokenType;
 import com.per.auth.security.principal.UserPrincipal;
-import com.per.auth.service.MailService;
 import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
+import com.per.common.event.EmailEvent;
 import com.per.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +80,9 @@ class AuthServiceImplTest {
 
     @Mock private UserTokenService userTokenService;
 
-    @Mock private MailService mailService;
+    @Mock private KafkaTemplate<String, Object> kafkaTemplate;
+
+    @Mock private ApplicationProperties applicationProperties;
 
     @Mock private Clock clock;
 
@@ -121,6 +125,7 @@ class AuthServiceImplTest {
         testUser.addRole(userRole);
 
         lenient().when(jwtProperties.getAccessTtl()).thenReturn(Duration.ofMinutes(15));
+        lenient().when(applicationProperties.getBaseUrl()).thenReturn("http://localhost:8080");
 
         // Reset SecurityContext before each test
         SecurityContextHolder.clearContext();
@@ -174,7 +179,7 @@ class AuthServiceImplTest {
             verify(roleRepository).findByName(RoleType.USER);
             verify(passwordEncoder).encode(PASSWORD);
             verify(userRepository).save(any(User.class));
-            verify(mailService).sendVerificationEmail(any(User.class), anyString());
+            verify(kafkaTemplate).send(eq("email-topic"), any(EmailEvent.class));
             verify(jwtService, never()).generateAccessToken(any(User.class));
             verify(jwtService, never()).generateRefreshToken(any(User.class));
             verify(refreshTokenService, never()).store(anyString(), anyString());
@@ -552,7 +557,7 @@ class AuthServiceImplTest {
             verify(userRepository).findByEmail(EMAIL);
             verify(userTokenService)
                     .create(any(User.class), eq(TokenType.PASSWORD_RESET), any(Duration.class));
-            verify(mailService).sendPasswordResetEmail(any(User.class), anyString());
+            verify(kafkaTemplate).send(eq("email-topic"), any(EmailEvent.class));
         }
 
         @Test
@@ -569,7 +574,7 @@ class AuthServiceImplTest {
             // Then
             verify(userRepository).findByEmail(EMAIL);
             verify(userTokenService, never()).create(any(), any(), any());
-            verify(mailService, never()).sendPasswordResetEmail(any(), anyString());
+            verify(kafkaTemplate, never()).send(anyString(), any(EmailEvent.class));
         }
     }
 
