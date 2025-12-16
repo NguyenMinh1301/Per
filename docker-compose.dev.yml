@@ -150,6 +150,64 @@ services:
     networks:
       - per-network
 
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    user: root
+    hostname: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SING_UP=false
+      - GF_SERVER_DOMAIN=localhost
+      # enable logger
+      - GF_LOG_MODE=console file
+      - GF_LOG_FILTERS=alerting.notifier.slack:debug alertmanager:debug ngalert:debug
+    volumes:
+      - ./grafana-storage:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - per-network
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    container_name: node-exporter
+    restart: unless-stopped
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)(5690|/)
+    ports:
+      - "9100:9100"
+    networks:
+      - per-network
+
+  redis-exporter:
+    image: oliver006/redis_exporter
+    container_name: redis-exporter
+    command: -redis.addr redis://redis:6379
+    ports:
+      - "9121:9121"
+    networks:
+      - per-network
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter
+    container_name: postgres-exporter
+    environment:
+      DATA_SOURCE_URI: "postgres:5432/postgres?sslmode=disable"
+      DATA_SOURCE_USER: ${POSTGRES_USER}
+      DATA_SOURCE_PASS: ${POSTGRES_PASSWORD}
+    networks:
+      - per-network
+    ports:
+      - "9187:9187"
+
 volumes:
   db:
 

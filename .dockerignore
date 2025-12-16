@@ -3,13 +3,15 @@ target
 /database
 /document
 /scirpt
+/data
+/grafana-storage
 .git
 .gitignore
 README.md
 Dockerfile
 docker-compose.yml
-docker-compose-dev.yml
-docker-compose-prod.yml
+docker-compose.dev.yml
+docker-compose.prod.yml
 /.github
 .env
 **/*.iml

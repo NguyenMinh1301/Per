@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 data
+grafana-storage
 
 ### STS ###
 .apt_generated

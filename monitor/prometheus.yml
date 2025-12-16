@@ -14,13 +14,19 @@ scrape_configs:
       - targets: ["host.docker.internal:8080"]
     metrics_path: "/actuator/prometheus"
 
-  #- job_name: "banvetau-node-exporter"
-  #  scrape_interval: 5s
-  #  static_configs:
-  #    - targets: [ "pre-event-node-exporter:9100" ]
+  - job_name: "per-node-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "node-exporter:9100" ]
 
-  #- job_name: "banvetau-redis-exporter"
-  #  scrape_interval: 5s
-  #  static_configs:
-  #    - targets: [ "pre-event-redis-exporter:9121" ]
-  #  metrics_path: "/metrics"
+  - job_name: "per-redis-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "redis-exporter:9121" ]
+    metrics_path: "/metrics"
+
+  - job_name: "postgres-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "postgres-exporter:9187" ]
+    metrics_path: "/metrics"

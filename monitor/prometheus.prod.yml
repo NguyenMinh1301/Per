@@ -13,3 +13,20 @@ scrape_configs:
     static_configs:
       - targets: ["per:8080"]
     metrics_path: "/actuator/prometheus"
+
+  - job_name: "per-node-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "node-exporter:9100" ]
+
+  - job_name: "per-redis-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "redis-exporter:9121" ]
+    metrics_path: "/metrics"
+
+  - job_name: "postgres-exporter"
+    scrape_interval: 5s
+    static_configs:
+      - targets: [ "postgres-exporter:9187" ]
+    metrics_path: "/metrics"
