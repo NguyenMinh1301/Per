@@ -78,7 +78,7 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     ports:
-      - "9090:9090"
+      - "9091:9090"
     networks:
       - per-network
 
