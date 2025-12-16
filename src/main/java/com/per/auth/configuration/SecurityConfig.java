@@ -51,6 +51,9 @@ public class SecurityConfig {
         "/per/swagger-ui/**",
         "/per/api-docs",
 
+        // Actuator
+        "/actuator/prometheus",
+
         // Payment (PayOS)
         "/per/payments/payos/webhook",
         "/per/payments/payos/return"

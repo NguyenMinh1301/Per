@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "per-prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:9090"]
+    metrics_path: "/metrics"
+
+  - job_name: "per-springboot"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["per:8080"]
+    metrics_path: "/actuator/prometheus"

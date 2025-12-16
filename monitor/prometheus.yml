@@ -1,0 +1,26 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: "per-prometheus"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["localhost:9090"]
+    metrics_path: "/metrics"
+
+  - job_name: "per-springboot"
+    scrape_interval: 5s
+    static_configs:
+      - targets: ["host.docker.internal:8080"]
+    metrics_path: "/actuator/prometheus"
+
+  #- job_name: "banvetau-node-exporter"
+  #  scrape_interval: 5s
+  #  static_configs:
+  #    - targets: [ "pre-event-node-exporter:9100" ]
+
+  #- job_name: "banvetau-redis-exporter"
+  #  scrape_interval: 5s
+  #  static_configs:
+  #    - targets: [ "pre-event-redis-exporter:9121" ]
+  #  metrics_path: "/metrics"
