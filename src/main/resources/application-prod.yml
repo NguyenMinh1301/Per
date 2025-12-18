@@ -1,3 +1,5 @@
+debug: false
+
 jpa:
   hibernate:
     ddl-auto: validate
