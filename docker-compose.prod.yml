@@ -60,7 +60,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports: ["5432:5432"]
+    ports: ["127.0.0.1:5432:5432"]
     networks:
       - per-network
     volumes: ["db:/var/lib/postgresql/data"]
@@ -70,7 +70,7 @@ services:
     container_name: redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     networks:
       - per-network
 
@@ -81,7 +81,7 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
-      - "22181:2181"
+      - "127.0.0.1:22181:2181"
     networks:
       - per-network
 
@@ -91,7 +91,7 @@ services:
     depends_on:
       - zookeeper
     ports:
-      - "29092:29092"
+      - "127.0.0.1:29092:29092"
     networks:
       - per-network
     environment:
@@ -133,7 +133,7 @@ services:
       - "--web.console.templates=/etc/prometheus/consoles"
       - "--web.enable-lifecycle"
     ports:
-      - "9091:9090"
+      - "127.0.0.1:9091:9090"
     networks:
       - per-network
 
@@ -152,7 +152,7 @@ services:
     volumes:
       - ./grafana-storage:/var/lib/grafana
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - per-network
 
@@ -170,7 +170,7 @@ services:
       - --path.sysfs=/host/sys
       - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)(5690|/)
     ports:
-      - "9100:9100"
+      - "127.0.0.1:9100:9100"
     networks:
       - per-network
 
@@ -179,7 +179,7 @@ services:
     container_name: redis-exporter
     command: -redis.addr redis://redis:6379
     ports:
-      - "9121:9121"
+      - "127.0.0.1:9121:9121"
     networks:
       - per-network
 
@@ -193,7 +193,7 @@ services:
     networks:
       - per-network
     ports:
-      - "9187:9187"
+      - "127.0.0.1:9187:9187"
 
 volumes:
   db:
