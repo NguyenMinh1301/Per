@@ -37,6 +37,9 @@ spring:
     default-encoding: UTF-8
 
 management:
+  health:
+    circuitbreakers:
+      enabled: true
   endpoint:
     health:
       show-details: always

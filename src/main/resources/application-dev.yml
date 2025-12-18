@@ -49,8 +49,20 @@ springdoc:
   server-url: ${APP_BASE_URL:http://localhost:8080}
 
 resilience4j:
+  circuitbreaker:
+    instances:
+      media:
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+        permittedNumberOfCallsInHalfOpenState: 3
+        eventConsumerBufferSize: 10
+        registerHealthIndicator: true
+
   ratelimiter:
     instances:
+      # Auth
       authStrict:
         limitForPeriod: 20
         limitRefreshPeriod: 60s
@@ -64,5 +76,17 @@ resilience4j:
       authModerate:
         limitForPeriod: 30
         limitRefreshPeriod: 60s
+        timeoutDuration: 5s
+        registerHealthIndicator: true
+
+      #Media
+      mediaSingle:
+        limitForPeriod: 3
+        limitRefreshPeriod: 5s
+        timeoutDuration: 2s
+        registerHealthIndicator: true
+      mediaMultipart:
+        limitForPeriod: 10
+        limitRefreshPeriod: 20s
         timeoutDuration: 5s
         registerHealthIndicator: true
