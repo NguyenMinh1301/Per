@@ -1,17 +1,21 @@
 package com.per.common.exception;
 
+
 import java.util.HashMap;
 import java.util.Map;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.per.common.ApiResponse;
@@ -48,6 +52,15 @@ public class GlobalExceptionHandler {
                                         violation.getPropertyPath().toString(),
                                         violation.getMessage()));
         return buildErrorResponse(ApiErrorCode.VALIDATION_ERROR, ex.getMessage(), errors);
+    }
+
+    @ExceptionHandler(RequestNotPermitted.class)
+    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
+    public ResponseEntity<ApiResponse<Void>> handleRateLimitException(RequestNotPermitted ex) {
+        return buildErrorResponse(
+                ApiErrorCode.TOO_MANY_REQUESTS,
+                ApiErrorCode.TOO_MANY_REQUESTS.getDefaultMessage(),
+                null);
     }
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})

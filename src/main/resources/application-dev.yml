@@ -52,7 +52,7 @@ resilience4j:
   ratelimiter:
     instances:
       login:
-        limitForPeriod: 2
+        limitForPeriod: 10
         limitRefreshPeriod: 1s
         timeoutDuration: 0
         registerHealthIndicator: true

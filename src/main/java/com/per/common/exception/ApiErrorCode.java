@@ -15,6 +15,7 @@ public enum ApiErrorCode {
     FORBIDDEN("FORBIDDEN", "Access to this resource is forbidden", HttpStatus.FORBIDDEN),
     UNAUTHORIZED("UNAUTHORIZED", "Authentication is required", HttpStatus.UNAUTHORIZED),
     INTERNAL_ERROR("INTERNAL_ERROR", "An unexpected error occurred", HttpStatus.INTERNAL_SERVER_ERROR),
+    TOO_MANY_REQUESTS("TOO_MANY_REQUESTS", "The system is busy. Please try again in a few minutes.", HttpStatus.TOO_MANY_REQUESTS),
 
     // Auth
     AUTH_INVALID_CREDENTIALS("BAD_REQUEST", "Invalid username or password", HttpStatus.UNAUTHORIZED),

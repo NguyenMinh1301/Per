@@ -1,10 +1,9 @@
 package com.per.auth.controller;
 
-import com.per.common.fallback.FallBack;
+import com.per.common.base.BaseController;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
-import org.antlr.v4.runtime.tree.xpath.XPath;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Auth.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "Authentication APIs")
-public class AuthController {
+public class AuthController extends BaseController {
 
     private final AuthService authService;
     private final MeService meService;
@@ -54,21 +53,17 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.LOGIN)
-    @RateLimiter(name = "login", fallbackMethod = "test")
+    @RateLimiter(name = "login")
     public ResponseEntity<ApiResponse<AuthTokenResponse>> login(
             @Valid @RequestBody SigninRequest request) {
         AuthTokenResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGIN_SUCCESS, response));
     }
 
-    @GetMapping("test")
-    @RateLimiter(name = "login", fallbackMethod = "test")
+    @GetMapping("/test")
+    @RateLimiter(name = "login")
     public String test() {
         return "test";
-    }
-
-    public String test(Throwable throwable) {
-        return "Too many request";
     }
 
     @PostMapping(ApiConstants.Auth.REFRESH)
