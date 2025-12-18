@@ -1,7 +1,5 @@
 package com.per.auth.controller;
 
-import com.per.common.base.BaseController;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
@@ -31,8 +29,10 @@ import com.per.auth.service.AuthService;
 import com.per.auth.service.MeService;
 import com.per.common.ApiConstants;
 import com.per.common.ApiResponse;
+import com.per.common.base.BaseController;
 import com.per.common.response.ApiSuccessCode;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 

@@ -1,10 +1,8 @@
 package com.per.common.exception;
 
-
 import java.util.HashMap;
 import java.util.Map;
 
-import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.per.common.ApiResponse;
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

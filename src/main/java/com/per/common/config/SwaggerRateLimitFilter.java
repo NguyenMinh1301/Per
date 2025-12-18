@@ -46,13 +46,13 @@ public class SwaggerRateLimitFilter extends OncePerRequestFilter {
                 || path.startsWith("/per/swagger-ui")) {
 
             // Exclude static assets
-            //if (path.endsWith(".css")
+            // if (path.endsWith(".css")
             //        || path.endsWith(".js")
             //        || path.endsWith(".png")
             //        || path.endsWith(".ico")) {
             //    filterChain.doFilter(request, response);
             //    return;
-            //}
+            // }
 
             RateLimiter rateLimiter = rateLimiterRegistry.rateLimiter("swagger");
 
