@@ -45,3 +45,19 @@ springdoc:
   api-docs:
     path: /per/v3/api-docs
   server-url: ${APP_BASE_URL}
+
+resilience4j:
+  ratelimiter:
+    instances:
+      authStrict:
+        limitForPeriod: 20
+        limitRefreshPeriod: 60s
+        timeoutDuration: 0
+      authVeryStrict:
+        limitForPeriod: 20
+        limitRefreshPeriod: 1h
+        timeoutDuration: 0
+      authModerate:
+        limitForPeriod: 30
+        limitRefreshPeriod: 60s
+        timeoutDuration: 5s

@@ -51,13 +51,18 @@ springdoc:
 resilience4j:
   ratelimiter:
     instances:
-      login:
-        limitForPeriod: 10
-        limitRefreshPeriod: 1s
+      authStrict:
+        limitForPeriod: 20
+        limitRefreshPeriod: 60s
         timeoutDuration: 0
         registerHealthIndicator: true
-        eventConsumerBufferSize: 100
-      backendB:
-        limitForPeriod: 6
-        limitRefreshPeriod: 500ms
-        timeoutDuration: 3s
+      authVeryStrict:
+        limitForPeriod: 20
+        limitRefreshPeriod: 1h
+        timeoutDuration: 0
+        registerHealthIndicator: true
+      authModerate:
+        limitForPeriod: 30
+        limitRefreshPeriod: 60s
+        timeoutDuration: 5s
+        registerHealthIndicator: true

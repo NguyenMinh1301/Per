@@ -46,6 +46,7 @@ public class AuthController extends BaseController {
     private final MeService meService;
 
     @PostMapping(ApiConstants.Auth.REGISTER)
+    @RateLimiter(name = "authStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody SignupRequest request) {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,20 +54,15 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Auth.LOGIN)
-    @RateLimiter(name = "login")
+    @RateLimiter(name = "authStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<AuthTokenResponse>> login(
             @Valid @RequestBody SigninRequest request) {
         AuthTokenResponse response = authService.login(request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.AUTH_LOGIN_SUCCESS, response));
     }
 
-    @GetMapping("/test")
-    @RateLimiter(name = "login")
-    public String test() {
-        return "test";
-    }
-
     @PostMapping(ApiConstants.Auth.REFRESH)
+    @RateLimiter(name = "authModerate", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<AuthTokenResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request) {
         AuthTokenResponse response = authService.refreshToken(request);
@@ -75,6 +71,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Auth.INTROSPECT)
+    @RateLimiter(name = "authModerate", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<IntrospectResponse>> introspect(
             @Valid @RequestBody IntrospectRequest request) {
         IntrospectResponse response = authService.introspect(request);
@@ -92,6 +89,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Auth.VERIFY_EMAIL)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
             @Valid @RequestBody VerifyEmailRequest request) {
         authService.verifyEmail(request);
@@ -99,6 +97,7 @@ public class AuthController extends BaseController {
     }
 
     @GetMapping(ApiConstants.Auth.VERIFY_EMAIL)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam("token") String token) {
         VerifyEmailRequest request = VerifyEmailRequest.builder().token(token).build();
         authService.verifyEmail(request);
@@ -106,6 +105,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Auth.FORGOT_PASSWORD)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
@@ -113,6 +113,7 @@ public class AuthController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Auth.RESET_PASSWORD)
+    @RateLimiter(name = "authStrict", fallbackMethod = "fallback")
     public ResponseEntity<ApiResponse<Void>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);
