@@ -9,9 +9,9 @@ jpa:
 
 security:
   jwt:
-    secret: ${JWT_SECRET}                   # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 60 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
+    secret: ${JWT_SECRET} # base64 256-bit+
+    access-ttl: ${ACCESS_TOKEN_TTL:PT15M} # 60 minutes (ISO-8601)
+    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D} # 30 days (ISO-8601)
     issuer: ${JWT_ISSUER:per-auth-service}
 
 app:
@@ -88,5 +88,12 @@ resilience4j:
       mediaMultipart:
         limitForPeriod: 10
         limitRefreshPeriod: 20s
+        timeoutDuration: 5s
+        registerHealthIndicator: true
+
+      # Swagger
+      swagger:
+        limitForPeriod: 100 # include file .js, .css, .ico,...
+        limitRefreshPeriod: 60s
         timeoutDuration: 5s
         registerHealthIndicator: true
