@@ -47,3 +47,17 @@ springdoc:
   api-docs:
     path: /per/v3/api-docs
   server-url: ${APP_BASE_URL:http://localhost:8080}
+
+resilience4j:
+  ratelimiter:
+    instances:
+      login:
+        limitForPeriod: 2
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+      backendB:
+        limitForPeriod: 6
+        limitRefreshPeriod: 500ms
+        timeoutDuration: 3s

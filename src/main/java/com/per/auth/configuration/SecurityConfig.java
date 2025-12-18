@@ -44,6 +44,7 @@ public class SecurityConfig {
         "/per/auth/verify-email",
         "/per/auth/forgot-password",
         "/per/auth/reset-password",
+            "/per/auth/test",
 
         // Swagger
         "/per/v3/api-docs/**",
