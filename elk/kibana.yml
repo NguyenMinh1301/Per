@@ -2,4 +2,6 @@
 
 server.host: 0.0.0.0
 elasticsearch.hosts: ["http://elasticsearch:9200"]
+elasticsearch.username: "${ELASTICSEARCH_USERNAME}"
+elasticsearch.password: "${ELASTIC_PASSWORD}"
 monitoring.ui.container.elasticsearch.enabled: false

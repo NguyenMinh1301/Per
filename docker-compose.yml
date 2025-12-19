@@ -149,8 +149,10 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      discovery.type: single-node
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ES_JAVA_OPTS=-Xmx256m -Xms256m
+      - discovery.type=single-node
+      - xpack.security.enabled=true
     networks:
       - per-network
 
@@ -177,6 +179,10 @@ services:
     container_name: kibana
     volumes:
       - ./elk/kibana.yml:/usr/share/kibana/config/kibana.yml
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
     ports:
       - "5601:5601"
     networks:
