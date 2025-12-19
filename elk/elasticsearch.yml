@@ -3,7 +3,7 @@
 network.host: 0.0.0.0
 
 xpack.license.self_generated.type: trial
-xpack.security.enabled: true # true -> is authentication
+xpack.security.enabled: false # true -> is authentication
 xpack.monitoring.collection.enabled: false
 
 cluster.routing.allocation.disk.threshold_enabled: false
