@@ -91,7 +91,7 @@ resilience4j:
 
       # Swagger
       swagger:
-        limitForPeriod: 100 # include file .js, .css, .ico,...
-        limitRefreshPeriod: 60s
-        timeoutDuration: 5s
+        limitForPeriod: 10
+        limitRefreshPeriod: 30s
+        timeoutDuration: 0
         registerHealthIndicator: true
