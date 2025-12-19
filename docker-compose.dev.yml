@@ -55,6 +55,7 @@ services:
       - PAY_OS_CLIENT_ID=${PAY_OS_CLIENT_ID}
       - PAY_OS_API_KEY=${PAY_OS_API_KEY}
       - PAY_OS_CHECKSUM_KEY=${PAY_OS_CHECKSUM_KEY}
+      - LOGSTASH_HOST=logstash
 
       # --- Kafka ---
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092

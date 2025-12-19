@@ -9,7 +9,7 @@
 
     <appender name="LOG_STASH"
               class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5044</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:5044</destination>
 
         <encoder charset="UTF-8"
                  class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
