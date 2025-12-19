@@ -140,6 +140,50 @@ services:
     ports:
       - "9187:9187"
 
+  elasticsearch:
+    image: elasticsearch:7.17.25
+    container_name: elasticsearch
+    volumes:
+      - ./elk/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - ES_JAVA_OPTS=-Xmx256m -Xms256m
+      - discovery.type=single-node
+    networks:
+      - per-network
+
+  logstash:
+    image: logstash:7.17.25
+    container_name: logstash
+    volumes:
+      - ./elk/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./elk/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+      - "5033:5000/tcp"
+      - "5022:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - per-network
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: kibana:7.17.25
+    container_name: kibana
+    volumes:
+      - ./elk/kibana.yml:/usr/share/kibana/config/kibana.yml
+    ports:
+      - "5601:5601"
+    networks:
+      - per-network
+    depends_on:
+      - elasticsearch
+
 volumes:
   db:
 
