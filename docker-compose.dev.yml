@@ -59,6 +59,9 @@ services:
 
       # --- Kafka ---
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
+      # --- ELK ---
+      - LOGSTASH_HOST=logstash
     ports:
       - "8080:8080"
     networks:
