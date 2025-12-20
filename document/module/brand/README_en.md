@@ -88,4 +88,16 @@ Extending the Module
 * **Brand assets**: Add image uploads by extending DTO/entity, updating mapper, and referencing the media module.
 * **Brand-localised data**: Introduce additional entity columns and extend `BrandResponse`.
 * **Soft delete**: Add an `isActive` toggle (already present) and filter in `BrandRepository.search/findAll` as needed.
-* **Caching**: Wrap read methods with `@Cacheable` if read-heavy workloads warrant it.
+
+Caching
+-------
+
+Redis caching is enabled for read operations:
+
+* `getBrands` and `getBrand` are annotated with `@Cacheable`.
+* Cache names: `brands` (list), `brand` (single item by ID).
+* TTL: 30 minutes (master data).
+* Write operations (create, update, delete) trigger post-commit cache eviction via `CacheEvictionHelper`.
+
+See [Cache Module Documentation](../../cache/README.md) for details.
+
