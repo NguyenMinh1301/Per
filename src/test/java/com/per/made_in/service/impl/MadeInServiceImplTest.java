@@ -24,6 +24,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import com.per.common.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -41,6 +42,8 @@ class MadeInServiceImplTest {
     @Mock private MadeInRepository madeInRepository;
 
     @Mock private MadeInMapper madeInMapper;
+
+    @Mock private CacheEvictionHelper cacheEvictionHelper;
 
     @InjectMocks private MadeInServiceImpl madeInService;
 
@@ -199,6 +202,7 @@ class MadeInServiceImplTest {
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
             when(madeInMapper.toEntity(request)).thenReturn(newMadeIn);
+            when(madeInRepository.save(any(MadeIn.class))).thenReturn(newMadeIn);
             when(madeInMapper.toResponse(newMadeIn)).thenReturn(newMadeInResponse);
 
             // When
@@ -240,6 +244,7 @@ class MadeInServiceImplTest {
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
             when(madeInMapper.toEntity(request)).thenReturn(newMadeIn);
+            when(madeInRepository.save(any(MadeIn.class))).thenReturn(newMadeIn);
             when(madeInMapper.toResponse(newMadeIn)).thenReturn(newMadeInResponse);
 
             // When

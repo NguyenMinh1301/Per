@@ -2,6 +2,7 @@ package com.per.category.service.impl;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import com.per.category.entity.Category;
 import com.per.category.mapper.CategoryMapper;
 import com.per.category.repository.CategoryRepository;
 import com.per.category.service.CategoryService;
+import com.per.common.cache.CacheEvictionHelper;
+import com.per.common.cache.CacheNames;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -27,9 +30,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CacheEvictionHelper cacheEvictionHelper;
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.CATEGORIES,
+            key =
+                    "'list:' + (#query ?: 'all') + ':p' + #pageable.pageNumber + ':s' + #pageable.pageSize",
+            sync = true)
     public PageResponse<CategoryResponse> getCategories(String query, Pageable pageable) {
         Page<Category> page;
 
@@ -44,13 +53,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheNames.CATEGORY, key = "#id", sync = true)
     public CategoryResponse getCategory(UUID id) {
         Category category = findById(id);
         return categoryMapper.toResponse(category);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CategoryResponse createCategory(CategoryCreateRequest request) {
         String name = request.getName();
         validateNameUniqueness(name);
@@ -60,12 +69,14 @@ public class CategoryServiceImpl implements CategoryService {
         category.setIsActive(
                 request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
-        Category saved = categoryMapper.toEntity(request);
+        Category saved = categoryRepository.save(category);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
+
         return categoryMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public CategoryResponse updateCategory(UUID id, CategoryUpdateRequest request) {
         Category category = findById(id);
 
@@ -87,14 +98,20 @@ public class CategoryServiceImpl implements CategoryService {
         }
 
         Category saved = categoryRepository.save(category);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.CATEGORY, id);
+
         return categoryMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public void deleteCategory(UUID id) {
         Category category = findById(id);
         categoryRepository.delete(category);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.CATEGORY, id);
     }
 
     private Category findById(UUID id) {

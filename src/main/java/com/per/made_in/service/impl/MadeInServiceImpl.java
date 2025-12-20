@@ -2,11 +2,14 @@ package com.per.made_in.service.impl;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.per.common.cache.CacheEvictionHelper;
+import com.per.common.cache.CacheNames;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -27,9 +30,15 @@ public class MadeInServiceImpl implements MadeInService {
 
     private final MadeInRepository madeInRepository;
     private final MadeInMapper madeInMapper;
+    private final CacheEvictionHelper cacheEvictionHelper;
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.MADE_INS,
+            key =
+                    "'list:' + (#query ?: 'all') + ':p' + #pageable.pageNumber + ':s' + #pageable.pageSize",
+            sync = true)
     public PageResponse<MadeInResponse> getMadeIns(String query, Pageable pageable) {
         Page<MadeIn> page;
 
@@ -44,13 +53,13 @@ public class MadeInServiceImpl implements MadeInService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheNames.MADE_IN, key = "#id", sync = true)
     public MadeInResponse getMadeIn(UUID id) {
         MadeIn madeIn = findById(id);
         return madeInMapper.toResponse(madeIn);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public MadeInResponse createMadeIn(MadeInCreateRequest request) {
         String name = request.getName();
         validateNameUniqueness(name);
@@ -60,12 +69,14 @@ public class MadeInServiceImpl implements MadeInService {
         madeIn.setIsActive(
                 request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
-        MadeIn saved = madeInMapper.toEntity(request);
+        MadeIn saved = madeInRepository.save(madeIn);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
+
         return madeInMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public MadeInResponse updateMadeIn(UUID id, MadeInUpdateRequest request) {
         MadeIn madeIn = findById(id);
 
@@ -87,14 +98,20 @@ public class MadeInServiceImpl implements MadeInService {
         }
 
         MadeIn saved = madeInRepository.save(madeIn);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.MADE_IN, id);
+
         return madeInMapper.toResponse(saved);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public void deleteMadeIn(UUID id) {
         MadeIn madeIn = findById(id);
         madeInRepository.delete(madeIn);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.MADE_IN, id);
     }
 
     private MadeIn findById(UUID id) {
