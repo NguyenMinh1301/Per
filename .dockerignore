@@ -5,6 +5,7 @@ target
 /scirpt
 /data
 /grafana-storage
+/elk
 .git
 .gitignore
 README.md
