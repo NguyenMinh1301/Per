@@ -30,6 +30,7 @@ import com.per.brand.dto.response.BrandResponse;
 import com.per.brand.entity.Brand;
 import com.per.brand.mapper.BrandMapper;
 import com.per.brand.repository.BrandRepository;
+import com.per.common.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -41,6 +42,8 @@ class BrandServiceImplTest {
     @Mock private BrandRepository brandRepository;
 
     @Mock private BrandMapper brandMapper;
+
+    @Mock private CacheEvictionHelper cacheEvictionHelper;
 
     @InjectMocks private BrandServiceImpl brandService;
 
@@ -217,7 +220,7 @@ class BrandServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("New Brand");
-            assertThat(result.isActive()).isTrue();
+            assertThat(result.getIsActive()).isTrue();
 
             verify(brandRepository).existsByNameIgnoreCase("New Brand");
             verify(brandRepository).save(any(Brand.class));
@@ -259,7 +262,7 @@ class BrandServiceImplTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.isActive()).isTrue();
+            assertThat(result.getIsActive()).isTrue();
         }
 
         @Test
@@ -327,7 +330,7 @@ class BrandServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("Updated Brand");
-            assertThat(result.isActive()).isFalse();
+            assertThat(result.getIsActive()).isFalse();
 
             verify(brandRepository).findById(brandId);
             verify(brandRepository).save(any(Brand.class));

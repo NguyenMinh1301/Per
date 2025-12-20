@@ -31,6 +31,7 @@ import com.per.brand.entity.Brand;
 import com.per.brand.repository.BrandRepository;
 import com.per.category.entity.Category;
 import com.per.category.repository.CategoryRepository;
+import com.per.common.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -65,6 +66,8 @@ class ProductServiceImplTest {
     @Mock private ProductMapper productMapper;
 
     @Mock private ProductVariantMapper productVariantMapper;
+
+    @Mock private CacheEvictionHelper cacheEvictionHelper;
 
     @InjectMocks private ProductServiceImpl productService;
 
