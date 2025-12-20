@@ -2,6 +2,7 @@ package com.per.brand.service.impl;
 
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,8 @@ import com.per.brand.entity.Brand;
 import com.per.brand.mapper.BrandMapper;
 import com.per.brand.repository.BrandRepository;
 import com.per.brand.service.BrandService;
+import com.per.common.cache.CacheEvictionHelper;
+import com.per.common.cache.CacheNames;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -27,9 +30,15 @@ public class BrandServiceImpl implements BrandService {
 
     private final BrandRepository brandRepository;
     private final BrandMapper brandMapper;
+    private final CacheEvictionHelper cacheEvictionHelper;
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.BRANDS,
+            key =
+                    "'list:' + (#query ?: 'all') + ':p' + #pageable.pageNumber + ':s' + #pageable.pageSize",
+            sync = true)
     public PageResponse<BrandResponse> getBrands(String query, Pageable pageable) {
         Page<Brand> page;
 
@@ -44,6 +53,7 @@ public class BrandServiceImpl implements BrandService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheNames.BRAND, key = "#id", sync = true)
     public BrandResponse getBrand(UUID id) {
         Brand brand = findById(id);
         return brandMapper.toResponse(brand);
@@ -60,6 +70,9 @@ public class BrandServiceImpl implements BrandService {
                 request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         Brand saved = brandRepository.save(brand);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.BRANDS);
+
         return brandMapper.toResponse(saved);
     }
 
@@ -85,6 +98,10 @@ public class BrandServiceImpl implements BrandService {
         }
 
         Brand saved = brandRepository.save(brand);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.BRANDS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.BRAND, id);
+
         return brandMapper.toResponse(saved);
     }
 
@@ -92,6 +109,9 @@ public class BrandServiceImpl implements BrandService {
     public void deleteBrand(UUID id) {
         Brand brand = findById(id);
         brandRepository.delete(brand);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.BRANDS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.BRAND, id);
     }
 
     private Brand findById(UUID id) {
