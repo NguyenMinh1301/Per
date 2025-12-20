@@ -84,4 +84,16 @@ Extending the Module
 * **Nested categories**: add parent/child relationship fields in the entity and adjust mapper/service logic.
 * **Slugging/SEO**: populate the `slug` field from the name in the service layer (ensure uniqueness with dedicated repository method).
 * **Localization**: create additional DTO/entity fields for translated names, descriptions, and adapt responses accordingly.
-* **Caching**: enable caching on `getCategories` if categories are relatively static.
+
+Caching
+-------
+
+Redis caching is enabled for read operations:
+
+* `getCategories` and `getCategory` are annotated with `@Cacheable`.
+* Cache names: `categories` (list), `category` (single item by ID).
+* TTL: 30 minutes (master data).
+* Write operations (create, update, delete) trigger post-commit cache eviction via `CacheEvictionHelper`.
+
+See [Cache Module Documentation](../../cache/README.md) for details.
+

@@ -106,6 +106,30 @@ Extending the Module
    - Provide an endpoint to generate signed upload parameters (`Cloudinary#apiSignRequest`).  
    - Consumers can upload directly to Cloudinary and still persist metadata by calling a separate endpoint with the upload result.
 
+Resilience Patterns
+-------------------
+
+Media endpoints are protected by both rate limiting and circuit breaker patterns:
+
+### Rate Limiting
+
+| Instance | Endpoint | Description |
+| --- | --- | --- |
+| `mediaSingle` | `/upload` | Limits single file uploads |
+| `mediaMultipart` | `/upload/batch` | Limits batch uploads |
+
+Rate limiters prevent abuse and protect server resources. When exceeded, endpoints return `429 Too Many Requests`.
+
+### Circuit Breaker
+
+The `media` circuit breaker protects against Cloudinary service failures:
+
+* When Cloudinary is unavailable, the circuit opens after threshold failures.
+* Subsequent requests fail fast with `503 Service Unavailable` instead of timing out.
+* After a wait period, test requests are allowed to check recovery.
+
+See [Rate Limiting](../../resilience-patterns/rate-limit/README.md) and [Circuit Breaker](../../resilience-patterns/circuit-breaker/README.md) documentation for configuration details.
+
 Development Notes
 -----------------
 

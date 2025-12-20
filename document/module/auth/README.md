@@ -96,13 +96,27 @@ Define the following environment variables (see `.env.example`):
 - **Custom response codes**: register in `ApiSuccessCode`/`ApiErrorCode` to keep contracts consistent.
 - **Modify email content**: update `MailServiceImpl`. Keep links controlled by `ApplicationProperties`.
 
-## 8. Testing Recommendations
+## 8. Rate Limiting
+
+Authentication endpoints are protected by Resilience4j rate limiters to prevent brute-force attacks:
+
+| Instance | Endpoints | Description |
+| --- | --- | --- |
+| `authStrict` | `/register`, `/login`, `/reset-password` | High-risk operations |
+| `authModerate` | `/refresh`, `/introspect` | Token management |
+| `authVeryStrict` | `/verify-email`, `/forgot-password` | Sensitive operations |
+
+When rate limits are exceeded, endpoints return `429 Too Many Requests`. Configuration values are environment-specific and should be tuned based on server capacity.
+
+See [Rate Limiting Documentation](../../resilience-patterns/rate-limit/README.md) for details.
+
+## 9. Testing Recommendations
 
 - Unit test `AuthServiceImpl`, `JwtService`, and `UserTokenServiceImpl` with mocks for repositories and clock.
 - Use Testcontainers for integration tests to cover login → refresh → logout flows with PostgreSQL and Redis.
 - Verify email and reset flows using configured SMTP server (e.g., Gmail).
 
-## 9. Operational Notes
+## 10. Operational Notes
 
 - Redis key pattern: `auth:refresh:<token>` with TTL equal to refresh token duration.
 - Spotless enforces formatting; run `./mvnw spotless:apply` before committing.

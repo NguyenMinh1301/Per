@@ -98,3 +98,16 @@ Extending the Module
 * **Search facets**: expose more filters (brand, category, gender) by extending repository queries and controller parameters.
 * **Media associations**: link variant images or galleries using the media module.
 * **Soft delete**: respect `isActive` flags for both product and variants, filtering results while retaining history.
+
+Caching
+-------
+
+Redis caching is enabled for read operations:
+
+* `getProducts` and `getProduct` are annotated with `@Cacheable`.
+* Cache names: `products` (list), `product` (single item by ID).
+* TTL: 10 minutes (product data changes more frequently than master data).
+* Write operations (create, update, delete) and variant modifications trigger post-commit cache eviction via `CacheEvictionHelper`.
+
+See [Cache Module Documentation](../../cache/README.md) for details.
+

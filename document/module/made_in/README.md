@@ -83,4 +83,16 @@ Extending the Module
 * **Localized names**: add JSON/translation tables and extend DTOs accordingly.
 * **Association counts**: provide analytics for how many products reference an origin (requires repository query/join).
 * **Soft deletion**: leverage existing `isActive` flag to hide origins instead of hard delete; adjust queries to filter by active status.
-* **Caching**: if origins are rarely updated, enable caching on read endpoints to reduce DB load.
+
+Caching
+-------
+
+Redis caching is enabled for read operations:
+
+* `getMadeIns` and `getMadeIn` are annotated with `@Cacheable`.
+* Cache names: `madeIns` (list), `madeIn` (single item by ID).
+* TTL: 30 minutes (master data).
+* Write operations (create, update, delete) trigger post-commit cache eviction via `CacheEvictionHelper`.
+
+See [Cache Module Documentation](../../cache/README.md) for details.
+
