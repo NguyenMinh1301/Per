@@ -27,8 +27,9 @@ Các Thành Phần Chính
 | File | Mục đích |
 | --- | --- |
 | `KafkaConfig.java` | Cấu hình producer và consumer factory |
+| `KafkaTopicNames.java` | Các hằng số tên topic tập trung |
 | `EmailEvent.java` | Payload sự kiện cho email messages |
-| `EmailConsumer.java` | Kafka listener xử lý email events |
+| `EmailConsumer.java` | Kafka listener với hỗ trợ retry và DLQ |
 | `AuthServiceImpl.java` | Producer publish email events |
 
 Topics và Consumer Groups
@@ -37,6 +38,7 @@ Topics và Consumer Groups
 | Topic | Consumer Group | Mục đích |
 | --- | --- | --- |
 | `email-topic` | `email-group` | Hàng đợi gửi email |
+| `email-topic-dlt` | `email-group` | Dead Letter Topic cho email thất bại |
 
 Cấu Hình
 --------
@@ -146,25 +148,61 @@ Các Use Cases Hiện Tại
 | Đăng ký người dùng | Email xác minh | Sau khi tạo user |
 | Quên mật khẩu | Link reset mật khẩu | Khi yêu cầu quên mật khẩu |
 
-Xử Lý Lỗi
----------
+Xử Lý Lỗi và Dead Letter Queue (DLQ)
+-------------------------------------
 
-Triển khai hiện tại log lỗi nhưng không implement retry logic. Cho production:
+Ứng dụng triển khai retry với exponential backoff và Dead Letter Queue:
 
-* Cấu hình `spring.kafka.consumer.enable-auto-commit: false`
-* Thêm error handler vào `ConcurrentKafkaListenerContainerFactory`
-* Cân nhắc dead letter topic cho các messages thất bại
+### Retry Mechanism
+
+```java
+@RetryableTopic(
+    attempts = "4",  // 1 initial + 3 retries
+    backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 4000),
+    dltTopicSuffix = "-dlt"
+)
+@KafkaListener(topics = "email-topic", groupId = "email-group")
+public void consume(EmailEvent event) {
+    mailService.sendEmail(event.getTo(), event.getSubject(), event.getContent());
+}
+```
+
+| Attempt | Delay |
+| --- | --- |
+| 1 (initial) | 0s |
+| 2 (retry 1) | 1s |
+| 3 (retry 2) | 2s |
+| 4 (retry 3) | 4s |
+| DLT | after 4th failure |
+
+### Dead Letter Queue
+
+Messages fail sau tất cả retries được chuyển đến `email-topic-dlt`:
+
+```java
+@DltHandler
+@KafkaListener(topics = "email-topic-dlt", groupId = "email-group-dlt")
+public void handleDlt(EmailEvent event, @Header(KafkaHeaders.EXCEPTION_MESSAGE) String error) {
+    log.error("Email failed permanently: {}, Error: {}", event.getTo(), error);
+}
+```
+
+### Monitoring DLQ via Kafka UI
+
+1. Truy cập Kafka UI tại `http://localhost:8090`
+2. Vào Topics → `email-topic-dlt`
+3. Xem messages thất bại để xử lý thủ công
 
 Ghi Chú Phát Triển
 ------------------
 
 ### Phát Triển Local
 
-Đảm bảo Kafka đang chạy locally hoặc qua Docker:
+Đảm bảo Kafka đang chạy locally hoặc qua Docker (KRaft mode, không cần Zookeeper):
 
 ```bash
 # Sử dụng Docker Compose
-docker-compose up -d kafka zookeeper
+docker-compose up -d kafka
 ```
 
 ### Biến Môi Trường
