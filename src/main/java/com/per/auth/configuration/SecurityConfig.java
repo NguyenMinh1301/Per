@@ -35,8 +35,7 @@ public class SecurityConfig {
     private final DatabaseUserDetailsService userDetailsService;
     private final ApplicationProperties applicationProperties;
 
-    private static final String[] publicEndpoint = {
-        // Auth
+    private static final String[] publicAuthEndpoints = {
         "/per/auth/register",
         "/per/auth/login",
         "/per/auth/refresh",
@@ -44,27 +43,27 @@ public class SecurityConfig {
         "/per/auth/verify-email",
         "/per/auth/forgot-password",
         "/per/auth/reset-password",
+    };
 
-        // Public
-        "/per/products",
-        "/per/products/{id}",
-        "/per/brands",
-        "/per/brands/{id}",
-        "/per/categories",
-        "/per/categories/{id}",
-        "/per/made-in",
-        "/per/made-in/{id}",
+    // GET only - list, detail, search
+    private static final String[] publicGetEndpoints = {
+        "/per/products/list",
+        "/per/products/detail/{id}",
+        "/per/products/search",
+        "/per/brands/list",
+        "/per/brands/detail/{id}",
+        "/per/categories/list",
+        "/per/categories/detail/{id}",
+        "/per/made-in/list",
+        "/per/made-in/detail/{id}",
+    };
 
-        // Swagger
+    private static final String[] publicOtherEndpoints = {
         "/per/v3/api-docs/**",
         "/per/swagger-ui.html",
         "/per/swagger-ui/**",
         "/per/api-docs",
-
-        // Actuator
         "/actuator/prometheus",
-
-        // Payment (PayOS)
         "/per/payments/payos/webhook",
         "/per/payments/payos/return"
     };
@@ -77,7 +76,11 @@ public class SecurityConfig {
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers(publicEndpoint)
+                                auth.requestMatchers(publicAuthEndpoints)
+                                        .permitAll()
+                                        .requestMatchers(HttpMethod.GET, publicGetEndpoints)
+                                        .permitAll()
+                                        .requestMatchers(publicOtherEndpoints)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()
