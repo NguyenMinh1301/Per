@@ -31,7 +31,7 @@ import com.per.brand.entity.Brand;
 import com.per.brand.repository.BrandRepository;
 import com.per.category.entity.Category;
 import com.per.category.repository.CategoryRepository;
-import com.per.common.cache.CacheEvictionHelper;
+import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;

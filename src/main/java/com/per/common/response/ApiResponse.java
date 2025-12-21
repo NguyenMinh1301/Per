@@ -1,10 +1,9 @@
-package com.per.common;
+package com.per.common.response;
 
 import java.time.Instant;
 
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
-import com.per.common.response.ApiSuccessCode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

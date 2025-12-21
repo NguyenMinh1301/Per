@@ -24,7 +24,7 @@ import com.per.brand.dto.request.BrandUpdateRequest;
 import com.per.brand.dto.response.BrandResponse;
 import com.per.brand.service.BrandService;
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 

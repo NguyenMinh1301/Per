@@ -1,4 +1,4 @@
-package com.per.common.cache;
+package com.per.common.config.cache;
 
 /**
  * Centralized cache name constants. Single source of truth for all cache names in the application

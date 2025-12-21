@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 import com.per.user.dto.request.UserCreateRequest;

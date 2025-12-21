@@ -30,7 +30,7 @@ import com.per.category.dto.response.CategoryResponse;
 import com.per.category.entity.Category;
 import com.per.category.mapper.CategoryMapper;
 import com.per.category.repository.CategoryRepository;
-import com.per.common.cache.CacheEvictionHelper;
+import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;

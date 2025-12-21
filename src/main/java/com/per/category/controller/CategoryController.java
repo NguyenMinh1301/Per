@@ -16,7 +16,7 @@ import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
 import com.per.category.service.CategoryService;
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
