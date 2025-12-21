@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,7 +34,8 @@ public class ProductVariantController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(ApiConstants.ProductVariant.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductVariantResponse>> createVariant(
             @PathVariable("productId") UUID productId,
             @Valid @RequestBody ProductVariantCreateRequest request) {
@@ -42,7 +44,8 @@ public class ProductVariantController {
                 .body(ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_CREATE_SUCCESS, data));
     }
 
-    @PutMapping(ApiConstants.Product.DETAILS)
+    @PutMapping(ApiConstants.ProductVariant.UPDATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductVariantResponse>> updateVariant(
             @PathVariable("productId") UUID productId,
             @PathVariable("variantId") UUID variantId,
@@ -52,7 +55,8 @@ public class ProductVariantController {
                 ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_UPDATE_SUCCESS, data));
     }
 
-    @DeleteMapping(ApiConstants.Product.DETAILS)
+    @DeleteMapping(ApiConstants.ProductVariant.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteVariant(
             @PathVariable("productId") UUID productId, @PathVariable("variantId") UUID variantId) {
         productService.deleteVariant(productId, variantId);

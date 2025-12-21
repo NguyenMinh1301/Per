@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -46,7 +47,7 @@ public class ProductController extends BaseController {
     private final ProductService productService;
     private final ProductSearchService productSearchService;
 
-    @GetMapping("/search")
+    @GetMapping(ApiConstants.Product.SEARCH)
     @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
     @Operation(
             summary = "Search products",
@@ -57,7 +58,8 @@ public class ProductController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_LIST_SUCCESS, data));
     }
 
-    @PostMapping("/reindex")
+    @PostMapping(ApiConstants.Product.REINDEX)
+    @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Reindex all products",
             description = "Admin operation to rebuild Elasticsearch index")
@@ -66,7 +68,7 @@ public class ProductController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_UPDATE_SUCCESS));
     }
 
-    @GetMapping
+    @GetMapping(ApiConstants.Product.LIST)
     @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProducts(
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -75,7 +77,7 @@ public class ProductController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_LIST_SUCCESS, data));
     }
 
-    @GetMapping(ApiConstants.Product.DETAILS)
+    @GetMapping(ApiConstants.Product.DETAIL)
     @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProduct(
             @PathVariable("id") UUID id) {
@@ -83,7 +85,8 @@ public class ProductController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_FETCH_SUCCESS, data));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.Product.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request) {
         ProductDetailResponse data = productService.createProduct(request);
@@ -91,14 +94,16 @@ public class ProductController extends BaseController {
                 .body(ApiResponse.success(ApiSuccessCode.PRODUCT_CREATE_SUCCESS, data));
     }
 
-    @PutMapping(ApiConstants.Product.DETAILS)
+    @PutMapping(ApiConstants.Product.UPDATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> updateProduct(
             @PathVariable("id") UUID id, @Valid @RequestBody ProductUpdateRequest request) {
         ProductDetailResponse data = productService.updateProduct(id, request);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_UPDATE_SUCCESS, data));
     }
 
-    @DeleteMapping(ApiConstants.Product.DETAILS)
+    @DeleteMapping(ApiConstants.Product.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable("id") UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_DELETE_SUCCESS));

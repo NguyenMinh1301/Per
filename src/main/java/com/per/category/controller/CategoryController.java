@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.per.category.dto.request.CategoryCreateRequest;
@@ -33,7 +34,7 @@ public class CategoryController extends BaseController {
 
     private final CategoryService categoryService;
 
-    @GetMapping
+    @GetMapping(ApiConstants.Category.LIST)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<CategoryResponse>>> searchCategories(
             @RequestParam(value = "query", required = false) String query,
@@ -44,7 +45,7 @@ public class CategoryController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.CATEGORY_LIST_SUCCESS, response));
     }
 
-    @GetMapping(ApiConstants.Category.DETAILS)
+    @GetMapping(ApiConstants.Category.DETAIL)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") UUID id) {
         CategoryResponse response = categoryService.getCategory(id);
@@ -52,7 +53,8 @@ public class CategoryController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.CATEGORY_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.Category.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategoryResponse>> create(
             @Valid @RequestBody CategoryCreateRequest request) {
         CategoryResponse response = categoryService.createCategory(request);
@@ -60,7 +62,8 @@ public class CategoryController extends BaseController {
                 .body(ApiResponse.success(ApiSuccessCode.CATEGORY_CREATE_SUCCESS, response));
     }
 
-    @PutMapping(ApiConstants.Category.DETAILS)
+    @PutMapping(ApiConstants.Category.UPDATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody CategoryUpdateRequest request) {
         CategoryResponse response = categoryService.updateCategory(id, request);
@@ -68,7 +71,8 @@ public class CategoryController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.CATEGORY_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping(ApiConstants.Category.DETAILS)
+    @DeleteMapping(ApiConstants.Category.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_DELETE_SUCCESS));

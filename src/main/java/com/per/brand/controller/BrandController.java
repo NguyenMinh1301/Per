@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,7 +42,7 @@ public class BrandController extends BaseController {
 
     private final BrandService brandService;
 
-    @GetMapping
+    @GetMapping(ApiConstants.Brand.LIST)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<BrandResponse>>> searchBrands(
             @RequestParam(value = "query", required = false) String query,
@@ -51,14 +52,15 @@ public class BrandController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, response));
     }
 
-    @GetMapping(ApiConstants.Brand.DETAILS)
+    @GetMapping(ApiConstants.Brand.DETAIL)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<BrandResponse>> getBrand(@PathVariable("id") UUID id) {
         BrandResponse response = brandService.getBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.Brand.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BrandResponse>> create(
             @Valid @RequestBody BrandCreateRequest request) {
         BrandResponse response = brandService.createBrand(request);
@@ -66,7 +68,8 @@ public class BrandController extends BaseController {
                 .body(ApiResponse.success(ApiSuccessCode.BRAND_CREATE_SUCCESS, response));
     }
 
-    @PutMapping(ApiConstants.Brand.DETAILS)
+    @PutMapping(ApiConstants.Brand.UPDATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BrandResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody BrandUpdateRequest request) {
         BrandResponse response = brandService.updateBrand(id, request);
@@ -74,7 +77,8 @@ public class BrandController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.BRAND_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping(ApiConstants.Brand.DETAILS)
+    @DeleteMapping(ApiConstants.Brand.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_DELETE_SUCCESS));

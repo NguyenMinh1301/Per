@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.per.common.ApiConstants;
@@ -33,7 +34,7 @@ public class MadeInController extends BaseController {
 
     private final MadeInService madeInService;
 
-    @GetMapping
+    @GetMapping(ApiConstants.MadeIn.LIST)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<MadeInResponse>>> searchMadeIn(
             @RequestParam(value = "query", required = false) String query,
@@ -43,7 +44,7 @@ public class MadeInController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_LIST_SUCCESS, response));
     }
 
-    @GetMapping(ApiConstants.MadeIn.DETAILS)
+    @GetMapping(ApiConstants.MadeIn.DETAIL)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<MadeInResponse>> getMadeIn(@PathVariable("id") UUID id) {
         MadeInResponse response = madeInService.getMadeIn(id);
@@ -51,7 +52,8 @@ public class MadeInController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.MADEIN_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.MadeIn.CREATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MadeInResponse>> create(
             @Valid @RequestBody MadeInCreateRequest request) {
         MadeInResponse response = madeInService.createMadeIn(request);
@@ -59,7 +61,8 @@ public class MadeInController extends BaseController {
                 .body(ApiResponse.success(ApiSuccessCode.MADEIN_CREATE_SUCCESS, response));
     }
 
-    @PutMapping(ApiConstants.MadeIn.DETAILS)
+    @PutMapping(ApiConstants.MadeIn.UPDATE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MadeInResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody MadeInUpdateRequest request) {
         MadeInResponse response = madeInService.updateMadeIn(id, request);
@@ -67,7 +70,8 @@ public class MadeInController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.MADEIN_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping(ApiConstants.MadeIn.DETAILS)
+    @DeleteMapping(ApiConstants.MadeIn.DELETE)
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         madeInService.deleteMadeIn(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_DELETE_SUCCESS));
