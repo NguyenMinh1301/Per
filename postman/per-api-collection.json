@@ -396,7 +396,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/brands?query=&page=0&size=10&sort=createdAt,desc",
+                            "raw": "{{baseUrl}}/brands/list?query=&page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -434,7 +434,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -474,7 +474,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands",
+                            "raw": "{{baseUrl}}/brands/list",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -515,7 +515,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -558,7 +558,7 @@
                         },
                         "method": "DELETE",
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -588,7 +588,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/categories?query=&page=0&size=10&sort=createdAt,desc",
+                            "raw": "{{baseUrl}}/categories/list?query=&page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -626,7 +626,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
+                            "raw": "{{baseUrl}}/categories/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -666,7 +666,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/categories",
+                            "raw": "{{baseUrl}}/categories/list",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -707,7 +707,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
+                            "raw": "{{baseUrl}}/categories/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -750,7 +750,7 @@
                         },
                         "method": "DELETE",
                         "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
+                            "raw": "{{baseUrl}}/categories/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -780,7 +780,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/made-in?query=&page=0&size=10&sort=createdAt,desc",
+                            "raw": "{{baseUrl}}/made-in/list?query=&page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -818,7 +818,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
+                            "raw": "{{baseUrl}}/made-in/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -858,7 +858,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/made-in",
+                            "raw": "{{baseUrl}}/made-in/list",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -899,7 +899,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
+                            "raw": "{{baseUrl}}/made-in/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -942,7 +942,7 @@
                         },
                         "method": "DELETE",
                         "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
+                            "raw": "{{baseUrl}}/made-in/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1099,7 +1099,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/products?page=0&size=10&sort=createdAt,desc",
+                            "raw": "{{baseUrl}}/products/list?page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1132,7 +1132,7 @@
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1172,7 +1172,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/products",
+                            "raw": "{{baseUrl}}/products/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1213,7 +1213,7 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -1256,7 +1256,7 @@
                         },
                         "method": "DELETE",
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
