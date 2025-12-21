@@ -45,6 +45,16 @@ public class SecurityConfig {
         "/per/auth/forgot-password",
         "/per/auth/reset-password",
 
+        // Public
+        "/per/products",
+        "/per/products/{id}",
+        "/per/brands",
+        "/per/brands/{id}",
+        "/per/categories",
+        "/per/categories/{id}",
+        "/per/made-in",
+        "/per/made-in/{id}",
+
         // Swagger
         "/per/v3/api-docs/**",
         "/per/swagger-ui.html",

@@ -2,6 +2,8 @@ package com.per.product.controller;
 
 import java.util.UUID;
 
+import com.per.common.base.BaseController;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -36,11 +38,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Product.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Product", description = "Product Management APIs")
-public class ProductController {
+public class ProductController extends BaseController {
 
     private final ProductService productService;
 
     @GetMapping
+    @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<ProductResponse>>> getProducts(
             @RequestParam(value = "q", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -50,6 +53,7 @@ public class ProductController {
     }
 
     @GetMapping(ApiConstants.Product.DETAILS)
+    @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> getProduct(
             @PathVariable("id") UUID id) {
         ProductDetailResponse data = productService.getProduct(id);

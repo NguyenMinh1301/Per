@@ -2,6 +2,8 @@ package com.per.category.controller;
 
 import java.util.UUID;
 
+import com.per.common.base.BaseController;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -27,11 +29,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Category.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Category", description = "Category Management APIs")
-public class CategoryController {
+public class CategoryController extends BaseController {
 
     private final CategoryService categoryService;
 
     @GetMapping
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<CategoryResponse>>> searchCategories(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -42,6 +45,7 @@ public class CategoryController {
     }
 
     @GetMapping(ApiConstants.Category.DETAILS)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<CategoryResponse>> getCategory(@PathVariable("id") UUID id) {
         CategoryResponse response = categoryService.getCategory(id);
         return ResponseEntity.ok(

@@ -2,6 +2,8 @@ package com.per.brand.controller;
 
 import java.util.UUID;
 
+import com.per.common.base.BaseController;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -35,11 +37,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Brand.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Brand", description = "Brand Management APIs")
-public class BrandController {
+public class BrandController extends BaseController {
 
     private final BrandService brandService;
 
     @GetMapping
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<BrandResponse>>> searchBrands(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -49,6 +52,7 @@ public class BrandController {
     }
 
     @GetMapping(ApiConstants.Brand.DETAILS)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<BrandResponse>> getBrand(@PathVariable("id") UUID id) {
         BrandResponse response = brandService.getBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_FETCH_SUCCESS, response));

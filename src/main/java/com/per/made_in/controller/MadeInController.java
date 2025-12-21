@@ -2,6 +2,8 @@ package com.per.made_in.controller;
 
 import java.util.UUID;
 
+import com.per.common.base.BaseController;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -27,11 +29,12 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.MadeIn.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Made In", description = "Made In Origin APIs")
-public class MadeInController {
+public class MadeInController extends BaseController {
 
     private final MadeInService madeInService;
 
     @GetMapping
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<MadeInResponse>>> searchMadeIn(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -41,6 +44,7 @@ public class MadeInController {
     }
 
     @GetMapping(ApiConstants.MadeIn.DETAILS)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<MadeInResponse>> getMadeIn(@PathVariable("id") UUID id) {
         MadeInResponse response = madeInService.getMadeIn(id);
         return ResponseEntity.ok(
