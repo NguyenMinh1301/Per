@@ -1,14 +1,10 @@
 # Per E-commerce Backend
 
 ![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5.6-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-Security-000000?style=for-the-badge&logo=json-web-tokens&logoColor=white)
-![Flyway](https://img.shields.io/badge/Flyway-11.10-CC0200?style=for-the-badge&logo=flyway&logoColor=white)
-![Cloudinary](https://img.shields.io/badge/Cloudinary-1.39-3448C5?style=for-the-badge&logo=cloudinary&logoColor=white)
-![Swagger](https://img.shields.io/badge/Swagger-2.8-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
-![PayOS](https://img.shields.io/badge/PayOS-1.0-5D5FEF?style=for-the-badge&logo=credit-card&logoColor=white)
+![Kafka](https://img.shields.io/badge/Kafka-3.9-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
 
 <p align="center">
   <a href="./">
@@ -18,150 +14,187 @@
 
 ## Introduction
 
-**Per** is a robust, high-performance E-commerce backend application engineered with **Java 21** and **Spring Boot 3.5**. Designed with a **Modular Monolith** architecture, it ensures scalability, maintainability, and clean separation of concerns. This project demonstrates a production-ready implementation of modern backend standards, featuring secure authentication, efficient data management, and seamless third-party integrations.
+Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing clean separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Redis caching with transactional consistency, event-driven email processing via Kafka, and resilience patterns for external service integration.
 
 ## Key Features
 
-- **Advanced Authentication**: Secure JWT-based authentication with Access/Refresh token rotation, Redis-backed token management, and comprehensive flows for login, registration, and password recovery.
-- **Modular Architecture**: Distinct modules for Auth, User, Product, Order, Payment, Cart, and more, promoting code decoupling and domain-driven design.
-- **High-Performance Caching**: Integrated **Redis** caching for session management and frequently accessed data to minimize database load.
-- **Database Migrations**: Automated schema management using **Flyway** ensures consistent database states across environments.
-- **Payment Integration**: Seamless payment processing via **PayOS**.
-- **Media Management**: Cloud-based asset storage and optimization using **Cloudinary**.
-- **Email Services**: Asynchronous email delivery system using **Kafka** and **SMTP**.
-- **API Documentation**: Auto-generated, interactive API documentation with **OpenAPI/Swagger**.
+- **JWT Authentication**: Access and refresh token rotation with Redis-backed session management. Supports registration, login, email verification, and password recovery flows.
+- **Redis Caching**: Cache-Aside pattern with post-commit eviction ensures data consistency between cache and database under concurrent writes.
+- **Event-Driven Email**: Asynchronous email delivery via Kafka decouples authentication flows from SMTP latency.
+- **Resilience Patterns**: Rate limiting and circuit breaker patterns protect endpoints from abuse and external service failures.
+- **Payment Integration**: PayOS integration with webhook support for order checkout and payment status synchronization.
+- **Media Management**: Cloudinary-backed file uploads with metadata persistence.
+- **Database Migrations**: Flyway manages schema versioning across environments.
+- **API Documentation**: OpenAPI/Swagger UI provides interactive API exploration.
 
 ## Technology Stack
 
-### Core & Frameworks
+### Core
 
-- **Language**: Java 21
-- **Framework**: Spring Boot 3.5.6
-- **Security**: Spring Security, JJWT (0.11.5)
-- **ORM**: Spring Data JPA (Hibernate)
+| Technology | Version | Purpose |
+| --- | --- | --- |
+| Java | 21 | Language runtime |
+| Spring Boot | 3.5.6 | Application framework |
+| Spring Security | 6.x | Authentication and authorization |
+| Spring Data JPA | 3.x | ORM and data access |
 
-### Data & Storage
+### Data and Messaging
 
-- **Database**: PostgreSQL 16
-- **Caching**: Redis (Lettuce Client)
-- **Migration**: Flyway 11.10.0
-- **Cloud Storage**: Cloudinary
-- **Message Broker**: Kafka (Confluent) & Zookeeper
+| Technology | Version | Purpose |
+| --- | --- | --- |
+| PostgreSQL | 16 | Primary database |
+| Redis | 7 | Caching and session storage |
+| Kafka | 3.9 | Asynchronous event processing |
+| Flyway | 11.10 | Database migrations |
 
-### DevOps & Tools
+### External Services
 
-- **Containerization**: Docker, Docker Compose
-- **Build Tool**: Maven
-- **Code Quality**: Spotless (Google Java Format), JaCoCo (Code Coverage)
-- **Testing**: JUnit 5, Mockito, Testcontainers
-- **API Documentation**: SpringDoc OpenAPI (Swagger UI)
+| Technology | Purpose |
+| --- | --- |
+| Cloudinary | Media storage and delivery |
+| PayOS | Payment gateway |
+| SMTP | Email delivery |
+
+### Infrastructure
+
+| Technology | Purpose |
+| --- | --- |
+| Docker Compose | Local development environment |
+| Maven | Build and dependency management |
+| Spotless | Code formatting (Google Java Format) |
+| JUnit 5 / Mockito | Testing framework |
 
 ## Architecture Overview
 
-The project follows a **Modular Monolith** approach. Each domain is encapsulated within its own package in `src/main/java/com/per`, ensuring that business logic remains cohesive.
+The application follows a modular monolith structure. Each domain module resides in `src/main/java/com/per` with its own controller, service, repository, and DTO layers.
 
-- **`auth`**: Authentication, token management, and security configurations.
-- **`user`**: User profile management and role-based access control.
-- **`product`**: Product catalog, inventory, and categorization.
-- **`brand`**: Brand management and association with products.
-- **`category`**: Product category hierarchy and management.
-- **`made_in`**: Product origin/manufacturing location management.
-- **`order`**: Order processing, status tracking, and history.
-- **`payment`**: Payment gateway integration (PayOS) with webhook support.
-- **`cart`**: Shopping cart management.
-- **`media`**: Image and file upload handling.
+| Module | Responsibility |
+| --- | --- |
+| `auth` | Authentication, JWT management, email verification |
+| `user` | User profile and role management (admin) |
+| `product` | Product catalog and variant inventory |
+| `brand` | Brand master data |
+| `category` | Product categorization |
+| `made_in` | Product origin metadata |
+| `cart` | Shopping cart management |
+| `order` | Order snapshot and lifecycle |
+| `payment` | PayOS integration and checkout |
+| `media` | File upload and Cloudinary integration |
+| `common` | Shared utilities, caching, resilience, configuration |
+
+### Cross-Cutting Concerns
+
+- **Caching**: Redis-based caching for products and master data with configurable TTL per cache type.
+- **Rate Limiting**: Resilience4j rate limiters protect authentication and media endpoints.
+- **Circuit Breaker**: Prevents cascading failures when Cloudinary or other external services are unavailable.
+- **Exception Handling**: Global exception handler provides consistent API error responses.
 
 ## Getting Started
 
 ### Prerequisites
 
-Ensure you have the following installed on your local machine:
-
-- **Java 21 SDK**
-- **Docker & Docker Compose**
-- **Maven** (optional, wrapper included)
+- Java 21 SDK
+- Docker and Docker Compose
+- Maven (optional, wrapper included)
 
 ### Installation
 
-1.  **Clone the repository**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/NguyenMinh1301/Per.git
+   cd Per
+   ```
 
-    ```bash
-    git clone https://github.com/NguyenMinh1301/Per.git
-    cd Per
-    ```
+2. Configure environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+   Update `.env` with your PostgreSQL, Redis, Kafka, Mail, Cloudinary, and PayOS credentials.
 
-2.  **Configure Environment Variables**
-    Duplicate the `.env.example` file to create `.env` and populate it with your credentials.
+3. Start infrastructure services:
+   ```bash
+   docker-compose up -d
+   ```
 
-    ```bash
-    cp .env.example .env
-    ```
+4. Build and run the application:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+   
+   Alternatively, build and run the JAR:
+   ```bash
+   ./mvnw clean package -DskipTests
+   java -jar target/per-0.0.3.jar
+   ```
 
-    _Ensure you configure your PostgreSQL, Redis, Mail, and Cloudinary credentials in the `.env` file._
+### Endpoints
 
-3.  **Start Infrastructure**
-    Use Docker Compose to spin up the required services (PostgreSQL, Redis, Kafka, Zookeeper).
+| Endpoint | Description |
+| --- | --- |
+| `http://localhost:8080/api/v1` | API base URL |
+| `http://localhost:8080/swagger-ui/index.html` | Swagger UI |
 
-    ```bash
-    docker-compose up -d
-    ```
-
-4.  **Build and Run the Application**
-    ```bash
-    ./mvnw spring-boot:run
-    ```
-    _Alternatively, you can build the JAR and run it:_
-    ```bash
-    ./mvnw clean package -DskipTests
-    java -jar target/per-0.0.3.jar
-    ```
-
-### Accessing the Application
-
-- **API Base URL**: `http://localhost:8080/api/v1`
-- **Swagger UI**: `http://localhost:8080/swagger-ui/index.html`
-
-## Development Workflow
+## Development
 
 ### Code Formatting
 
-This project uses **Spotless** with **Google Java Format** to maintain code consistency.
-
+The project uses Spotless with Google Java Format:
 ```bash
 ./mvnw spotless:apply
 ```
 
 ### Running Tests
 
-Execute the test suite to ensure system stability.
-
 ```bash
 ./mvnw test
 ```
 
-_Code coverage reports are generated by JaCoCo._
+### Build Validation
+
+```bash
+./mvnw clean verify
+```
 
 ## Project Structure
 
 ```
 Per/
-├── document/               # Module-specific documentation
-├── src/
-│   ├── main/
-│   │   ├── java/com/per/
-│   │   │   ├── auth/       # Authentication Module
-│   │   │   ├── product/    # Product Module
-│   │   │   ├── order/      # Order Module
-│   │   │   └── ...
-│   │   └── resources/
-│   │       ├── db/migration/ # Flyway SQL Migrations
-│   │       └── application.yml
-├── docker-compose.yml      # Infrastructure orchestration
-├── pom.xml                 # Maven dependencies
-└── README.md               # Project documentation
+├── document/                    # Documentation
+│   ├── cache/                   # Cache module docs
+│   ├── kafka/                   # Kafka messaging docs
+│   ├── resilience-patterns/     # Rate limiting, circuit breaker docs
+│   └── module/                  # Per-module documentation
+├── src/main/
+│   ├── java/com/per/
+│   │   ├── auth/                # Authentication module
+│   │   ├── product/             # Product catalog module
+│   │   ├── order/               # Order management module
+│   │   ├── payment/             # Payment integration module
+│   │   ├── common/              # Shared components
+│   │   │   ├── cache/           # Redis caching infrastructure
+│   │   │   ├── config/          # Application configuration
+│   │   │   └── exception/       # Global exception handling
+│   │   └── ...
+│   └── resources/
+│       ├── db/migration/        # Flyway SQL migrations
+│       └── application.yml      # Application configuration
+├── docker-compose.yml           # Infrastructure services
+├── pom.xml                      # Maven dependencies
+└── README.md
 ```
 
-## 📄 License
+## Documentation
+
+Detailed documentation is available in the `document/` directory:
+
+- [Cache Module](document/cache/README_en.md) - Redis caching strategy and implementation
+- [Kafka Messaging](document/kafka/README_en.md) - Asynchronous event processing
+- [Rate Limiting](document/resilience-patterns/rate-limit/README_en.md) - Request quota management
+- [Circuit Breaker](document/resilience-patterns/circuit-breaker/README_en.md) - External service protection
+
+Module-specific documentation is available under `document/module/`.
+
+## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
