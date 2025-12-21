@@ -43,8 +43,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/register",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "register"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "register"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -85,8 +90,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/login",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "login"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "login"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -112,8 +122,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/refresh",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "refresh"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "refresh"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -139,8 +154,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/introspect",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "introspect"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "introspect"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -159,7 +179,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -170,8 +196,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/logout",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "logout"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "logout"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -197,8 +228,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/verify-email",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "verify-email"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "verify-email"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -218,8 +254,13 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/auth/verify-email?token=verification_token_here",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "verify-email"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "verify-email"
+                            ],
                             "query": [
                                 {
                                     "key": "token",
@@ -242,8 +283,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/forgot-password",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "forgot-password"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "forgot-password"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -269,8 +315,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/reset-password",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "reset-password"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -290,8 +341,13 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/auth/reset-password?token=reset_token_here",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "reset-password"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "reset-password"
+                            ],
                             "query": [
                                 {
                                     "key": "token",
@@ -307,13 +363,24 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/auth/me",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["auth", "me"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "me"
+                            ]
                         }
                     },
                     "response": []
@@ -330,13 +397,33 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/brands?query=&page=0&size=10&sort=createdAt,desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["brands"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands"
+                            ],
                             "query": [
-                                {"key": "query", "value": "", "description": "Search query (optional)"},
-                                {"key": "page", "value": "0", "description": "Page number (0-indexed)"},
-                                {"key": "size", "value": "10", "description": "Page size"},
-                                {"key": "sort", "value": "createdAt,desc", "description": "Sort field and direction"}
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
                         }
                     },
@@ -348,10 +435,19 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/brands/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["brands", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Brand ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
                             ]
                         }
                     },
@@ -362,7 +458,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -373,8 +475,12 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/brands",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["brands"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -393,7 +499,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -404,10 +516,19 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/brands/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["brands", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Brand ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
                             ]
                         },
                         "body": {
@@ -427,15 +548,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/brands/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["brands", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Brand ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
                             ]
                         }
                     },
@@ -453,13 +589,33 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/categories?query=&page=0&size=10&sort=createdAt,desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["categories"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories"
+                            ],
                             "query": [
-                                {"key": "query", "value": "", "description": "Search query (optional)"},
-                                {"key": "page", "value": "0", "description": "Page number (0-indexed)"},
-                                {"key": "size", "value": "10", "description": "Page size"},
-                                {"key": "sort", "value": "createdAt,desc", "description": "Sort field and direction"}
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
                         }
                     },
@@ -471,10 +627,19 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/categories/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["categories", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Category ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
                             ]
                         }
                     },
@@ -485,7 +650,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -496,8 +667,12 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/categories",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["categories"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -516,7 +691,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -527,10 +708,19 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/categories/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["categories", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Category ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
                             ]
                         },
                         "body": {
@@ -550,15 +740,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/categories/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["categories", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Category ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
                             ]
                         }
                     },
@@ -576,13 +781,33 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/made-in?query=&page=0&size=10&sort=createdAt,desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["made-in"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in"
+                            ],
                             "query": [
-                                {"key": "query", "value": "", "description": "Search query (optional)"},
-                                {"key": "page", "value": "0", "description": "Page number (0-indexed)"},
-                                {"key": "size", "value": "10", "description": "Page size"},
-                                {"key": "sort", "value": "createdAt,desc", "description": "Sort field and direction"}
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
                         }
                     },
@@ -594,10 +819,19 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/made-in/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["made-in", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Made In ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
                             ]
                         }
                     },
@@ -608,7 +842,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -619,8 +859,12 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/made-in",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["made-in"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -639,7 +883,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -650,10 +900,19 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/made-in/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["made-in", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Made In ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
                             ]
                         },
                         "body": {
@@ -673,15 +932,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/made-in/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["made-in", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Made In ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
                             ]
                         }
                     },
@@ -694,18 +968,160 @@
             "description": "Product Management APIs",
             "item": [
                 {
-                    "name": "Search Products",
+                    "name": "ES Search Products (Fuzzy)",
                     "request": {
                         "method": "GET",
                         "url": {
-                            "raw": "{{baseUrl}}/products?q=&page=0&size=10&sort=createdAt,desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["products"],
+                            "raw": "{{baseUrl}}/products/search?query=dior&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "search"
+                            ],
                             "query": [
-                                {"key": "q", "value": "", "description": "Search query (optional)"},
-                                {"key": "page", "value": "0", "description": "Page number (0-indexed)"},
-                                {"key": "size", "value": "10", "description": "Page size"},
-                                {"key": "sort", "value": "createdAt,desc", "description": "Sort field and direction"}
+                                {
+                                    "key": "query",
+                                    "value": "dior",
+                                    "description": "Full-text search with fuzzy matching"
+                                },
+                                {
+                                    "key": "brandId",
+                                    "value": "",
+                                    "description": "Filter by brand UUID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "categoryId",
+                                    "value": "",
+                                    "description": "Filter by category UUID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "gender",
+                                    "value": "MALE",
+                                    "description": "MALE, FEMALE, UNISEX",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "fragranceFamily",
+                                    "value": "WOODY_AMBER",
+                                    "description": "WOODY_AMBER, AMBER, SOFT_AMBER, etc.",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sillage",
+                                    "value": "MODERATE",
+                                    "description": "SOFT, LIGHT, MODERATE, STRONG, HEAVY",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "longevity",
+                                    "value": "LONG_LASTING",
+                                    "description": "SHORT, MODERATE, LONG_LASTING, VERY_LONG_LASTING",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "seasonality",
+                                    "value": "SUMMER",
+                                    "description": "SPRING, SUMMER, FALL, WINTER, ALL_SEASONS, SPRING_SUMMER, FALL_WINTER",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "occasion",
+                                    "value": "DAILY",
+                                    "description": "DAILY, EVENING, FORMAL, CASUAL, PARTY, BUSINESS_CASUAL, etc.",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "minPrice",
+                                    "value": "100000",
+                                    "description": "Minimum price filter",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "maxPrice",
+                                    "value": "5000000",
+                                    "description": "Maximum price filter",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true",
+                                    "description": "Active status (default: true)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ES Reindex All Products",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/products/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Products",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/products?page=0&size=10&sort=createdAt,desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
                         }
                     },
@@ -717,10 +1133,19 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/products/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["products", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Product ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
                         }
                     },
@@ -731,7 +1156,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -742,8 +1173,12 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/products",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["products"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -762,7 +1197,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -773,10 +1214,19 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/products/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["products", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Product ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
                         },
                         "body": {
@@ -796,15 +1246,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/products/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["products", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "Product ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
                         }
                     },
@@ -819,7 +1284,13 @@
                             "request": {
                                 "auth": {
                                     "type": "bearer",
-                                    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 "method": "POST",
                                 "header": [
@@ -830,10 +1301,20 @@
                                 ],
                                 "url": {
                                     "raw": "{{baseUrl}}/products/:productId/variants",
-                                    "host": ["{{baseUrl}}"],
-                                    "path": ["products", ":productId", "variants"],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ":productId",
+                                        "variants"
+                                    ],
                                     "variable": [
-                                        {"key": "productId", "value": "uuid-here", "description": "Product ID"}
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        }
                                     ]
                                 },
                                 "body": {
@@ -853,7 +1334,13 @@
                             "request": {
                                 "auth": {
                                     "type": "bearer",
-                                    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 "method": "PUT",
                                 "header": [
@@ -864,11 +1351,26 @@
                                 ],
                                 "url": {
                                     "raw": "{{baseUrl}}/products/:productId/variants/:variantId",
-                                    "host": ["{{baseUrl}}"],
-                                    "path": ["products", ":productId", "variants", ":variantId"],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ":productId",
+                                        "variants",
+                                        ":variantId"
+                                    ],
                                     "variable": [
-                                        {"key": "productId", "value": "uuid-here", "description": "Product ID"},
-                                        {"key": "variantId", "value": "uuid-here", "description": "Variant ID"}
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        },
+                                        {
+                                            "key": "variantId",
+                                            "value": "uuid-here",
+                                            "description": "Variant ID"
+                                        }
                                     ]
                                 },
                                 "body": {
@@ -888,16 +1390,37 @@
                             "request": {
                                 "auth": {
                                     "type": "bearer",
-                                    "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
                                 },
                                 "method": "DELETE",
                                 "url": {
                                     "raw": "{{baseUrl}}/products/:productId/variants/:variantId",
-                                    "host": ["{{baseUrl}}"],
-                                    "path": ["products", ":productId", "variants", ":variantId"],
+                                    "host": [
+                                        "{{baseUrl}}"
+                                    ],
+                                    "path": [
+                                        "products",
+                                        ":productId",
+                                        "variants",
+                                        ":variantId"
+                                    ],
                                     "variable": [
-                                        {"key": "productId", "value": "uuid-here", "description": "Product ID"},
-                                        {"key": "variantId", "value": "uuid-here", "description": "Variant ID"}
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        },
+                                        {
+                                            "key": "variantId",
+                                            "value": "uuid-here",
+                                            "description": "Variant ID"
+                                        }
                                     ]
                                 }
                             },
@@ -916,13 +1439,23 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/cart",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["cart"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "cart"
+                            ]
                         }
                     },
                     "response": []
@@ -932,7 +1465,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -943,8 +1482,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/cart/items",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["cart", "items"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "items"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -963,7 +1507,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PATCH",
                         "header": [
@@ -974,10 +1524,20 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/cart/items/:itemId",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["cart", "items", ":itemId"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "items",
+                                ":itemId"
+                            ],
                             "variable": [
-                                {"key": "itemId", "value": "uuid-here", "description": "Cart Item ID"}
+                                {
+                                    "key": "itemId",
+                                    "value": "uuid-here",
+                                    "description": "Cart Item ID"
+                                }
                             ]
                         },
                         "body": {
@@ -997,15 +1557,31 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/cart/items/:itemId",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["cart", "items", ":itemId"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "items",
+                                ":itemId"
+                            ],
                             "variable": [
-                                {"key": "itemId", "value": "uuid-here", "description": "Cart Item ID"}
+                                {
+                                    "key": "itemId",
+                                    "value": "uuid-here",
+                                    "description": "Cart Item ID"
+                                }
                             ]
                         }
                     },
@@ -1016,13 +1592,24 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/cart/items",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["cart", "items"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "cart",
+                                "items"
+                            ]
                         }
                     },
                     "response": []
@@ -1038,7 +1625,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -1049,8 +1642,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/payments/checkout",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["payments", "checkout"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "checkout"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -1071,12 +1669,30 @@
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/payments/payos/return?orderCode=123456789&cancel=false&code=00",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["payments", "payos", "return"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "payos",
+                                "return"
+                            ],
                             "query": [
-                                {"key": "orderCode", "value": "123456789", "description": "PayOS Order Code"},
-                                {"key": "cancel", "value": "false", "description": "Whether payment was cancelled"},
-                                {"key": "code", "value": "00", "description": "PayOS response code (00 = success)"}
+                                {
+                                    "key": "orderCode",
+                                    "value": "123456789",
+                                    "description": "PayOS Order Code"
+                                },
+                                {
+                                    "key": "cancel",
+                                    "value": "false",
+                                    "description": "Whether payment was cancelled"
+                                },
+                                {
+                                    "key": "code",
+                                    "value": "00",
+                                    "description": "PayOS response code (00 = success)"
+                                }
                             ]
                         }
                     },
@@ -1095,8 +1711,14 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/payments/payos/webhook",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["payments", "payos", "webhook"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "payos",
+                                "webhook"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -1121,13 +1743,24 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "url": {
                             "raw": "{{baseUrl}}/media/upload",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["media", "upload"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "media",
+                                "upload"
+                            ]
                         },
                         "body": {
                             "mode": "formdata",
@@ -1148,13 +1781,25 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "url": {
                             "raw": "{{baseUrl}}/media/upload/batch",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["media", "upload", "batch"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "media",
+                                "upload",
+                                "batch"
+                            ]
                         },
                         "body": {
                             "mode": "formdata",
@@ -1181,18 +1826,45 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/users/search?q=&page=0&size=10&sort=createdAt,desc",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["users", "search"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "search"
+                            ],
                             "query": [
-                                {"key": "q", "value": "", "description": "Search query (optional)"},
-                                {"key": "page", "value": "0", "description": "Page number (0-indexed)"},
-                                {"key": "size", "value": "10", "description": "Page size"},
-                                {"key": "sort", "value": "createdAt,desc", "description": "Sort field and direction"}
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
                         }
                     },
@@ -1203,15 +1875,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "GET",
                         "url": {
                             "raw": "{{baseUrl}}/users/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["users", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "User ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
+                                }
                             ]
                         }
                     },
@@ -1222,7 +1909,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "POST",
                         "header": [
@@ -1233,8 +1926,13 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/users/create",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["users", "create"]
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "create"
+                            ]
                         },
                         "body": {
                             "mode": "raw",
@@ -1253,7 +1951,13 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "PUT",
                         "header": [
@@ -1264,10 +1968,19 @@
                         ],
                         "url": {
                             "raw": "{{baseUrl}}/users/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["users", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "User ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
+                                }
                             ]
                         },
                         "body": {
@@ -1287,15 +2000,30 @@
                     "request": {
                         "auth": {
                             "type": "bearer",
-                            "bearer": [{"key": "token", "value": "{{token}}", "type": "string"}]
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
                         },
                         "method": "DELETE",
                         "url": {
                             "raw": "{{baseUrl}}/users/:id",
-                            "host": ["{{baseUrl}}"],
-                            "path": ["users", ":id"],
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
                             "variable": [
-                                {"key": "id", "value": "uuid-here", "description": "User ID"}
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
+                                }
                             ]
                         }
                     },
