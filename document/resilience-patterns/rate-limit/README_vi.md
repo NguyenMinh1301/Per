@@ -101,10 +101,10 @@ Các tham số:
 
 ### Fallback Method
 
-Được định nghĩa trong `BaseController`:
+Được định nghĩa trong `BaseController`. Fallback chỉ xử lý exception `RequestNotPermitted` từ Resilience4j. Các business exceptions (ví dụ: sai credentials) được propagate đến `GlobalExceptionHandler`.
 
 ```java
-public ResponseEntity<ApiResponse<Void>> rateLimit(Throwable ex) {
+public ResponseEntity<ApiResponse<Void>> rateLimit(RequestNotPermitted ex) {
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
             .body(ApiResponse.failure(ApiErrorCode.TOO_MANY_REQUESTS));
 }

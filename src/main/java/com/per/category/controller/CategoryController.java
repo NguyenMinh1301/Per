@@ -2,8 +2,6 @@ package com.per.category.controller;
 
 import java.util.UUID;
 
-import com.per.common.base.BaseController;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -18,10 +16,12 @@ import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
 import com.per.category.service.CategoryService;
 import com.per.common.ApiConstants;
+import com.per.common.base.BaseController;
 import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 

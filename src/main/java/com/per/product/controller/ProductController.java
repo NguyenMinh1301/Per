@@ -2,8 +2,6 @@ package com.per.product.controller;
 
 import java.util.UUID;
 
-import com.per.common.base.BaseController;
-import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -22,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.per.common.ApiConstants;
+import com.per.common.base.BaseController;
 import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
@@ -31,6 +30,7 @@ import com.per.product.dto.response.ProductDetailResponse;
 import com.per.product.dto.response.ProductResponse;
 import com.per.product.service.ProductService;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 

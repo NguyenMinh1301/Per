@@ -88,10 +88,10 @@ public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadSingle(@RequestPar
 
 ### Fallback Method
 
-Khi circuit OPEN hoặc call fail, fallback được gọi:
+Khi circuit OPEN, fallback được gọi. Fallback chỉ xử lý exception `CallNotPermittedException` từ Resilience4j. Các exceptions khác (ví dụ: business logic errors) được propagate đến `GlobalExceptionHandler`.
 
 ```java
-public ResponseEntity<ApiResponse<Void>> circuitBreaker(Throwable ex) {
+public ResponseEntity<ApiResponse<Void>> circuitBreaker(CallNotPermittedException ex) {
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(ApiResponse.failure(ApiErrorCode.SERVICE_UNAVAILABLE));
 }
@@ -99,7 +99,7 @@ public ResponseEntity<ApiResponse<Void>> circuitBreaker(Throwable ex) {
 
 **Quan trọng**: Fallback method signature phải:
 - Chấp nhận các tham số giống với method gốc (tùy chọn)
-- Chấp nhận `Throwable` là tham số cuối
+- Chấp nhận exception type cụ thể của Resilience4j (`CallNotPermittedException`) là tham số cuối
 - Trả về kiểu giống với method gốc
 
 Kết Hợp Với Rate Limiter

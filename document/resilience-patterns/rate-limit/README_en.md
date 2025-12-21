@@ -101,10 +101,10 @@ Parameters:
 
 ### Fallback Method
 
-Defined in `BaseController`:
+Defined in `BaseController`. The fallback only handles `RequestNotPermitted` exceptions from Resilience4j. Business exceptions (e.g., invalid credentials) propagate to `GlobalExceptionHandler`.
 
 ```java
-public ResponseEntity<ApiResponse<Void>> rateLimit(Throwable ex) {
+public ResponseEntity<ApiResponse<Void>> rateLimit(RequestNotPermitted ex) {
     return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
             .body(ApiResponse.failure(ApiErrorCode.TOO_MANY_REQUESTS));
 }

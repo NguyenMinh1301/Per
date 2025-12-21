@@ -88,10 +88,10 @@ public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadSingle(@RequestPar
 
 ### Fallback Method
 
-When circuit is OPEN or call fails, fallback is invoked:
+When circuit is OPEN, fallback is invoked. The fallback only handles `CallNotPermittedException` from Resilience4j. Other exceptions (e.g., business logic errors) propagate to `GlobalExceptionHandler`.
 
 ```java
-public ResponseEntity<ApiResponse<Void>> circuitBreaker(Throwable ex) {
+public ResponseEntity<ApiResponse<Void>> circuitBreaker(CallNotPermittedException ex) {
     return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
             .body(ApiResponse.failure(ApiErrorCode.SERVICE_UNAVAILABLE));
 }
@@ -99,7 +99,7 @@ public ResponseEntity<ApiResponse<Void>> circuitBreaker(Throwable ex) {
 
 **Important**: Fallback method signature must:
 - Accept the same parameters as the original method (optional)
-- Accept a `Throwable` as the last parameter
+- Accept a specific Resilience4j exception type (`CallNotPermittedException`) as the last parameter
 - Return the same type as the original method
 
 Combining with Rate Limiter

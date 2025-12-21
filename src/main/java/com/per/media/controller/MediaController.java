@@ -32,7 +32,7 @@ public class MediaController extends BaseController {
     private final MediaService mediaService;
 
     @PostMapping(value = ApiConstants.Media.UPLOAD, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @RateLimiter(name = "mediaSingle", fallbackMethod = "fallback")
+    @RateLimiter(name = "mediaSingle", fallbackMethod = "rateLimit")
     @CircuitBreaker(name = "media", fallbackMethod = "circuitBreaker")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadSingle(
             @RequestPart("file") MultipartFile file) {
@@ -44,7 +44,7 @@ public class MediaController extends BaseController {
     @PostMapping(
             value = ApiConstants.Media.UPLOAD_BATCH,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @RateLimiter(name = "mediaMultipart", fallbackMethod = "fallback")
+    @RateLimiter(name = "mediaMultipart", fallbackMethod = "rateLimit")
     @CircuitBreaker(name = "media", fallbackMethod = "circuitBreaker")
     public ResponseEntity<ApiResponse<List<MediaUploadResponse>>> uploadBatch(
             @RequestPart("files") List<MultipartFile> files) {
