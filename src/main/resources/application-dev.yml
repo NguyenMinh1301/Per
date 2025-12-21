@@ -1,6 +1,6 @@
 spring:
   config:
-    import: classpath:com/per/common/config/resilience4j/resilience4j-dev.yml
+    import: classpath:resilience4j/resilience4j-dev.yml
 
 jpa:
   hibernate:
