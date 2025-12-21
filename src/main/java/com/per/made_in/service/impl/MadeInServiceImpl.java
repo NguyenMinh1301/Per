@@ -8,8 +8,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.per.common.cache.CacheEvictionHelper;
-import com.per.common.cache.CacheNames;
+import com.per.common.config.cache.CacheEvictionHelper;
+import com.per.common.config.cache.CacheNames;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.per.cart.dto.response.CartResponse;
 import com.per.cart.service.CartService;
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 
 import io.swagger.v3.oas.annotations.tags.Tag;

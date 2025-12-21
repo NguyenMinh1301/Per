@@ -1,4 +1,4 @@
-package com.per.common.config;
+package com.per.common.config.openapi;
 
 import java.util.List;
 

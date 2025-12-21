@@ -1,4 +1,4 @@
-package com.per.common.configuration;
+package com.per.common.config.kafka;
 
 import java.util.HashMap;
 import java.util.Map;

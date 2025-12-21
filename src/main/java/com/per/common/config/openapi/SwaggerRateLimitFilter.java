@@ -1,4 +1,4 @@
-package com.per.common.config;
+package com.per.common.config.openapi;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.per.common.ApiResponse;
 import com.per.common.exception.ApiErrorCode;
+import com.per.common.response.ApiResponse;
 
 import io.github.resilience4j.ratelimiter.RateLimiter;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;

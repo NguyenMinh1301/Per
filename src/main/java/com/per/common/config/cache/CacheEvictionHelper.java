@@ -1,4 +1,4 @@
-package com.per.common.cache;
+package com.per.common.config.cache;
 
 import java.util.Objects;
 
