@@ -10,11 +10,9 @@ public final class KafkaTopicNames {
     public static final String EMAIL_TOPIC = "email-topic";
     public static final String EMAIL_GROUP = "email-group";
 
-    // Add future topics here:
-    // public static final String ORDER_TOPIC = "order-topic";
-    // public static final String ORDER_GROUP = "order-group";
-    // public static final String NOTIFICATION_TOPIC = "notification-topic";
-    // public static final String NOTIFICATION_GROUP = "notification-group";
+    // Product index topics (Elasticsearch sync)
+    public static final String PRODUCT_INDEX_TOPIC = "product-index-topic";
+    public static final String PRODUCT_INDEX_GROUP = "product-index-group";
 
     private KafkaTopicNames() {
         // Utility class - prevent instantiation
