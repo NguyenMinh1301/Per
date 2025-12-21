@@ -28,9 +28,11 @@ Các Thành Phần Chính
 
 | File | Mục đích |
 | --- | --- |
-| `application-*.yml` | Cấu hình các circuit breaker instances |
+| `com/per/common/config/resilience4j/resilience4j-*.yml` | Cấu hình các circuit breaker instances |
 | `MediaController.java` | Sử dụng `@CircuitBreaker` cho external uploads |
 | `BaseController.java` | Chứa các fallback methods |
+
+> **Lưu ý**: Config resilience4j được tách ra file riêng và import vào `application-*.yml` qua `spring.config.import`.
 
 Sử Dụng Hiện Tại
 ----------------
@@ -246,8 +248,9 @@ Mở Rộng Circuit Breaker
 
 ### Thêm Circuit Breaker cho Service Mới
 
-1. Thêm cấu hình instance:
+1. Thêm cấu hình instance trong file `resilience4j-dev.yml` và `resilience4j-prod.yml`:
    ```yaml
+   # File: src/main/java/com/per/common/config/resilience4j/resilience4j-dev.yml
    resilience4j:
      circuitbreaker:
        instances:

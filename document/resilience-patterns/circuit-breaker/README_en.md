@@ -28,9 +28,11 @@ Key Components
 
 | File | Purpose |
 | --- | --- |
-| `application-*.yml` | Circuit breaker instance configurations |
+| `com/per/common/config/resilience4j/resilience4j-*.yml` | Circuit breaker instance configurations |
 | `MediaController.java` | Uses `@CircuitBreaker` for external uploads |
 | `BaseController.java` | Contains fallback methods |
+
+> **Note**: Resilience4j configuration is separated into dedicated files and imported into `application-*.yml` via `spring.config.import`.
 
 Current Usage
 -------------
@@ -246,8 +248,9 @@ Extending Circuit Breaker
 
 ### Adding Circuit Breaker to New Service
 
-1. Add instance configuration:
+1. Add instance configuration in `resilience4j-dev.yml` and `resilience4j-prod.yml`:
    ```yaml
+   # File: src/main/java/com/per/common/config/resilience4j/resilience4j-dev.yml
    resilience4j:
      circuitbreaker:
        instances:
