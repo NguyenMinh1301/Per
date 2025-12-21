@@ -25,7 +25,7 @@ Key Components
 
 | File | Purpose |
 | --- | --- |
-| `com/per/common/config/resilience4j/resilience4j-*.yml` | Rate limiter instance configurations |
+| `resilience4j/resilience4j-*.yml` | Rate limiter instance configurations |
 | `SwaggerRateLimitFilter.java` | Servlet filter for Swagger UI rate limiting |
 | `AuthController.java` | Uses `@RateLimiter` annotation |
 | `MediaController.java` | Uses `@RateLimiter` + `@CircuitBreaker` |
@@ -248,7 +248,7 @@ Extending Rate Limiting
 
 1. Define instance in `resilience4j-dev.yml` and `resilience4j-prod.yml`:
    ```yaml
-   # File: src/main/java/com/per/common/config/resilience4j/resilience4j-dev.yml
+   # File: src/main/resources/resilience4j/resilience4j-dev.yml
    resilience4j:
      ratelimiter:
        instances:

@@ -28,7 +28,7 @@ Key Components
 
 | File | Purpose |
 | --- | --- |
-| `com/per/common/config/resilience4j/resilience4j-*.yml` | Circuit breaker instance configurations |
+| `resilience4j/resilience4j-*.yml` | Circuit breaker instance configurations |
 | `MediaController.java` | Uses `@CircuitBreaker` for external uploads |
 | `BaseController.java` | Contains fallback methods |
 
@@ -250,7 +250,7 @@ Extending Circuit Breaker
 
 1. Add instance configuration in `resilience4j-dev.yml` and `resilience4j-prod.yml`:
    ```yaml
-   # File: src/main/java/com/per/common/config/resilience4j/resilience4j-dev.yml
+   # File: src/main/resources/resilience4j/resilience4j-dev.yml
    resilience4j:
      circuitbreaker:
        instances:

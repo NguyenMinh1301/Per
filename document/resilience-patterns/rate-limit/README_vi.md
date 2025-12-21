@@ -25,7 +25,7 @@ Các Thành Phần Chính
 
 | File | Mục đích |
 | --- | --- |
-| `com/per/common/config/resilience4j/resilience4j-*.yml` | Cấu hình các rate limiter instances |
+| `resilience4j/resilience4j-*.yml` | Cấu hình các rate limiter instances |
 | `SwaggerRateLimitFilter.java` | Servlet filter cho rate limiting Swagger UI |
 | `AuthController.java` | Sử dụng `@RateLimiter` annotation |
 | `MediaController.java` | Sử dụng `@RateLimiter` + `@CircuitBreaker` |
@@ -248,7 +248,7 @@ Mở Rộng Rate Limiting
 
 1. Định nghĩa instance trong file `resilience4j-dev.yml` và `resilience4j-prod.yml`:
    ```yaml
-   # File: src/main/java/com/per/common/config/resilience4j/resilience4j-dev.yml
+   # File: src/main/resources/resilience4j/resilience4j-dev.yml
    resilience4j:
      ratelimiter:
        instances:

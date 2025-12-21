@@ -2,7 +2,7 @@ debug: false
 
 spring:
   config:
-    import: classpath:resilience4j/resilience4j-dev.yml
+    import: classpath:resilience4j/resilience4j-prod.yml
 
 jpa:
   hibernate:
