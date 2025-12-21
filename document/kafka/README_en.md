@@ -27,8 +27,9 @@ Key Components
 | File | Purpose |
 | --- | --- |
 | `KafkaConfig.java` | Producer and consumer factory configuration |
+| `KafkaTopicNames.java` | Centralized topic name constants |
 | `EmailEvent.java` | Event payload for email messages |
-| `EmailConsumer.java` | Kafka listener that processes email events |
+| `EmailConsumer.java` | Kafka listener with retry and DLQ support |
 | `AuthServiceImpl.java` | Producer that publishes email events |
 
 Topics and Consumer Groups
@@ -37,6 +38,7 @@ Topics and Consumer Groups
 | Topic | Consumer Group | Purpose |
 | --- | --- | --- |
 | `email-topic` | `email-group` | Email delivery queue |
+| `email-topic-dlt` | `email-group` | Dead Letter Topic for failed emails |
 
 Configuration
 -------------
@@ -146,25 +148,60 @@ Current Use Cases
 | User Registration | Email verification | After user creation |
 | Forgot Password | Password reset link | On forgot password request |
 
-Error Handling
---------------
+Error Handling and Dead Letter Queue (DLQ)
+-------------------------------------------
 
-Current implementation logs errors but does not implement retry logic. For production:
+The application implements retry with exponential backoff and Dead Letter Queue:
 
-* Configure `spring.kafka.consumer.enable-auto-commit: false`
-* Add error handler to `ConcurrentKafkaListenerContainerFactory`
-* Consider dead letter topic for failed messages
+### Retry Mechanism
+
+```java
+@RetryableTopic(
+    attempts = "4",  // 1 initial + 3 retries
+    backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 4000),
+    dltTopicSuffix = "-dlt"
+)
+@KafkaListener(topics = "email-topic", groupId = "email-group")
+public void consume(EmailEvent event) {
+    mailService.sendEmail(event.getTo(), event.getSubject(), event.getContent());
+}
+```
+
+| Attempt | Delay |
+| --- | --- |
+| 1 (initial) | 0s |
+| 2 (retry 1) | 1s |
+| 3 (retry 2) | 2s |
+| 4 (retry 3) | 4s |
+| DLT | after 4th failure |
+
+### Dead Letter Queue
+
+Messages failing after all retries are sent to `email-topic-dlt`:
+
+```java
+@DltHandler
+public void handleDlt(EmailEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+    log.error("Email failed permanently: {}, Topic: {}", event.getTo(), topic);
+}
+```
+
+### Monitoring DLQ via Kafka UI
+
+1. Access Kafka UI at `http://localhost:8090`
+2. Navigate to Topics → `email-topic-dlt`
+3. Review failed messages for manual processing
 
 Development Notes
 -----------------
 
 ### Local Development
 
-Ensure Kafka is running locally or via Docker:
+Ensure Kafka is running locally or via Docker (KRaft mode, no Zookeeper required):
 
 ```bash
 # Using Docker Compose
-docker-compose up -d kafka zookeeper
+docker compose up -d kafka
 ```
 
 ### Environment Variables
