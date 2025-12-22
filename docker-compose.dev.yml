@@ -65,6 +65,12 @@ services:
 
       # --- Elasticsearch ---
       - ELASTICSEARCH_URI=${ELASTICSEARCH_URI}
+
+      # --- Admin Auto-Creation ---
+      - APP_ADMIN_EMAIL=${ADMIN_EMAIL}
+      - APP_ADMIN_USERNAME=${ADMIN_USERNAME}
+      - APP_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - APP_ADMIN_ENABLED=${ADMIN_ENABLED}
     ports:
       - "8080:8080"
     networks:
