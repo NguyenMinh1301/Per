@@ -45,6 +45,7 @@ services:
 
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - LOGSTASH_HOST=logstash
+      - ELASTICSEARCH_URI=${ELASTICSEARCH_URI}
     ports:
       - "8080:8080"
     networks:
@@ -52,6 +53,7 @@ services:
     depends_on:
       - db
       - redis
+      - elasticsearch
 
   db:
     image: postgres:16-alpine

@@ -62,6 +62,9 @@ services:
 
       # --- ELK ---
       - LOGSTASH_HOST=logstash
+
+      # --- Elasticsearch ---
+      - ELASTICSEARCH_URI=${ELASTICSEARCH_URI}
     ports:
       - "8080:8080"
     networks:
@@ -69,6 +72,7 @@ services:
     depends_on:
       - db
       - redis
+      - elasticsearch
 
   db:
     image: postgres:16-alpine
