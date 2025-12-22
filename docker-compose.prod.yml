@@ -46,6 +46,11 @@ services:
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
       - LOGSTASH_HOST=logstash
       - ELASTICSEARCH_URI=${ELASTICSEARCH_URI}
+
+      # --- Admin Account ---
+      - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
+      - APP_ADMIN_EMAIL=${APP_ADMIN_EMAIL}
+      - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
     ports:
       - "8080:8080"
     networks:

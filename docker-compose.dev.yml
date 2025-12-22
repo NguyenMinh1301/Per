@@ -55,13 +55,20 @@ services:
       - PAY_OS_CLIENT_ID=${PAY_OS_CLIENT_ID}
       - PAY_OS_API_KEY=${PAY_OS_API_KEY}
       - PAY_OS_CHECKSUM_KEY=${PAY_OS_CHECKSUM_KEY}
-      - LOGSTASH_HOST=logstash
 
       # --- Kafka ---
       - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
 
       # --- ELK ---
       - LOGSTASH_HOST=logstash
+
+      # --- Elasticsearch ---
+      - ELASTICSEARCH_URI=http://elasticsearch:9200
+
+      # --- Admin Account ---
+      - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
+      - APP_ADMIN_EMAIL=${APP_ADMIN_EMAIL}
+      - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
     ports:
       - "8080:8080"
     networks:
