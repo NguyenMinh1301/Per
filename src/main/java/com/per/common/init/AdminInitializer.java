@@ -1,76 +1,60 @@
 package com.per.common.init;
 
-import java.util.Set;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.per.auth.entity.Role;
 import com.per.auth.entity.RoleType;
 import com.per.auth.repository.RoleRepository;
-import com.per.auth.repository.UserRepository;
 import com.per.user.entity.User;
+import com.per.user.repository.UserAdminRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Initializes default admin user on application startup if not exists. Admin credentials are read
- * from environment variables.
- */
+/** Initializes required roles and admin account on application startup. */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(1)
 public class AdminInitializer implements CommandLineRunner {
 
-    private final UserRepository userRepository;
+    private final UserAdminRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${app.admin.email:admin@per.com}")
-    private String adminEmail;
-
-    @Value("${app.admin.username:admin}")
-    private String adminUsername;
-
-    @Value("${app.admin.password:Admin@123}")
-    private String adminPassword;
-
-    @Value("${app.admin.enabled:true}")
-    private boolean adminCreationEnabled;
+    private final Environment env;
 
     @Override
-    @Transactional
     public void run(String... args) {
-        if (!adminCreationEnabled) {
-            log.info("Admin auto-creation is disabled");
-            return;
-        }
+        initializeRoles();
+        initializeAdminAccount();
+    }
 
-        if (userRepository.existsByEmail(adminEmail)) {
-            log.info("Admin user already exists: {}", adminEmail);
-            return;
+    private void initializeRoles() {
+        for (RoleType roleType : RoleType.values()) {
+            if (roleRepository.findByName(roleType).isEmpty()) {
+                Role role = new Role(roleType, roleType.name() + " role");
+                roleRepository.save(role);
+                log.info("Created role: {}", roleType);
+            }
         }
+    }
+
+    private void initializeAdminAccount() {
+        String adminUsername = env.getProperty("APP_ADMIN_USERNAME", "admin");
+        String adminEmail = env.getProperty("APP_ADMIN_EMAIL", "admin@per.com");
+        String adminPassword = env.getProperty("APP_ADMIN_PASSWORD", "admin123");
 
         if (userRepository.existsByUsername(adminUsername)) {
-            log.info("Admin username already exists: {}", adminUsername);
+            log.info("Admin account '{}' already exists", adminUsername);
             return;
         }
 
         Role adminRole =
                 roleRepository
                         .findByName(RoleType.ADMIN)
-                        .orElseGet(
-                                () -> {
-                                    log.info("Creating ADMIN role...");
-                                    Role role = new Role(RoleType.ADMIN, "Administrator role");
-                                    return roleRepository.save(role);
-                                });
+                        .orElseThrow(() -> new IllegalStateException("ADMIN role not found"));
 
         User admin =
                 User.builder()
@@ -81,10 +65,10 @@ public class AdminInitializer implements CommandLineRunner {
                         .lastName("User")
                         .emailVerified(true)
                         .active(true)
-                        .roles(Set.of(adminRole))
                         .build();
+        admin.addRole(adminRole);
 
         userRepository.save(admin);
-        log.info("Default admin user created: {}", adminEmail);
+        log.info("Admin account '{}' created successfully", adminUsername);
     }
 }

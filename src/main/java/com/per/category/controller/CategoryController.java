@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.per.category.dto.request.CategoryCreateRequest;
@@ -54,7 +53,6 @@ public class CategoryController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Category.CREATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategoryResponse>> create(
             @Valid @RequestBody CategoryCreateRequest request) {
         CategoryResponse response = categoryService.createCategory(request);
@@ -63,7 +61,6 @@ public class CategoryController extends BaseController {
     }
 
     @PutMapping(ApiConstants.Category.UPDATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<CategoryResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody CategoryUpdateRequest request) {
         CategoryResponse response = categoryService.updateCategory(id, request);
@@ -72,7 +69,6 @@ public class CategoryController extends BaseController {
     }
 
     @DeleteMapping(ApiConstants.Category.DELETE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_DELETE_SUCCESS));

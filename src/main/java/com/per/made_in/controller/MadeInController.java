@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.per.common.ApiConstants;
@@ -53,7 +52,6 @@ public class MadeInController extends BaseController {
     }
 
     @PostMapping(ApiConstants.MadeIn.CREATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MadeInResponse>> create(
             @Valid @RequestBody MadeInCreateRequest request) {
         MadeInResponse response = madeInService.createMadeIn(request);
@@ -62,7 +60,6 @@ public class MadeInController extends BaseController {
     }
 
     @PutMapping(ApiConstants.MadeIn.UPDATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<MadeInResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody MadeInUpdateRequest request) {
         MadeInResponse response = madeInService.updateMadeIn(id, request);
@@ -71,7 +68,6 @@ public class MadeInController extends BaseController {
     }
 
     @DeleteMapping(ApiConstants.MadeIn.DELETE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         madeInService.deleteMadeIn(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_DELETE_SUCCESS));

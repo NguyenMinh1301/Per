@@ -9,7 +9,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,7 +59,6 @@ public class BrandController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Brand.CREATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BrandResponse>> create(
             @Valid @RequestBody BrandCreateRequest request) {
         BrandResponse response = brandService.createBrand(request);
@@ -69,7 +67,6 @@ public class BrandController extends BaseController {
     }
 
     @PutMapping(ApiConstants.Brand.UPDATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<BrandResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody BrandUpdateRequest request) {
         BrandResponse response = brandService.updateBrand(id, request);
@@ -78,7 +75,6 @@ public class BrandController extends BaseController {
     }
 
     @DeleteMapping(ApiConstants.Brand.DELETE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_DELETE_SUCCESS));

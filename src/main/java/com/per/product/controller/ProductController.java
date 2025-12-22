@@ -86,7 +86,6 @@ public class ProductController extends BaseController {
     }
 
     @PostMapping(ApiConstants.Product.CREATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> createProduct(
             @Valid @RequestBody ProductCreateRequest request) {
         ProductDetailResponse data = productService.createProduct(request);
@@ -95,7 +94,6 @@ public class ProductController extends BaseController {
     }
 
     @PutMapping(ApiConstants.Product.UPDATE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<ProductDetailResponse>> updateProduct(
             @PathVariable("id") UUID id, @Valid @RequestBody ProductUpdateRequest request) {
         ProductDetailResponse data = productService.updateProduct(id, request);
@@ -103,7 +101,6 @@ public class ProductController extends BaseController {
     }
 
     @DeleteMapping(ApiConstants.Product.DELETE)
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteProduct(@PathVariable("id") UUID id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.PRODUCT_DELETE_SUCCESS));
