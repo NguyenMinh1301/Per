@@ -52,10 +52,13 @@ public class SecurityConfig {
         "/per/products/search",
         "/per/brands/list",
         "/per/brands/detail/{id}",
+        "/per/brands/search",
         "/per/categories/list",
         "/per/categories/detail/{id}",
+        "/per/categories/search",
         "/per/made-in/list",
         "/per/made-in/detail/{id}",
+        "/per/made-in/search",
     };
 
     private static final String[] publicOtherEndpoints = {
@@ -63,7 +66,9 @@ public class SecurityConfig {
         "/per/swagger-ui.html",
         "/per/swagger-ui/**",
         "/per/api-docs",
+
         "/actuator/prometheus",
+
         "/per/payments/payos/webhook",
         "/per/payments/payos/return"
     };
