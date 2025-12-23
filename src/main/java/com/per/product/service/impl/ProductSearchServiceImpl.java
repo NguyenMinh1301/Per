@@ -100,13 +100,28 @@ public class ProductSearchServiceImpl implements ProductSearchService {
     private Query buildSearchQuery(ProductSearchRequest request) {
         BoolQuery.Builder boolQuery = new BoolQuery.Builder();
 
-        // Full-text search with fuzzy matching
+        // Full-text search with fuzzy matching and prefix support
         if (StringUtils.hasText(request.getQuery())) {
-            boolQuery.must(
-                    m ->
-                            m.multiMatch(
+            String query = request.getQuery();
+            String lowerQuery = query.toLowerCase();
+            String wildcardQuery = lowerQuery + "*";
+
+            // Use should with minimum_should_match for flexible matching
+            boolQuery.should(
+                    // Prefix match on name (highest priority)
+                    s -> s.prefix(p -> p.field("name").value(lowerQuery).boost(4.0f)));
+            boolQuery.should(
+                    // Wildcard match on name
+                    s -> s.wildcard(w -> w.field("name").value(wildcardQuery).boost(3.0f)));
+            boolQuery.should(
+                    // Wildcard match on brand name
+                    s -> s.wildcard(w -> w.field("brandName").value(wildcardQuery).boost(2.0f)));
+            boolQuery.should(
+                    // Fuzzy match for typos
+                    s ->
+                            s.multiMatch(
                                     mm ->
-                                            mm.query(request.getQuery())
+                                            mm.query(query)
                                                     .fields(
                                                             "name^3",
                                                             "shortDescription^2",
@@ -114,6 +129,11 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                                                             "brandName^2",
                                                             "categoryName")
                                                     .fuzziness("AUTO")));
+            boolQuery.should(
+                    // Wildcard on description
+                    s -> s.wildcard(w -> w.field("shortDescription").value(wildcardQuery)));
+
+            boolQuery.minimumShouldMatch("1");
         }
 
         // Filters
