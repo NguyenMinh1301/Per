@@ -1,10 +1,13 @@
 # Per E-commerce Backend
 
-![Java](https://img.shields.io/badge/Java-21-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![Kafka](https://img.shields.io/badge/Kafka-3.9-231F20?style=for-the-badge&logo=apachekafka&logoColor=white)
+<h1 align="center">
+  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="80" alt="Spring Boot" /></a>
+  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="80" alt="PostgreSQL" /></a>
+  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="80" alt="Redis" /></a>
+  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="80" alt="Kafka" /></a>
+  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="80" alt="Elasticsearch" /></a>
+  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="80" alt="Docker" /></a>
+</h1>
 
 <p align="center">
   <a href="./">
@@ -14,13 +17,14 @@
 
 ## Introduction
 
-Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing clean separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Redis caching with transactional consistency, event-driven email processing via Kafka, and resilience patterns for external service integration.
+Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Elasticsearch full-text search, Redis caching with transactional consistency, event-driven processing via Kafka, and resilience patterns for external service integration.
 
 ## Key Features
 
-- **JWT Authentication**: Access and refresh token rotation with Redis-backed session management. Supports registration, login, email verification, and password recovery flows.
-- **Redis Caching**: Cache-Aside pattern with post-commit eviction ensures data consistency between cache and database under concurrent writes.
-- **Event-Driven Email**: Asynchronous email delivery via Kafka decouples authentication flows from SMTP latency.
+- **Full-Text Search**: Elasticsearch-powered search across Products, Brands, Categories, and Made In with fuzzy matching and prefix support.
+- **Real-Time Sync**: Kafka-based event-driven synchronization between PostgreSQL and Elasticsearch for CUD operations.
+- **JWT Authentication**: Access and refresh token rotation with Redis-backed session management. Supports registration, login, email verification, and password recovery.
+- **Redis Caching**: Cache-Aside pattern with post-commit eviction ensures data consistency between cache and database.
 - **Resilience Patterns**: Rate limiting and circuit breaker patterns protect endpoints from abuse and external service failures.
 - **Payment Integration**: PayOS integration with webhook support for order checkout and payment status synchronization.
 - **Media Management**: Cloudinary-backed file uploads with metadata persistence.
@@ -37,6 +41,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
 | Spring Boot | 3.5.6 | Application framework |
 | Spring Security | 6.x | Authentication and authorization |
 | Spring Data JPA | 3.x | ORM and data access |
+| Spring Data Elasticsearch | 3.x | Full-text search |
 
 ### Data and Messaging
 
@@ -44,6 +49,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
 | --- | --- | --- |
 | PostgreSQL | 16 | Primary database |
 | Redis | 7 | Caching and session storage |
+| Elasticsearch | 8.x | Full-text search engine |
 | Kafka | 3.9 | Asynchronous event processing |
 | Flyway | 11.10 | Database migrations |
 
@@ -72,10 +78,10 @@ The application follows a modular monolith structure. Each domain module resides
 | --- | --- |
 | `auth` | Authentication, JWT management, email verification |
 | `user` | User profile and role management (admin) |
-| `product` | Product catalog and variant inventory |
-| `brand` | Brand master data |
-| `category` | Product categorization |
-| `made_in` | Product origin metadata |
+| `product` | Product catalog, variant inventory, search |
+| `brand` | Brand master data, search |
+| `category` | Product categorization, search |
+| `made_in` | Product origin metadata, search |
 | `cart` | Shopping cart management |
 | `order` | Order snapshot and lifecycle |
 | `payment` | PayOS integration and checkout |
@@ -84,9 +90,10 @@ The application follows a modular monolith structure. Each domain module resides
 
 ### Cross-Cutting Concerns
 
+- **Search**: Elasticsearch indexes for Products, Brands, Categories, and Made In with real-time Kafka sync.
 - **Caching**: Redis-based caching for products and master data with configurable TTL per cache type.
-- **Rate Limiting**: Resilience4j rate limiters protect authentication and media endpoints.
-- **Circuit Breaker**: Prevents cascading failures when Cloudinary or other external services are unavailable.
+- **Rate Limiting**: Resilience4j rate limiters protect authentication, media, and API endpoints.
+- **Circuit Breaker**: Prevents cascading failures when external services are unavailable.
 - **Exception Handling**: Global exception handler provides consistent API error responses.
 
 ## Getting Started
@@ -109,7 +116,7 @@ The application follows a modular monolith structure. Each domain module resides
    ```bash
    cp .env.example .env
    ```
-   Update `.env` with your PostgreSQL, Redis, Kafka, Mail, Cloudinary, and PayOS credentials.
+   Update `.env` with your configuration values.
 
 3. Start infrastructure services:
    ```bash
@@ -120,12 +127,6 @@ The application follows a modular monolith structure. Each domain module resides
    ```bash
    ./mvnw spring-boot:run
    ```
-   
-   Alternatively, build and run the JAR:
-   ```bash
-   ./mvnw clean package -DskipTests
-   java -jar target/per-0.0.3.jar
-   ```
 
 ### Endpoints
 
@@ -133,6 +134,15 @@ The application follows a modular monolith structure. Each domain module resides
 | --- | --- |
 | `http://localhost:8080/api/v1` | API base URL |
 | `http://localhost:8080/swagger-ui/index.html` | Swagger UI |
+
+### Search API
+
+| Module | Search Endpoint | Reindex Endpoint |
+| --- | --- | --- |
+| Product | `GET /per/products/search` | `POST /per/products/reindex` |
+| Brand | `GET /per/brands/search` | `POST /per/brands/reindex` |
+| Category | `GET /per/categories/search` | `POST /per/categories/reindex` |
+| Made In | `GET /per/made-in/search` | `POST /per/made-in/reindex` |
 
 ## Development
 
@@ -161,6 +171,7 @@ The project uses Spotless with Google Java Format:
 Per/
 ├── document/                    # Documentation
 │   ├── cache/                   # Cache module docs
+│   ├── elasticsearch/           # Elasticsearch search docs
 │   ├── kafka/                   # Kafka messaging docs
 │   ├── resilience-patterns/     # Rate limiting, circuit breaker docs
 │   └── module/                  # Per-module documentation
@@ -187,6 +198,7 @@ Per/
 
 Detailed documentation is available in the `document/` directory:
 
+- [Elasticsearch Search](document/elasticsearch/README_en.md) - Full-text search implementation
 - [Cache Module](document/cache/README_en.md) - Redis caching strategy and implementation
 - [Kafka Messaging](document/kafka/README_en.md) - Asynchronous event processing
 - [Rate Limiting](document/resilience-patterns/rate-limit/README_en.md) - Request quota management

@@ -1,206 +1,198 @@
-Elasticsearch Product Search
-============================
+# Elasticsearch Search
 
-The application uses Elasticsearch for advanced product search with full-text search, fuzzy matching, and multi-field filtering.
+The application uses Elasticsearch for full-text search across Products, Brands, Categories, and Made In entities. Search features include fuzzy matching, prefix support, and multi-field filtering.
 
-Architecture
-------------
+## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                         Search Architecture                                  │
-│                                                                             │
-│  User ──► GET /products/search ──► ProductSearchService ──► Elasticsearch   │
-│                                                                             │
-│  ProductServiceImpl ──► Kafka(product-index-topic) ──► ProductIndexConsumer │
-│       (create/update/delete)                              │                 │
-│                                                           ▼                 │
-│                                                    Elasticsearch            │
-│                                                    (sync document)          │
+│                                                                              │
+│  User ──► GET /search ──► SearchService ──► Elasticsearch                   │
+│                                                                              │
+│  ServiceImpl ──► Kafka(index-topic) ──► IndexConsumer ──► Elasticsearch     │
+│  (create/update/delete)                                                      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-Key Features
-------------
+## Supported Modules
+
+| Module | Search Fields | Search Endpoint | Reindex Endpoint |
+| --- | --- | --- | --- |
+| Product | name, description, brandName, categoryName | `GET /per/products/search` | `POST /per/products/reindex` |
+| Brand | name, description | `GET /per/brands/search` | `POST /per/brands/reindex` |
+| Category | name, description | `GET /per/categories/search` | `POST /per/categories/reindex` |
+| Made In | name, region, description | `GET /per/made-in/search` | `POST /per/made-in/reindex` |
+
+## Key Features
 
 | Feature | Description |
 | --- | --- |
-| **Multi-field Search** | Searches across name, description, brand, category |
-| **Fuzzy Matching** | Finds results with typos (e.g., "savge" → "Sauvage") |
-| **Relevance Scoring** | Results sorted by relevance with field boosting |
-| **Filters** | Brand, category, gender, fragrance family, sillage, longevity, seasonality, occasion, price range |
-| **Async Sync** | Data synced via Kafka for eventual consistency |
+| Multi-field Search | Searches across multiple fields with relevance boosting |
+| Fuzzy Matching | Finds results with typos (e.g., "savge" matches "Sauvage") |
+| Prefix Matching | Partial input matches (e.g., "parf" matches "Parfum") |
+| Relevance Scoring | Results sorted by relevance with field boosting |
+| Real-time Sync | Data synchronized via Kafka for eventual consistency |
 
-Key Components
---------------
+## Search Query Strategy
 
-| File | Purpose |
-| --- | --- |
-| `ProductDocument.java` | Elasticsearch document mapping |
-| `ProductSearchRepository.java` | Spring Data ES repository |
-| `ProductDocumentMapper.java` | Entity to Document conversion |
-| `ProductSearchService.java` | Search service interface |
-| `ProductSearchServiceImpl.java` | Search implementation with fuzzy queries |
-| `ProductIndexEvent.java` | Kafka event for index sync |
-| `ProductIndexConsumer.java` | Kafka consumer for ES sync |
+The search implementation combines multiple query types for optimal results:
 
-API Endpoints
--------------
-
-### Search Products
+1. **Prefix Query**: Highest priority for exact prefix matches
+2. **Wildcard Query**: Flexible partial matching
+3. **Fuzzy Multi-Match**: Typo tolerance across multiple fields
 
 ```
-GET /products/search
+Query: "parf"
+├── 1. Prefix: parf* → name (boost 3x)
+├── 2. Wildcard: parf* → name (boost 2x)
+├── 3. Fuzzy: parf → name, description (AUTO fuzziness)
+└── 4. Wildcard: parf* → description
 ```
 
-**Query Parameters:**
+Fuzzy matching uses `fuzziness: AUTO`:
+- 1-2 character words: exact match only
+- 3-5 character words: 1 edit allowed
+- 6+ character words: 2 edits allowed
+
+## Product Search API
+
+### Endpoint
+
+```
+GET /per/products/search
+```
+
+### Query Parameters
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `query` | String | Full-text search query (fuzzy) |
+| `query` | String | Full-text search query |
 | `brandId` | UUID | Filter by brand |
 | `categoryId` | UUID | Filter by category |
 | `gender` | Enum | MALE, FEMALE, UNISEX |
-| `fragranceFamily` | Enum | WOODY, FLORAL, ORIENTAL, etc. |
+| `fragranceFamily` | Enum | WOODY, FLORAL, ORIENTAL, FRESH, etc. |
 | `sillage` | Enum | SOFT, LIGHT, MODERATE, STRONG, HEAVY |
 | `longevity` | Enum | SHORT, MODERATE, LONG_LASTING, VERY_LONG_LASTING |
 | `seasonality` | Enum | SPRING, SUMMER, FALL, WINTER, ALL_SEASONS |
 | `occasion` | Enum | DAILY, EVENING, FORMAL, CASUAL, PARTY |
 | `minPrice` | BigDecimal | Minimum price filter |
 | `maxPrice` | BigDecimal | Maximum price filter |
-| `isActive` | Boolean | Active status (default: true) |
 | `page` | Integer | Page number (default: 0) |
 | `size` | Integer | Page size (default: 20) |
 
-**Example Requests:**
+### Example Requests
 
 ```bash
-# Simple text search
-curl "/products/search?query=dior"
+# Text search
+curl "/per/products/search?query=dior"
 
 # Fuzzy search (typo tolerance)
-curl "/products/search?query=savge"   # finds "Sauvage"
+curl "/per/products/search?query=savge"
+
+# Prefix search
+curl "/per/products/search?query=parf"
 
 # Search with filters
-curl "/products/search?query=eau&gender=MALE&minPrice=100000&maxPrice=2000000"
+curl "/per/products/search?query=eau&gender=MALE&minPrice=100000"
 
-# Filter only (no text search)
-curl "/products/search?brandId=xxx&fragranceFamily=WOODY"
+# Filter only
+curl "/per/products/search?brandId=xxx&fragranceFamily=WOODY"
 ```
 
-**Response:**
+## Brand, Category, Made In Search API
 
-```json
-{
-  "success": true,
-  "data": {
-    "content": [
-      {
-        "id": "uuid",
-        "name": "Dior Sauvage",
-        "shortDescription": "A radically fresh composition...",
-        "brandName": "Dior",
-        "categoryName": "Eau de Parfum",
-        "gender": "MALE",
-        "minPrice": 2500000,
-        "maxPrice": 4500000,
-        "imageUrl": "https://..."
-      }
-    ],
-    "page": 0,
-    "size": 20,
-    "totalElements": 15,
-    "totalPages": 1
-  }
-}
-```
-
-### Reindex All Products
+### Endpoint
 
 ```
-POST /products/reindex
+GET /per/brands/search?q=<query>
+GET /per/categories/search?q=<query>
+GET /per/made-in/search?q=<query>
 ```
 
-Admin operation to rebuild the Elasticsearch index from PostgreSQL.
+### Query Parameters
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `q` | String | Full-text search query |
+| `page` | Integer | Page number (default: 0) |
+| `size` | Integer | Page size (default: 20) |
+
+### Example Requests
 
 ```bash
-curl -X POST "/products/reindex"
+# Brand search
+curl "/per/brands/search?q=dior"
+
+# Category search
+curl "/per/categories/search?q=parfum"
+
+# Made In search
+curl "/per/made-in/search?q=france"
 ```
 
-Search Relevance
-----------------
+## Data Synchronization
 
-Query results are ranked by relevance score with field boosting:
-
-| Field | Boost | Priority |
-| --- | --- | --- |
-| `name` | 3x | Highest |
-| `brandName` | 2x | High |
-| `shortDescription` | 2x | High |
-| `categoryName` | 1x | Normal |
-| `description` | 1x | Normal |
-
-**Fuzzy Matching:**
-
-The search uses `fuzziness: AUTO` which allows:
-- 1-2 character words: exact match
-- 3-5 character words: 1 edit allowed
-- 6+ character words: 2 edits allowed
-
-Examples:
-- `dior` → "Dior", "DIOR"
-- `savge` → "Sauvage"
-- `bluu` → "Bleu"
-
-Data Synchronization
---------------------
-
-Products are synced to Elasticsearch via Kafka events:
+Entities are synchronized to Elasticsearch via Kafka events:
 
 ### Event Flow
 
 ```
-ProductServiceImpl ──► KafkaTemplate.send() ──► [product-index-topic]
-                                                        │
-                                                        ▼
-                                               ProductIndexConsumer
-                                                        │
-                                                        ▼
-                                               ProductSearchRepository.save()
+ServiceImpl ──► KafkaTemplate.send() ──► [index-topic]
+                                               │
+                                               ▼
+                                         IndexConsumer
+                                               │
+                                               ▼
+                                         SearchRepository.save()
 ```
 
-### Events
+### Kafka Topics
 
-| Action | When | Result |
+| Module | Topic |
+| --- | --- |
+| Product | `product-index-topic` |
+| Brand | `brand-index-topic` |
+| Category | `category-index-topic` |
+| Made In | `made-in-index-topic` |
+
+### Event Types
+
+| Action | Trigger | Result |
 | --- | --- | --- |
-| `INDEX` | Product created/updated | Document indexed |
-| `DELETE` | Product deleted | Document removed |
+| INDEX | Entity created/updated | Document indexed |
+| DELETE | Entity deleted | Document removed |
 
-### Retry & DLQ
+### Retry and DLQ
 
-Index events use the same retry pattern as email:
+Failed index events follow the retry pattern:
 - 3 retries with exponential backoff (1s, 2s, 4s)
-- Failed events go to `product-index-topic-dlt`
+- Failed events sent to Dead Letter Topic (`*-index-topic-dlt`)
 
-Configuration
--------------
+## Auto-Reindex on Startup
 
-### application.yml
+The application can automatically reindex empty Elasticsearch indexes on startup:
 
-```yaml
-spring:
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
-```
+- Enabled by default in development profile
+- Disabled by default in production profile
+- Configurable via environment variable
 
-### Environment Variables
+Only triggers when an index is empty, preventing unnecessary reindexing on normal restarts.
 
-| Variable | Default | Description |
-| --- | --- | --- |
-| `ELASTICSEARCH_URI` | `http://localhost:9200` | Elasticsearch server URL |
+## Key Components
 
-Development Notes
------------------
+| File | Purpose |
+| --- | --- |
+| `*Document.java` | Elasticsearch document mapping |
+| `*SearchRepository.java` | Spring Data Elasticsearch repository |
+| `*DocumentMapper.java` | Entity to Document conversion |
+| `*SearchService.java` | Search service interface |
+| `*SearchServiceImpl.java` | Search implementation |
+| `*IndexEvent.java` | Kafka event for index sync |
+| `*IndexConsumer.java` | Kafka consumer for Elasticsearch sync |
+| `ElasticsearchInitializer.java` | Auto-reindex on startup |
+
+## Development
 
 ### Local Development
 
@@ -212,57 +204,46 @@ docker compose up -d elasticsearch
 
 ### Initial Indexing
 
-After starting the application, call reindex to populate ES:
+After first startup, call reindex endpoints to populate Elasticsearch:
 
 ```bash
-curl -X POST http://localhost:8080/products/reindex
+curl -X POST "/per/products/reindex"
+curl -X POST "/per/brands/reindex"
+curl -X POST "/per/categories/reindex"
+curl -X POST "/per/made-in/reindex"
 ```
 
 ### Monitoring
 
 Access Kibana at `http://localhost:5601` to:
-- View product index
+- View indexes
 - Analyze search queries
 - Debug relevance scoring
 
-### Testing Search
-
-```bash
-# Test fuzzy matching
-curl "/products/search?query=savge"
-
-# Test filters
-curl "/products/search?gender=MALE&fragranceFamily=WOODY"
-
-# Test combined
-curl "/products/search?query=fresh&gender=UNISEX&minPrice=500000"
-```
-
-Extending Search
-----------------
+## Extending Search
 
 ### Adding New Searchable Fields
 
-1. Add field to `ProductDocument.java`:
+1. Add field to `*Document.java`:
    ```java
    @Field(type = FieldType.Text, analyzer = "standard")
    private String newField;
    ```
 
-2. Update `ProductDocumentMapper.java` to map the field
+2. Update `*DocumentMapper.java` to map the field
 
-3. Add field to search query in `ProductSearchServiceImpl.java`:
+3. Add field to search query in `*SearchServiceImpl.java`:
    ```java
    .fields("name^3", "newField^2", ...)
    ```
 
-4. Reindex all products
+4. Reindex all entities
 
 ### Adding New Filters
 
-1. Add field to `ProductSearchRequest.java`
+1. Add field to search request DTO
 
-2. Add filter logic in `ProductSearchServiceImpl.buildSearchQuery()`:
+2. Add filter logic in `buildSearchQuery()`:
    ```java
    if (request.getNewFilter() != null) {
        boolQuery.filter(f -> f.term(t -> t.field("newField").value(...)));
