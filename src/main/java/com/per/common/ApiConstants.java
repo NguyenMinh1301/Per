@@ -39,6 +39,8 @@ public final class ApiConstants {
         public static final String CREATE = "/create";
         public static final String UPDATE = "/update/{id}";
         public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class Category {
@@ -50,6 +52,8 @@ public final class ApiConstants {
         public static final String CREATE = "/create";
         public static final String UPDATE = "/update/{id}";
         public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class MadeIn {
@@ -61,6 +65,8 @@ public final class ApiConstants {
         public static final String CREATE = "/create";
         public static final String UPDATE = "/update/{id}";
         public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class Product {

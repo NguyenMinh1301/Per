@@ -9,11 +9,14 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.per.category.document.CategoryDocument;
 import com.per.category.dto.request.CategoryCreateRequest;
 import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
+import com.per.category.service.CategorySearchService;
 import com.per.category.service.CategoryService;
 import com.per.common.ApiConstants;
 import com.per.common.base.BaseController;
@@ -22,6 +25,7 @@ import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -32,16 +36,27 @@ import lombok.RequiredArgsConstructor;
 public class CategoryController extends BaseController {
 
     private final CategoryService categoryService;
+    private final CategorySearchService categorySearchService;
 
     @GetMapping(ApiConstants.Category.LIST)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-    public ResponseEntity<ApiResponse<PageResponse<CategoryResponse>>> searchCategories(
+    public ResponseEntity<ApiResponse<PageResponse<CategoryResponse>>> getCategories(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
         PageResponse<CategoryResponse> response = categoryService.getCategories(query, pageable);
         return ResponseEntity.ok(
                 ApiResponse.success(ApiSuccessCode.CATEGORY_LIST_SUCCESS, response));
+    }
+
+    @GetMapping(ApiConstants.Category.SEARCH)
+    @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
+    @Operation(summary = "Search categories", description = "Full-text search with fuzzy matching")
+    public ResponseEntity<ApiResponse<PageResponse<CategoryDocument>>> searchCategories(
+            @RequestParam(value = "q", required = false) String query,
+            @PageableDefault(size = 20) Pageable pageable) {
+        PageResponse<CategoryDocument> data = categorySearchService.search(query, pageable);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_LIST_SUCCESS, data));
     }
 
     @GetMapping(ApiConstants.Category.DETAIL)
@@ -72,5 +87,15 @@ public class CategoryController extends BaseController {
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_DELETE_SUCCESS));
+    }
+
+    @PostMapping(ApiConstants.Category.REINDEX)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Reindex all categories",
+            description = "Admin operation to rebuild ES index")
+    public ResponseEntity<ApiResponse<Void>> reindexCategories() {
+        categorySearchService.reindexAll();
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.CATEGORY_UPDATE_SUCCESS));
     }
 }
