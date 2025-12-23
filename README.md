@@ -1,15 +1,15 @@
 <p align="center">
-  <a href="https://spring.io/" target="_blank"><img src="document/img/springio.svg" height="100" alt="Spring Boot" /></a>
+  <a href="https://spring.io/" target="_blank"><img src="document/img/springio.svg" height="140" alt="Spring Boot" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.postgresql.org/" target="_blank"><img src="document/img/postgresql.svg" height="100" alt="PostgreSQL" /></a>
+  <a href="https://www.postgresql.org/" target="_blank"><img src="document/img/postgresql.svg" height="140" alt="PostgreSQL" /></a>
   &nbsp;&nbsp;
-  <a href="https://redis.io/" target="_blank"><img src="document/img/redis.svg" height="100" alt="Redis" /></a>
+  <a href="https://redis.io/" target="_blank"><img src="document/img/redis.svg" height="140" alt="Redis" /></a>
   &nbsp;&nbsp;
-  <a href="https://kafka.apache.org/" target="_blank"><img src="document/img/kafka.svg" height="100" alt="Kafka" /></a>
+  <a href="https://kafka.apache.org/" target="_blank"><img src="document/img/kafka.svg" height="140" alt="Kafka" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.elastic.co/" target="_blank"><img src="document/img/elastic.svg" height="100" alt="Elasticsearch" /></a>
+  <a href="https://www.elastic.co/" target="_blank"><img src="document/img/elastic.svg" height="140" alt="Elasticsearch" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.docker.com/" target="_blank"><img src="document/img/docker.svg" height="100" alt="Docker" /></a>
+  <a href="https://www.docker.com/" target="_blank"><img src="document/img/docker.svg" height="140" alt="Docker" /></a>
 </p>
 
 ## Introduction
