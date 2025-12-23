@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,15 +20,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.per.brand.document.BrandDocument;
 import com.per.brand.dto.request.BrandCreateRequest;
 import com.per.brand.dto.request.BrandUpdateRequest;
 import com.per.brand.dto.response.BrandResponse;
+import com.per.brand.service.BrandSearchService;
 import com.per.brand.service.BrandService;
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.base.BaseController;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -35,12 +41,14 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Brand.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Brand", description = "Brand Management APIs")
-public class BrandController {
+public class BrandController extends BaseController {
 
     private final BrandService brandService;
+    private final BrandSearchService brandSearchService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<PageResponse<BrandResponse>>> searchBrands(
+    @GetMapping(ApiConstants.Brand.LIST)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
+    public ResponseEntity<ApiResponse<PageResponse<BrandResponse>>> getBrands(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
@@ -48,13 +56,24 @@ public class BrandController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, response));
     }
 
-    @GetMapping(ApiConstants.Brand.DETAILS)
+    @GetMapping(ApiConstants.Brand.SEARCH)
+    @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
+    @Operation(summary = "Search brands", description = "Full-text search with fuzzy matching")
+    public ResponseEntity<ApiResponse<PageResponse<BrandDocument>>> searchBrands(
+            @RequestParam(value = "q", required = false) String query,
+            @PageableDefault(size = 20) Pageable pageable) {
+        PageResponse<BrandDocument> data = brandSearchService.search(query, pageable);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_LIST_SUCCESS, data));
+    }
+
+    @GetMapping(ApiConstants.Brand.DETAIL)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<BrandResponse>> getBrand(@PathVariable("id") UUID id) {
         BrandResponse response = brandService.getBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.Brand.CREATE)
     public ResponseEntity<ApiResponse<BrandResponse>> create(
             @Valid @RequestBody BrandCreateRequest request) {
         BrandResponse response = brandService.createBrand(request);
@@ -62,7 +81,7 @@ public class BrandController {
                 .body(ApiResponse.success(ApiSuccessCode.BRAND_CREATE_SUCCESS, response));
     }
 
-    @PutMapping(ApiConstants.Brand.DETAILS)
+    @PutMapping(ApiConstants.Brand.UPDATE)
     public ResponseEntity<ApiResponse<BrandResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody BrandUpdateRequest request) {
         BrandResponse response = brandService.updateBrand(id, request);
@@ -70,9 +89,17 @@ public class BrandController {
                 ApiResponse.success(ApiSuccessCode.BRAND_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping(ApiConstants.Brand.DETAILS)
+    @DeleteMapping(ApiConstants.Brand.DELETE)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         brandService.deleteBrand(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_DELETE_SUCCESS));
+    }
+
+    @PostMapping(ApiConstants.Brand.REINDEX)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Reindex all brands", description = "Admin operation to rebuild ES index")
+    public ResponseEntity<ApiResponse<Void>> reindexBrands() {
+        brandSearchService.reindexAll();
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.BRAND_UPDATE_SUCCESS));
     }
 }

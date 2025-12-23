@@ -1,5 +1,3 @@
-debug: true
-
 spring:
   application:
     name: per
@@ -23,6 +21,8 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
   mail:
     host: smtp.gmail.com
     port: 587
@@ -37,6 +37,20 @@ spring:
       mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT:5000}
       mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
     default-encoding: UTF-8
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
 
 server:
   port: ${SERVER_PORT:8080}

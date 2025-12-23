@@ -28,9 +28,11 @@ import com.per.auth.dto.response.user.MeResponse;
 import com.per.auth.service.AuthService;
 import com.per.auth.service.MeService;
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.base.BaseController;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -38,12 +40,13 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Auth.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Auth", description = "Authentication APIs")
-public class AuthController {
+public class AuthController extends BaseController {
 
     private final AuthService authService;
     private final MeService meService;
 
     @PostMapping(ApiConstants.Auth.REGISTER)
+    @RateLimiter(name = "authStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> register(@Valid @RequestBody SignupRequest request) {
         authService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -51,6 +54,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.LOGIN)
+    @RateLimiter(name = "authStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<AuthTokenResponse>> login(
             @Valid @RequestBody SigninRequest request) {
         AuthTokenResponse response = authService.login(request);
@@ -58,6 +62,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.REFRESH)
+    @RateLimiter(name = "authModerate", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<AuthTokenResponse>> refresh(
             @Valid @RequestBody RefreshTokenRequest request) {
         AuthTokenResponse response = authService.refreshToken(request);
@@ -66,6 +71,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.INTROSPECT)
+    @RateLimiter(name = "authModerate", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<IntrospectResponse>> introspect(
             @Valid @RequestBody IntrospectRequest request) {
         IntrospectResponse response = authService.introspect(request);
@@ -83,6 +89,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.VERIFY_EMAIL)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(
             @Valid @RequestBody VerifyEmailRequest request) {
         authService.verifyEmail(request);
@@ -90,6 +97,7 @@ public class AuthController {
     }
 
     @GetMapping(ApiConstants.Auth.VERIFY_EMAIL)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam("token") String token) {
         VerifyEmailRequest request = VerifyEmailRequest.builder().token(token).build();
         authService.verifyEmail(request);
@@ -97,6 +105,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.FORGOT_PASSWORD)
+    @RateLimiter(name = "authVeryStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
             @Valid @RequestBody ForgotPasswordRequest request) {
         authService.forgotPassword(request);
@@ -104,6 +113,7 @@ public class AuthController {
     }
 
     @PostMapping(ApiConstants.Auth.RESET_PASSWORD)
+    @RateLimiter(name = "authStrict", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> resetPassword(
             @Valid @RequestBody ResetPasswordRequest request) {
         authService.resetPassword(request);

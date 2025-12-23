@@ -12,11 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.per.common.ApiConstants;
-import com.per.common.ApiResponse;
+import com.per.common.base.BaseController;
+import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.media.dto.response.MediaUploadResponse;
 import com.per.media.service.MediaService;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -24,11 +27,13 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping(ApiConstants.Media.ROOT)
 @RequiredArgsConstructor
 @Tag(name = "Media", description = "Media Upload APIs")
-public class MediaController {
+public class MediaController extends BaseController {
 
     private final MediaService mediaService;
 
     @PostMapping(value = ApiConstants.Media.UPLOAD, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RateLimiter(name = "mediaSingle", fallbackMethod = "rateLimit")
+    @CircuitBreaker(name = "media", fallbackMethod = "circuitBreaker")
     public ResponseEntity<ApiResponse<MediaUploadResponse>> uploadSingle(
             @RequestPart("file") MultipartFile file) {
         MediaUploadResponse response = mediaService.uploadSingle(file);
@@ -39,6 +44,8 @@ public class MediaController {
     @PostMapping(
             value = ApiConstants.Media.UPLOAD_BATCH,
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @RateLimiter(name = "mediaMultipart", fallbackMethod = "rateLimit")
+    @CircuitBreaker(name = "media", fallbackMethod = "circuitBreaker")
     public ResponseEntity<ApiResponse<List<MediaUploadResponse>>> uploadBatch(
             @RequestPart("files") List<MultipartFile> files) {
         List<MediaUploadResponse> responses = mediaService.uploadBatch(files);

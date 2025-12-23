@@ -1,6 +1,7 @@
 {
     "info": {
-        "name": "Per API",
+        "name": "Per API Collection",
+        "description": "Complete API collection for Per E-commerce Backend - Generated on 2025-12-22",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
@@ -15,9 +16,20 @@
             "type": "string"
         }
     ],
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{token}}",
+                "type": "string"
+            }
+        ]
+    },
     "item": [
         {
             "name": "Auth",
+            "description": "Authentication APIs - Login, Register, Token Management",
             "item": [
                 {
                     "name": "Register",
@@ -25,9 +37,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -40,10 +51,9 @@
                                 "register"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"user1\",\n    \"email\": \"user1@example.com\",\n    \"password\": \"password\",\n    \"firstName\": \"User\",\n    \"lastName\": \"One\"\n}",
+                            "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"testuser@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -63,6 +73,7 @@
                                     "var jsonData = pm.response.json();",
                                     "if (jsonData.data && jsonData.data.accessToken) {",
                                     "    pm.collectionVariables.set(\"token\", jsonData.data.accessToken);",
+                                    "    console.log(\"Token saved successfully\");",
                                     "}"
                                 ],
                                 "type": "text/javascript"
@@ -73,9 +84,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -88,10 +98,9 @@
                                 "login"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"username\": \"user1\",\n    \"password\": \"password\"\n}",
+                            "raw": "{\n    \"username\": \"admin\",\n    \"password\": \"admin123\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -107,9 +116,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -122,10 +130,9 @@
                                 "refresh"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"refreshToken\": \"your_refresh_token\"\n}",
+                            "raw": "{\n    \"refreshToken\": \"your_refresh_token_here\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -141,9 +148,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -156,10 +162,9 @@
                                 "introspect"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"token\": \"your_token\"\n}",
+                            "raw": "{\n    \"accessToken\": \"your_access_token_here\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -172,12 +177,21 @@
                 {
                     "name": "Logout",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -190,10 +204,9 @@
                                 "logout"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"token\": \"your_token\"\n}",
+                            "raw": "{\n    \"refreshToken\": \"your_refresh_token_here\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -204,14 +217,13 @@
                     "response": []
                 },
                 {
-                    "name": "Verify Email",
+                    "name": "Verify Email (POST)",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -224,10 +236,9 @@
                                 "verify-email"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"token\": \"verification_token\"\n}",
+                            "raw": "{\n    \"token\": \"verification_token_here\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -241,24 +252,22 @@
                     "name": "Verify Email (GET)",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/auth/verify-email?token=verification_token",
+                            "raw": "{{baseUrl}}/auth/verify-email?token=verification_token_here",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "auth",
-                                "verify-email?token=verification_token"
+                                "verify-email"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "verification_token_here"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
@@ -268,9 +277,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -283,10 +291,9 @@
                                 "forgot-password"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"user1@example.com\"\n}",
+                            "raw": "{\n    \"email\": \"user@example.com\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -302,9 +309,8 @@
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -317,10 +323,9 @@
                                 "reset-password"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"token\": \"reset_token\",\n    \"password\": \"new_password\"\n}",
+                            "raw": "{\n    \"token\": \"reset_token_here\",\n    \"newPassword\": \"newpassword123\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -334,38 +339,39 @@
                     "name": "Validate Reset Token",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/auth/reset-password?token=reset_token",
+                            "raw": "{{baseUrl}}/auth/reset-password?token=reset_token_here",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "auth",
-                                "reset-password?token=reset_token"
+                                "reset-password"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "reset_token_here"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
                     "name": "Me",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/auth/me",
                             "host": [
@@ -375,8 +381,7 @@
                                 "auth",
                                 "me"
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 }
@@ -384,28 +389,78 @@
         },
         {
             "name": "Brand",
+            "description": "Brand Management APIs",
             "item": [
                 {
-                    "name": "Get Brands",
+                    "name": "List Brands",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands",
+                            "raw": "{{baseUrl}}/brands/list?query=&page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "brands"
+                                "brands",
+                                "list"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ES Search Brands",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/brands/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
                     },
                     "response": []
                 },
@@ -413,51 +468,60 @@
                     "name": "Get Brand",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "brands",
+                                "detail",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
                     "name": "Create Brand",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands",
+                            "raw": "{{baseUrl}}/brands/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "brands"
+                                "brands",
+                                "create"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Brand Name\",\n    \"description\": \"Brand Description\",\n    \"websiteUrl\": \"https://brand.com\",\n    \"foundedYear\": 2020,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
+                            "raw": "{\n    \"name\": \"Brand Name\",\n    \"description\": \"Brand Description\",\n    \"websiteUrl\": \"https://brand.com\",\n    \"foundedYear\": 2020,\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"isActive\": true\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -470,28 +534,44 @@
                 {
                     "name": "Update Brand",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "PUT",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "brands",
+                                "update",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"Updated Brand Name\",\n    \"description\": \"Updated Description\",\n    \"websiteUrl\": \"https://brand.com\",\n    \"foundedYear\": 2021,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
+                            "raw": "{\n    \"name\": \"Updated Brand Name\",\n    \"description\": \"Updated Description\",\n    \"websiteUrl\": \"https://brand.com\",\n    \"foundedYear\": 2021,\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"isActive\": true\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -504,25 +584,578 @@
                 {
                     "name": "Delete Brand",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands/:id",
+                            "raw": "{{baseUrl}}/brands/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "brands",
+                                "delete",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Brand ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reindex Brands (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
                             ]
                         },
-                        "description": ""
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/brands/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Category",
+            "description": "Category Management APIs",
+            "item": [
+                {
+                    "name": "List Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/list?query=&page=0&size=10&sort=createdAt,desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "list"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ES Search Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Category",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/detail/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "detail",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Category",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/create",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Category Name\",\n    \"description\": \"Category Description\",\n    \"descriptions\": \"Extended descriptions\",\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"isActive\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Category",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/update/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "update",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Category Name\",\n    \"description\": \"Updated Description\",\n    \"descriptions\": \"Updated extended descriptions\",\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/image.jpg\",\n    \"isActive\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Category",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/delete/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "delete",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Category ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reindex Categories (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Made In",
+            "description": "Made In Origin Management APIs",
+            "item": [
+                {
+                    "name": "List Made In",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/list?query=&page=0&size=10&sort=createdAt,desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "list"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ES Search Made In",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Made In",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/detail/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "detail",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Made In",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/create",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"France\",\n    \"isoCode\": \"FR\",\n    \"region\": \"Europe\",\n    \"description\": \"Country famous for perfumes\",\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/flag.jpg\",\n    \"isActive\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Made In",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/update/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "update",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Updated Name\",\n    \"isoCode\": \"FR\",\n    \"region\": \"Western Europe\",\n    \"description\": \"Updated description\",\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/flag.jpg\",\n    \"isActive\": true\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Made In",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/delete/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "delete",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Made In ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reindex Made In (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "reindex"
+                            ]
+                        }
                     },
                     "response": []
                 }
@@ -530,28 +1163,165 @@
         },
         {
             "name": "Product",
+            "description": "Product Management APIs",
             "item": [
                 {
-                    "name": "Get Products",
+                    "name": "ES Search Products (Fuzzy)",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/products",
+                            "raw": "{{baseUrl}}/products/search?query=dior&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "query",
+                                    "value": "dior",
+                                    "description": "Full-text search with fuzzy matching"
+                                },
+                                {
+                                    "key": "brandId",
+                                    "value": "",
+                                    "description": "Filter by brand UUID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "categoryId",
+                                    "value": "",
+                                    "description": "Filter by category UUID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "gender",
+                                    "value": "MALE",
+                                    "description": "MALE, FEMALE, UNISEX",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "fragranceFamily",
+                                    "value": "WOODY_AMBER",
+                                    "description": "WOODY_AMBER, AMBER, SOFT_AMBER, etc.",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "sillage",
+                                    "value": "MODERATE",
+                                    "description": "SOFT, LIGHT, MODERATE, STRONG, HEAVY",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "longevity",
+                                    "value": "LONG_LASTING",
+                                    "description": "SHORT, MODERATE, LONG_LASTING, VERY_LONG_LASTING",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "seasonality",
+                                    "value": "SUMMER",
+                                    "description": "SPRING, SUMMER, FALL, WINTER, ALL_SEASONS, SPRING_SUMMER, FALL_WINTER",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "occasion",
+                                    "value": "DAILY",
+                                    "description": "DAILY, EVENING, FORMAL, CASUAL, PARTY, BUSINESS_CASUAL, etc.",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "minPrice",
+                                    "value": "100000",
+                                    "description": "Minimum price filter",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "maxPrice",
+                                    "value": "5000000",
+                                    "description": "Maximum price filter",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "isActive",
+                                    "value": "true",
+                                    "description": "Active status (default: true)",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "ES Reindex All Products",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/products/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "products",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List Products",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/products/list?page=0&size=10&sort=createdAt,desc",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
@@ -559,40 +1329,48 @@
                     "name": "Get Product",
                     "request": {
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/detail/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "products",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
                     "name": "Create Product",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/products",
+                            "raw": "{{baseUrl}}/products/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -600,10 +1378,9 @@
                                 "products"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"brandId\": \"uuid\",\n    \"categoryId\": \"uuid\",\n    \"madeInId\": \"uuid\",\n    \"name\": \"Product Name\",\n    \"shortDescription\": \"Short Desc\",\n    \"description\": \"Full Desc\",\n    \"launchYear\": 2023,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"fragranceFamily\": \"FLORAL\",\n    \"gender\": \"UNISEX\",\n    \"sillage\": \"MODERATE\",\n    \"longevity\": \"LONG_LASTING\",\n    \"seasonality\": \"SPRING\",\n    \"occasion\": \"DAY\",\n    \"limitedEdition\": false,\n    \"discontinued\": false,\n    \"active\": true,\n    \"variants\": [\n        {\n            \"variantSku\": \"SKU1\",\n            \"volumeMl\": 100.0,\n            \"packageType\": \"Bottle\",\n            \"price\": 99.99,\n            \"compareAtPrice\": 120.0,\n            \"currencyCode\": \"USD\",\n            \"stockQuantity\": 100,\n            \"lowStockThreshold\": 10,\n            \"imagePublicId\": \"img_id\",\n            \"imageUrl\": \"https://img.url\",\n            \"active\": true\n        }\n    ]\n}",
+                            "raw": "{\n    \"brandId\": \"brand-uuid-here\",\n    \"categoryId\": \"category-uuid-here\",\n    \"madeInId\": \"madein-uuid-here\",\n    \"name\": \"Product Name\",\n    \"shortDescription\": \"Short description of the product\",\n    \"description\": \"Full detailed description\",\n    \"launchYear\": 2023,\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/product.jpg\",\n    \"fragranceFamily\": \"FLORAL\",\n    \"gender\": \"UNISEX\",\n    \"sillage\": \"MODERATE\",\n    \"longevity\": \"LONG_LASTING\",\n    \"seasonality\": \"SPRING\",\n    \"occasion\": \"DAILY\",\n    \"limitedEdition\": false,\n    \"discontinued\": false,\n    \"active\": true,\n    \"variants\": [\n        {\n            \"variantSku\": \"SKU-001\",\n            \"volumeMl\": 100.0,\n            \"packageType\": \"Bottle\",\n            \"price\": 99.99,\n            \"compareAtPrice\": 120.00,\n            \"currencyCode\": \"VND\",\n            \"stockQuantity\": 100,\n            \"lowStockThreshold\": 10,\n            \"imagePublicId\": \"variant_img_id\",\n            \"imageUrl\": \"https://example.com/variant.jpg\",\n            \"active\": true\n        }\n    ]\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -616,28 +1393,43 @@
                 {
                     "name": "Update Product",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "PUT",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/update/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "products",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"brandId\": \"uuid\",\n    \"categoryId\": \"uuid\",\n    \"madeInId\": \"uuid\",\n    \"name\": \"Product Name\",\n    \"shortDescription\": \"Short Desc\",\n    \"description\": \"Full Desc\",\n    \"launchYear\": 2023,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"fragranceFamily\": \"FLORAL\",\n    \"gender\": \"UNISEX\",\n    \"sillage\": \"MODERATE\",\n    \"longevity\": \"LONG_LASTING\",\n    \"seasonality\": \"SPRING\",\n    \"occasion\": \"DAY\",\n    \"limitedEdition\": false,\n    \"discontinued\": false,\n    \"active\": true,\n    \"variantsToAdd\": [],\n    \"variantsToUpdate\": [],\n    \"variantsToDelete\": []\n}",
+                            "raw": "{\n    \"brandId\": \"brand-uuid-here\",\n    \"categoryId\": \"category-uuid-here\",\n    \"madeInId\": \"madein-uuid-here\",\n    \"name\": \"Updated Product Name\",\n    \"shortDescription\": \"Updated short description\",\n    \"description\": \"Updated full description\",\n    \"launchYear\": 2023,\n    \"imagePublicId\": \"img_public_id\",\n    \"imageUrl\": \"https://example.com/product.jpg\",\n    \"fragranceFamily\": \"FLORAL\",\n    \"gender\": \"UNISEX\",\n    \"sillage\": \"MODERATE\",\n    \"longevity\": \"LONG_LASTING\",\n    \"seasonality\": \"SPRING\",\n    \"occasion\": \"DAILY\",\n    \"limitedEdition\": false,\n    \"discontinued\": false,\n    \"active\": true,\n    \"variantsToAdd\": [],\n    \"variantsToUpdate\": [],\n    \"variantsToDelete\": []\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -650,40 +1442,59 @@
                 {
                     "name": "Delete Product",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
-                            "raw": "{{baseUrl}}/products/:id",
+                            "raw": "{{baseUrl}}/products/delete/:id",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "products",
                                 ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "Product ID"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
                     "name": "Variants",
+                    "description": "Product Variant Management",
                     "item": [
                         {
                             "name": "Create Variant",
                             "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "POST",
                                 "header": [
                                     {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}",
-                                        "type": "text"
+                                        "key": "Content-Type",
+                                        "value": "application/json"
                                     }
                                 ],
                                 "url": {
@@ -695,12 +1506,18 @@
                                         "products",
                                         ":productId",
                                         "variants"
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        }
                                     ]
                                 },
-                                "description": "",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"variantSku\": \"SKU2\",\n    \"volumeMl\": 50.0,\n    \"packageType\": \"Bottle\",\n    \"price\": 59.99,\n    \"compareAtPrice\": 70.0,\n    \"currencyCode\": \"USD\",\n    \"stockQuantity\": 50,\n    \"lowStockThreshold\": 5,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"active\": true\n}",
+                                    "raw": "{\n    \"variantSku\": \"SKU-002\",\n    \"volumeMl\": 50.0,\n    \"packageType\": \"Bottle\",\n    \"price\": 59.99,\n    \"compareAtPrice\": 70.00,\n    \"currencyCode\": \"VND\",\n    \"stockQuantity\": 50,\n    \"lowStockThreshold\": 5,\n    \"imagePublicId\": \"variant_img_id\",\n    \"imageUrl\": \"https://example.com/variant.jpg\",\n    \"active\": true\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -713,12 +1530,21 @@
                         {
                             "name": "Update Variant",
                             "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "PUT",
                                 "header": [
                                     {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}",
-                                        "type": "text"
+                                        "key": "Content-Type",
+                                        "value": "application/json"
                                     }
                                 ],
                                 "url": {
@@ -731,12 +1557,23 @@
                                         ":productId",
                                         "variants",
                                         ":variantId"
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        },
+                                        {
+                                            "key": "variantId",
+                                            "value": "uuid-here",
+                                            "description": "Variant ID"
+                                        }
                                     ]
                                 },
-                                "description": "",
                                 "body": {
                                     "mode": "raw",
-                                    "raw": "{\n    \"id\": \"uuid\",\n    \"variantSku\": \"SKU2\",\n    \"volumeMl\": 50.0,\n    \"packageType\": \"Bottle\",\n    \"price\": 59.99,\n    \"compareAtPrice\": 70.0,\n    \"currencyCode\": \"USD\",\n    \"stockQuantity\": 50,\n    \"lowStockThreshold\": 5,\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"active\": true\n}",
+                                    "raw": "{\n    \"id\": \"variant-uuid-here\",\n    \"variantSku\": \"SKU-002-UPDATED\",\n    \"volumeMl\": 50.0,\n    \"packageType\": \"Bottle\",\n    \"price\": 64.99,\n    \"compareAtPrice\": 75.00,\n    \"currencyCode\": \"VND\",\n    \"stockQuantity\": 60,\n    \"lowStockThreshold\": 5,\n    \"imagePublicId\": \"variant_img_id\",\n    \"imageUrl\": \"https://example.com/variant.jpg\",\n    \"active\": true\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"
@@ -749,14 +1586,17 @@
                         {
                             "name": "Delete Variant",
                             "request": {
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{token}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
                                 "method": "DELETE",
-                                "header": [
-                                    {
-                                        "key": "Authorization",
-                                        "value": "Bearer {{token}}",
-                                        "type": "text"
-                                    }
-                                ],
                                 "url": {
                                     "raw": "{{baseUrl}}/products/:productId/variants/:variantId",
                                     "host": [
@@ -767,9 +1607,20 @@
                                         ":productId",
                                         "variants",
                                         ":variantId"
+                                    ],
+                                    "variable": [
+                                        {
+                                            "key": "productId",
+                                            "value": "uuid-here",
+                                            "description": "Product ID"
+                                        },
+                                        {
+                                            "key": "variantId",
+                                            "value": "uuid-here",
+                                            "description": "Variant ID"
+                                        }
                                     ]
-                                },
-                                "description": ""
+                                }
                             },
                             "response": []
                         }
@@ -778,167 +1629,23 @@
             ]
         },
         {
-            "name": "User",
-            "item": [
-                {
-                    "name": "Search Users",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/users/search",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "users",
-                                "search"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get User",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/users/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "users",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create User",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/users/create",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "users",
-                                "create"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"new@example.com\",\n    \"password\": \"password\",\n    \"firstName\": \"New\",\n    \"lastName\": \"User\",\n    \"emailVerified\": true,\n    \"active\": true,\n    \"roles\": [\n        \"USER\"\n    ]\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Update User",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/users/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "users",
-                                ":id"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"firstName\": \"Updated\",\n    \"lastName\": \"User\",\n    \"emailVerified\": true,\n    \"active\": true,\n    \"roles\": [\n        \"USER\"\n    ]\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Delete User",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/users/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "users",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
             "name": "Cart",
+            "description": "Shopping Cart APIs",
             "item": [
                 {
                     "name": "Get Cart",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/cart",
                             "host": [
@@ -947,20 +1654,28 @@
                             "path": [
                                 "cart"
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
-                    "name": "Add Item",
+                    "name": "Add Item to Cart",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -973,10 +1688,9 @@
                                 "items"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"variantId\": \"uuid\",\n    \"quantity\": 1\n}",
+                            "raw": "{\n    \"variantId\": \"variant-uuid-here\",\n    \"quantity\": 1\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -987,14 +1701,23 @@
                     "response": []
                 },
                 {
-                    "name": "Update Item",
+                    "name": "Update Cart Item",
                     "request": {
-                        "method": "PUT",
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PATCH",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -1006,9 +1729,15 @@
                                 "cart",
                                 "items",
                                 ":itemId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "itemId",
+                                    "value": "uuid-here",
+                                    "description": "Cart Item ID"
+                                }
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"quantity\": 2\n}",
@@ -1022,16 +1751,19 @@
                     "response": []
                 },
                 {
-                    "name": "Remove Item",
+                    "name": "Remove Cart Item",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/cart/items/:itemId",
                             "host": [
@@ -1041,23 +1773,32 @@
                                 "cart",
                                 "items",
                                 ":itemId"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "itemId",
+                                    "value": "uuid-here",
+                                    "description": "Cart Item ID"
+                                }
                             ]
-                        },
-                        "description": ""
+                        }
                     },
                     "response": []
                 },
                 {
                     "name": "Clear Cart",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/cart/items",
                             "host": [
@@ -1067,300 +1808,7 @@
                                 "cart",
                                 "items"
                             ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Category",
-            "item": [
-                {
-                    "name": "Get Categories",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/categories",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "categories"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Category",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "categories",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create Category",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/categories",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "categories"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Category Name\",\n    \"description\": \"Description\",\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
                         }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Update Category",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "categories",
-                                ":id"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Updated Name\",\n    \"description\": \"Updated Description\",\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Delete Category",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/categories/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "categories",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                }
-            ]
-        },
-        {
-            "name": "Made In",
-            "item": [
-                {
-                    "name": "Get Made In",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/made-in",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "made-in"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Made In Detail",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "made-in",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create Made In",
-                    "request": {
-                        "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/made-in",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "made-in"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Country Name\",\n    \"isoCode\": \"US\",\n    \"region\": \"North America\",\n    \"description\": \"Description\",\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Update Made In",
-                    "request": {
-                        "method": "PUT",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "made-in",
-                                ":id"
-                            ]
-                        },
-                        "description": "",
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"name\": \"Updated Name\",\n    \"isoCode\": \"US\",\n    \"region\": \"North America\",\n    \"description\": \"Updated Description\",\n    \"imagePublicId\": \"img_id\",\n    \"imageUrl\": \"https://img.url\",\n    \"isActive\": true\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
-                            }
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Delete Made In",
-                    "request": {
-                        "method": "DELETE",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/made-in/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "made-in",
-                                ":id"
-                            ]
-                        },
-                        "description": ""
                     },
                     "response": []
                 }
@@ -1368,16 +1816,26 @@
         },
         {
             "name": "Payment",
+            "description": "Payment Management APIs",
             "item": [
                 {
                     "name": "Checkout",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -1390,10 +1848,9 @@
                                 "checkout"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"cartItemIds\": [\n        \"uuid\"\n    ],\n    \"receiverName\": \"Receiver\",\n    \"receiverPhone\": \"1234567890\",\n    \"shippingAddress\": \"Address\",\n    \"note\": \"Note\"\n}",
+                            "raw": "{\n    \"cartItemIds\": [\"cart-item-uuid-1\", \"cart-item-uuid-2\"],\n    \"receiverName\": \"John Doe\",\n    \"receiverPhone\": \"0123456789\",\n    \"shippingAddress\": \"123 Main Street, City, Country\",\n    \"note\": \"Please deliver before 5pm\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1404,14 +1861,50 @@
                     "response": []
                 },
                 {
-                    "name": "Webhook",
+                    "name": "PayOS Return (Callback)",
+                    "description": "This endpoint is called by PayOS after payment completion. The path is configured in application properties.",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/payments/payos/return?orderCode=123456789&cancel=false&code=00",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payments",
+                                "payos",
+                                "return"
+                            ],
+                            "query": [
+                                {
+                                    "key": "orderCode",
+                                    "value": "123456789",
+                                    "description": "PayOS Order Code"
+                                },
+                                {
+                                    "key": "cancel",
+                                    "value": "false",
+                                    "description": "Whether payment was cancelled"
+                                },
+                                {
+                                    "key": "code",
+                                    "value": "00",
+                                    "description": "PayOS response code (00 = success)"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "PayOS Webhook",
+                    "description": "This endpoint receives webhooks from PayOS. The path is configured in application properties.",
                     "request": {
                         "method": "POST",
                         "header": [
                             {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
+                                "key": "Content-Type",
+                                "value": "application/json"
                             }
                         ],
                         "url": {
@@ -1425,10 +1918,9 @@
                                 "webhook"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "raw",
-                            "raw": "{}",
+                            "raw": "{\n    \"code\": \"00\",\n    \"desc\": \"success\",\n    \"data\": {\n        \"orderCode\": 123456789,\n        \"amount\": 100000,\n        \"description\": \"Payment description\",\n        \"accountNumber\": \"123456789\",\n        \"reference\": \"REFERENCE\",\n        \"transactionDateTime\": \"2023-12-22 10:00:00\",\n        \"currency\": \"VND\",\n        \"paymentLinkId\": \"payment-link-id\",\n        \"code\": \"00\",\n        \"desc\": \"success\"\n    },\n    \"signature\": \"signature-from-payos\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -1437,49 +1929,27 @@
                         }
                     },
                     "response": []
-                },
-                {
-                    "name": "Return",
-                    "request": {
-                        "method": "GET",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
-                        "url": {
-                            "raw": "{{baseUrl}}/payments/payos/return",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "payments",
-                                "payos",
-                                "return"
-                            ]
-                        },
-                        "description": ""
-                    },
-                    "response": []
                 }
             ]
         },
         {
             "name": "Media",
+            "description": "Media Upload APIs",
             "item": [
                 {
-                    "name": "Upload Single",
+                    "name": "Upload Single File",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/media/upload",
                             "host": [
@@ -1490,14 +1960,14 @@
                                 "upload"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "formdata",
                             "formdata": [
                                 {
                                     "key": "file",
                                     "type": "file",
-                                    "src": []
+                                    "src": "",
+                                    "description": "Single file to upload"
                                 }
                             ]
                         }
@@ -1505,16 +1975,19 @@
                     "response": []
                 },
                 {
-                    "name": "Upload Batch",
+                    "name": "Upload Multiple Files",
                     "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
                         "method": "POST",
-                        "header": [
-                            {
-                                "key": "Authorization",
-                                "value": "Bearer {{token}}",
-                                "type": "text"
-                            }
-                        ],
                         "url": {
                             "raw": "{{baseUrl}}/media/upload/batch",
                             "host": [
@@ -1526,14 +1999,228 @@
                                 "batch"
                             ]
                         },
-                        "description": "",
                         "body": {
                             "mode": "formdata",
                             "formdata": [
                                 {
                                     "key": "files",
                                     "type": "file",
-                                    "src": []
+                                    "src": "",
+                                    "description": "Multiple files to upload"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "description": "User Management APIs (Admin only)",
+            "item": [
+                {
+                    "name": "Search Users",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/users/search?q=&page=0&size=10&sort=createdAt,desc",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (optional)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number (0-indexed)"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "10",
+                                    "description": "Page size"
+                                },
+                                {
+                                    "key": "sort",
+                                    "value": "createdAt,desc",
+                                    "description": "Sort field and direction"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/users/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/create",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                "create"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"newuser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"New\",\n    \"lastName\": \"User\",\n    \"emailVerified\": false,\n    \"active\": true,\n    \"roles\": [\"USER\"]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/users/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"username\": \"updateduser\",\n    \"email\": \"updated@example.com\",\n    \"firstName\": \"Updated\",\n    \"lastName\": \"User\",\n    \"emailVerified\": true,\n    \"active\": true,\n    \"password\": \"newpassword123\",\n    \"roles\": [\"USER\", \"ADMIN\"]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/users/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "users",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "uuid-here",
+                                    "description": "User ID"
                                 }
                             ]
                         }

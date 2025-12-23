@@ -1,3 +1,9 @@
+debug: false
+
+spring:
+  config:
+    import: classpath:resilience4j/resilience4j-prod.yml
+
 jpa:
   hibernate:
     ddl-auto: validate
@@ -14,6 +20,8 @@ app:
   base-url: ${APP_BASE_URL}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  elasticsearch:
+    auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:false}
   mail:
     from: ${MAIL_FROM}
 

@@ -1,0 +1,12 @@
+---
+
+network.host: 0.0.0.0
+
+xpack.license.self_generated.type: trial
+xpack.security.enabled: false # true -> is authentication
+xpack.monitoring.collection.enabled: false
+
+cluster.routing.allocation.disk.threshold_enabled: false
+cluster.routing.allocation.disk.watermark.flood_stage: 200mb
+cluster.routing.allocation.disk.watermark.low: 500mb
+cluster.routing.allocation.disk.watermark.high: 300mb

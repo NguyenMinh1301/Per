@@ -30,6 +30,7 @@ import com.per.category.dto.response.CategoryResponse;
 import com.per.category.entity.Category;
 import com.per.category.mapper.CategoryMapper;
 import com.per.category.repository.CategoryRepository;
+import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -41,6 +42,12 @@ class CategoryServiceImplTest {
     @Mock private CategoryRepository categoryRepository;
 
     @Mock private CategoryMapper categoryMapper;
+
+    @Mock private CacheEvictionHelper cacheEvictionHelper;
+
+    @Mock private com.per.category.mapper.CategoryDocumentMapper documentMapper;
+
+    @Mock private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
 
     @InjectMocks private CategoryServiceImpl categoryService;
 
@@ -189,6 +196,7 @@ class CategoryServiceImplTest {
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
             when(categoryMapper.toEntity(request)).thenReturn(newCategory);
+            when(categoryRepository.save(any(Category.class))).thenReturn(newCategory);
             when(categoryMapper.toResponse(newCategory)).thenReturn(newCategoryResponse);
 
             // When
@@ -230,6 +238,7 @@ class CategoryServiceImplTest {
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
             when(categoryMapper.toEntity(request)).thenReturn(newCategory);
+            when(categoryRepository.save(any(Category.class))).thenReturn(newCategory);
             when(categoryMapper.toResponse(newCategory)).thenReturn(newCategoryResponse);
 
             // When

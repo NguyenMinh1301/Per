@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,10 @@ import com.per.brand.entity.Brand;
 import com.per.brand.repository.BrandRepository;
 import com.per.category.entity.Category;
 import com.per.category.repository.CategoryRepository;
+import com.per.common.config.cache.CacheEvictionHelper;
+import com.per.common.config.cache.CacheNames;
+import com.per.common.config.kafka.KafkaTopicNames;
+import com.per.common.event.ProductIndexEvent;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -30,6 +35,7 @@ import com.per.product.dto.response.ProductResponse;
 import com.per.product.dto.response.ProductVariantResponse;
 import com.per.product.entity.Product;
 import com.per.product.entity.ProductVariant;
+import com.per.product.mapper.ProductDocumentMapper;
 import com.per.product.mapper.ProductMapper;
 import com.per.product.mapper.ProductVariantMapper;
 import com.per.product.repository.ProductRepository;
@@ -50,9 +56,17 @@ public class ProductServiceImpl implements ProductService {
     private final MadeInRepository madeInRepository;
     private final ProductMapper productMapper;
     private final ProductVariantMapper productVariantMapper;
+    private final ProductDocumentMapper productDocumentMapper;
+    private final CacheEvictionHelper cacheEvictionHelper;
+    private final org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = CacheNames.PRODUCTS,
+            key =
+                    "'list:' + (#query ?: 'all') + ':p' + #pageable.pageNumber + ':s' + #pageable.pageSize",
+            sync = true)
     public PageResponse<ProductResponse> getProducts(String query, Pageable pageable) {
         Page<Product> page;
         if (query == null || query.isBlank()) {
@@ -65,6 +79,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
+    @Cacheable(value = CacheNames.PRODUCT, key = "#id", sync = true)
     public ProductDetailResponse getProduct(UUID id) {
         Product product = findProduct(id);
         List<ProductVariant> variants = productVariantRepository.findByProductId(product.getId());
@@ -92,6 +107,12 @@ public class ProductServiceImpl implements ProductService {
 
         List<ProductVariant> variants =
                 productVariantRepository.findByProductId(savedProduct.getId());
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS, CacheNames.PRODUCT);
+
+        // Publish event for Elasticsearch indexing
+        publishIndexEvent(ProductIndexEvent.Action.INDEX, savedProduct, variants);
+
         return buildDetail(savedProduct, variants);
     }
 
@@ -125,6 +146,13 @@ public class ProductServiceImpl implements ProductService {
 
         List<ProductVariant> variants =
                 productVariantRepository.findByProductId(savedProduct.getId());
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, id);
+
+        // Publish event for Elasticsearch indexing
+        publishIndexEvent(ProductIndexEvent.Action.INDEX, savedProduct, variants);
+
         return buildDetail(savedProduct, variants);
     }
 
@@ -136,6 +164,12 @@ public class ProductServiceImpl implements ProductService {
             productVariantRepository.deleteAll(variants);
         }
         productRepository.delete(product);
+
+        cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS);
+        cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, id);
+
+        // Publish event for Elasticsearch deletion
+        publishDeleteEvent(id);
     }
 
     @Override
@@ -148,6 +182,9 @@ public class ProductServiceImpl implements ProductService {
         applyVariantDefaults(variant);
 
         ProductVariant saved = productVariantRepository.save(variant);
+
+        cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, productId);
+
         return productVariantMapper.toResponse(saved);
     }
 
@@ -166,6 +203,9 @@ public class ProductServiceImpl implements ProductService {
         applyVariantDefaults(variant);
 
         ProductVariant saved = productVariantRepository.save(variant);
+
+        cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, productId);
+
         return productVariantMapper.toResponse(saved);
     }
 
@@ -174,6 +214,8 @@ public class ProductServiceImpl implements ProductService {
         Product product = findProduct(productId);
         ProductVariant variant = findVariant(product.getId(), variantId);
         productVariantRepository.delete(variant);
+
+        cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, productId);
     }
 
     private ProductDetailResponse buildDetail(Product product, List<ProductVariant> variants) {
@@ -320,5 +362,28 @@ public class ProductServiceImpl implements ProductService {
 
     private <T> T require(Optional<T> optional, ApiErrorCode errorCode, String message) {
         return optional.orElseThrow(() -> new ApiException(errorCode, message));
+    }
+
+    // --- Elasticsearch Indexing Helpers ---
+
+    private void publishIndexEvent(
+            ProductIndexEvent.Action action, Product product, List<ProductVariant> variants) {
+        var document = productDocumentMapper.toDocument(product, variants);
+        var event =
+                ProductIndexEvent.builder()
+                        .action(action)
+                        .productId(product.getId().toString())
+                        .document(document)
+                        .build();
+        kafkaTemplate.send(KafkaTopicNames.PRODUCT_INDEX_TOPIC, event);
+    }
+
+    private void publishDeleteEvent(UUID productId) {
+        var event =
+                ProductIndexEvent.builder()
+                        .action(ProductIndexEvent.Action.DELETE)
+                        .productId(productId.toString())
+                        .build();
+        kafkaTemplate.send(KafkaTopicNames.PRODUCT_INDEX_TOPIC, event);
     }
 }

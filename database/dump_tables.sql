@@ -1,475 +1,452 @@
 /*
     Author: nguyenminh1301
-    Date:   09/11/2025
+    Date:   20/12/2025
 */
 
-create table public.flyway_schema_history
-(
-    installed_rank integer                 not null
-        constraint flyway_schema_history_pk
-            primary key,
-    version        varchar(50),
-    description    varchar(200)            not null,
-    type           varchar(20)             not null,
-    script         varchar(1000)           not null,
-    checksum       integer,
-    installed_by   varchar(100)            not null,
-    installed_on   timestamp default now() not null,
-    execution_time integer                 not null,
-    success        boolean                 not null
+-- DROP SCHEMA public;
+
+CREATE SCHEMA public AUTHORIZATION pg_database_owner;
+
+-- DROP SEQUENCE public.roles_id_seq;
+
+CREATE SEQUENCE public.roles_id_seq
+    INCREMENT BY 1
+    MINVALUE 1
+    MAXVALUE 9223372036854775807
+    START 1
+	CACHE 1
+	NO CYCLE;-- public.brand definition
+
+-- Drop table
+
+-- DROP TABLE public.brand;
+
+CREATE TABLE public.brand (
+                              id uuid NOT NULL,
+                              "name" varchar(150) NOT NULL,
+                              description text NULL,
+                              website_url text NULL,
+                              founded_year int4 NULL,
+                              image_public_id varchar(255) NULL,
+                              image_url text NULL,
+                              is_active bool DEFAULT true NOT NULL,
+                              created_at timestamptz DEFAULT now() NOT NULL,
+                              updated_at timestamptz DEFAULT now() NOT NULL,
+                              CONSTRAINT brand_pkey PRIMARY KEY (id),
+                              CONSTRAINT uq_brand_name UNIQUE (name)
+);
+CREATE INDEX idx_brand_is_active ON public.brand USING btree (is_active);
+
+
+-- public.category definition
+
+-- Drop table
+
+-- DROP TABLE public.category;
+
+CREATE TABLE public.category (
+                                 id uuid NOT NULL,
+                                 "name" varchar(150) NOT NULL,
+                                 description text NULL,
+                                 descriptions text NULL,
+                                 image_public_id varchar(255) NULL,
+                                 image_url text NULL,
+                                 is_active bool DEFAULT true NOT NULL,
+                                 created_at timestamptz DEFAULT now() NOT NULL,
+                                 updated_at timestamptz DEFAULT now() NOT NULL,
+                                 CONSTRAINT category_pkey PRIMARY KEY (id),
+                                 CONSTRAINT uq_category_name UNIQUE (name)
+);
+CREATE INDEX idx_category_is_active ON public.category USING btree (is_active);
+
+
+-- public.flyway_schema_history definition
+
+-- Drop table
+
+-- DROP TABLE public.flyway_schema_history;
+
+CREATE TABLE public.flyway_schema_history (
+                                              installed_rank int4 NOT NULL,
+                                              "version" varchar(50) NULL,
+                                              description varchar(200) NOT NULL,
+                                              "type" varchar(20) NOT NULL,
+                                              script varchar(1000) NOT NULL,
+                                              checksum int4 NULL,
+                                              installed_by varchar(100) NOT NULL,
+                                              installed_on timestamp DEFAULT now() NOT NULL,
+                                              execution_time int4 NOT NULL,
+                                              success bool NOT NULL,
+                                              CONSTRAINT flyway_schema_history_pk PRIMARY KEY (installed_rank)
+);
+CREATE INDEX flyway_schema_history_s_idx ON public.flyway_schema_history USING btree (success);
+
+
+-- public.made_id definition
+
+-- Drop table
+
+-- DROP TABLE public.made_id;
+
+CREATE TABLE public.made_id (
+                                id uuid NOT NULL,
+                                "name" varchar(120) NOT NULL,
+                                iso_code varchar(10) NULL,
+                                region varchar(120) NULL,
+                                description text NULL,
+                                image_public_id varchar(255) NULL,
+                                image_url text NULL,
+                                is_active bool DEFAULT true NOT NULL,
+                                created_at timestamptz DEFAULT now() NOT NULL,
+                                updated_at timestamptz DEFAULT now() NOT NULL,
+                                CONSTRAINT made_id_pkey PRIMARY KEY (id),
+                                CONSTRAINT uq_made_id_name UNIQUE (name)
+);
+CREATE INDEX idx_made_id_is_active ON public.made_id USING btree (is_active);
+
+
+-- public.media_assets definition
+
+-- Drop table
+
+-- DROP TABLE public.media_assets;
+
+CREATE TABLE public.media_assets (
+                                     id uuid NOT NULL,
+                                     asset_id varchar(150) NOT NULL,
+                                     public_id varchar(255) NOT NULL,
+                                     folder varchar(255) NULL,
+                                     resource_type varchar(32) NOT NULL,
+                                     format varchar(50) NULL,
+                                     mime_type varchar(100) NULL,
+                                     url text NOT NULL,
+                                     secure_url text NOT NULL,
+                                     bytes int8 NOT NULL,
+                                     width int4 NULL,
+                                     height int4 NULL,
+                                     duration float8 NULL,
+                                     original_filename varchar(255) NULL,
+                                     etag varchar(100) NULL,
+                                     signature varchar(255) NULL,
+                                     "version" varchar(50) NULL,
+                                     cloud_created_at timestamptz NULL,
+                                     created_at timestamptz DEFAULT now() NOT NULL,
+                                     updated_at timestamptz DEFAULT now() NOT NULL,
+                                     CONSTRAINT media_assets_pkey PRIMARY KEY (id),
+                                     CONSTRAINT media_assets_public_id_key UNIQUE (public_id)
+);
+CREATE INDEX idx_media_assets_public_id ON public.media_assets USING btree (public_id);
+CREATE INDEX idx_media_assets_resource_type ON public.media_assets USING btree (resource_type);
+
+
+-- public.roles definition
+
+-- Drop table
+
+-- DROP TABLE public.roles;
+
+CREATE TABLE public.roles (
+                              id bigserial NOT NULL,
+                              "name" varchar(32) NOT NULL,
+                              description varchar(255) NULL,
+                              created_at timestamptz DEFAULT now() NOT NULL,
+                              updated_at timestamptz DEFAULT now() NOT NULL,
+                              CONSTRAINT roles_name_key UNIQUE (name),
+                              CONSTRAINT roles_pkey PRIMARY KEY (id)
 );
 
-alter table public.flyway_schema_history
-    owner to postgres;
 
-create index flyway_schema_history_s_idx
-    on public.flyway_schema_history (success);
+-- public.users definition
 
-create table public.roles
-(
-    id          bigserial
-        primary key,
-    name        varchar(32)                            not null
-        unique,
-    description varchar(255),
-    created_at  timestamp with time zone default now() not null,
-    updated_at  timestamp with time zone default now() not null
+-- Drop table
+
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users (
+                              id uuid NOT NULL,
+                              username varchar(50) NOT NULL,
+                              email varchar(254) NOT NULL,
+                              password_hash varchar(255) NOT NULL,
+                              first_name varchar(100) NULL,
+                              last_name varchar(100) NULL,
+                              is_email_verified bool DEFAULT false NOT NULL,
+                              is_active bool DEFAULT true NOT NULL,
+                              last_login_at timestamptz NULL,
+                              created_at timestamptz DEFAULT now() NOT NULL,
+                              updated_at timestamptz DEFAULT now() NOT NULL,
+                              CONSTRAINT users_email_key UNIQUE (email),
+                              CONSTRAINT users_pkey PRIMARY KEY (id),
+                              CONSTRAINT users_username_key UNIQUE (username)
 );
 
-alter table public.roles
-    owner to postgres;
 
-create table public.users
-(
-    id                uuid                                   not null
-        primary key,
-    username          varchar(50)                            not null
-        unique,
-    email             varchar(254)                           not null
-        unique,
-    password_hash     varchar(255)                           not null,
-    first_name        varchar(100),
-    last_name         varchar(100),
-    is_email_verified boolean                  default false not null,
-    is_active         boolean                  default true  not null,
-    last_login_at     timestamp with time zone,
-    created_at        timestamp with time zone default now() not null,
-    updated_at        timestamp with time zone default now() not null
+-- public.cart definition
+
+-- Drop table
+
+-- DROP TABLE public.cart;
+
+CREATE TABLE public.cart (
+                             id uuid NOT NULL,
+                             user_id uuid NOT NULL,
+                             total_items int4 DEFAULT 0 NOT NULL,
+                             subtotal_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                             discount_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                             total_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                             status varchar(20) DEFAULT 'ACTIVE'::character varying NOT NULL,
+                             created_at timestamptz DEFAULT now() NOT NULL,
+                             updated_at timestamptz DEFAULT now() NOT NULL,
+                             CONSTRAINT cart_pkey PRIMARY KEY (id),
+                             CONSTRAINT fk_cart_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
+);
+CREATE UNIQUE INDEX uq_cart_user_active ON public.cart USING btree (user_id, status) WHERE ((status)::text = 'ACTIVE'::text);
+
+
+-- public."order" definition
+
+-- Drop table
+
+-- DROP TABLE public."order";
+
+CREATE TABLE public."order" (
+                                id uuid NOT NULL,
+                                user_id uuid NOT NULL,
+                                order_code int8 NOT NULL,
+                                total_items int4 DEFAULT 0 NOT NULL,
+                                subtotal_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                                discount_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                                shipping_fee numeric(15, 2) DEFAULT 0 NOT NULL,
+                                grand_total numeric(15, 2) DEFAULT 0 NOT NULL,
+                                currency_code varchar(10) DEFAULT 'VND'::character varying NOT NULL,
+                                receiver_name varchar(180) NULL,
+                                receiver_phone varchar(32) NULL,
+                                shipping_address text NULL,
+                                note text NULL,
+                                status varchar(32) DEFAULT 'PENDING_PAYMENT'::character varying NOT NULL,
+                                created_at timestamptz DEFAULT now() NOT NULL,
+                                updated_at timestamptz DEFAULT now() NOT NULL,
+                                CONSTRAINT order_order_code_key UNIQUE (order_code),
+                                CONSTRAINT order_pkey PRIMARY KEY (id),
+                                CONSTRAINT fk_order_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE RESTRICT
+);
+CREATE INDEX idx_order_status ON public."order" USING btree (status);
+CREATE INDEX idx_order_user ON public."order" USING btree (user_id);
+
+
+-- public.payment definition
+
+-- Drop table
+
+-- DROP TABLE public.payment;
+
+CREATE TABLE public.payment (
+                                id uuid NOT NULL,
+                                user_id uuid NULL,
+                                order_id uuid NOT NULL,
+                                order_code int8 NOT NULL,
+                                payment_link_id varchar(128) NOT NULL,
+                                amount numeric(15, 2) NOT NULL,
+                                currency_code varchar(10) DEFAULT 'VND'::character varying NOT NULL,
+                                description text NULL,
+                                checkout_url text NULL,
+                                status varchar(32) DEFAULT 'PENDING'::character varying NOT NULL,
+                                expired_at timestamptz NULL,
+                                created_at timestamptz DEFAULT now() NOT NULL,
+                                updated_at timestamptz DEFAULT now() NOT NULL,
+                                CONSTRAINT payment_order_code_key UNIQUE (order_code),
+                                CONSTRAINT payment_payment_link_id_key UNIQUE (payment_link_id),
+                                CONSTRAINT payment_pkey PRIMARY KEY (id),
+                                CONSTRAINT fk_payment_order FOREIGN KEY (order_id) REFERENCES public."order"(id) ON DELETE CASCADE,
+                                CONSTRAINT fk_payment_user FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE SET NULL
+);
+CREATE INDEX idx_payment_order_id ON public.payment USING btree (order_id);
+CREATE INDEX idx_payment_status ON public.payment USING btree (status);
+
+
+-- public.payment_transaction definition
+
+-- Drop table
+
+-- DROP TABLE public.payment_transaction;
+
+CREATE TABLE public.payment_transaction (
+                                            id uuid NOT NULL,
+                                            payment_id uuid NOT NULL,
+                                            reference varchar(128) NULL,
+                                            amount numeric(15, 2) NOT NULL,
+                                            status varchar(16) DEFAULT 'SUCCEEDED'::character varying NOT NULL,
+                                            transaction_date_time timestamptz NULL,
+                                            currency_code varchar(10) DEFAULT 'VND'::character varying NOT NULL,
+                                            account_number varchar(64) NULL,
+                                            counter_account_number varchar(64) NULL,
+                                            counter_account_name varchar(255) NULL,
+                                            raw_payload jsonb DEFAULT '{}'::jsonb NOT NULL,
+                                            created_at timestamptz DEFAULT now() NOT NULL,
+                                            CONSTRAINT payment_transaction_pkey PRIMARY KEY (id),
+                                            CONSTRAINT uq_payment_transaction_reference UNIQUE (reference),
+                                            CONSTRAINT fk_payment_txn_payment FOREIGN KEY (payment_id) REFERENCES public.payment(id) ON DELETE CASCADE
+);
+CREATE INDEX idx_payment_transaction_payment_id ON public.payment_transaction USING btree (payment_id);
+CREATE INDEX idx_payment_transaction_status ON public.payment_transaction USING btree (status);
+
+
+-- public.product definition
+
+-- Drop table
+
+-- DROP TABLE public.product;
+
+CREATE TABLE public.product (
+                                id uuid NOT NULL,
+                                brand_id uuid NOT NULL,
+                                category_id uuid NOT NULL,
+                                made_in_id uuid NOT NULL,
+                                "name" varchar(255) NOT NULL,
+                                short_description varchar(600) NULL,
+                                description text NULL,
+                                launch_year int4 NULL,
+                                image_public_id varchar(255) NULL,
+                                image_url text NULL,
+                                fragrance_family varchar(80) NULL,
+                                gender varchar(20) NULL,
+                                sillage varchar(30) NULL,
+                                longevity varchar(30) NULL,
+                                seasonality varchar(80) NULL,
+                                occasion varchar(120) NULL,
+                                is_limited_edition bool DEFAULT false NOT NULL,
+                                is_discontinued bool DEFAULT false NOT NULL,
+                                is_active bool DEFAULT true NOT NULL,
+                                created_at timestamptz DEFAULT now() NOT NULL,
+                                updated_at timestamptz DEFAULT now() NOT NULL,
+                                CONSTRAINT product_pkey PRIMARY KEY (id),
+                                CONSTRAINT fk_product_brand FOREIGN KEY (brand_id) REFERENCES public.brand(id),
+                                CONSTRAINT fk_product_category FOREIGN KEY (category_id) REFERENCES public.category(id),
+                                CONSTRAINT fk_product_made_in FOREIGN KEY (made_in_id) REFERENCES public.made_id(id)
+);
+CREATE INDEX idx_product_brand ON public.product USING btree (brand_id);
+CREATE INDEX idx_product_category ON public.product USING btree (category_id);
+CREATE INDEX idx_product_is_active ON public.product USING btree (is_active);
+CREATE INDEX idx_product_made_in ON public.product USING btree (made_in_id);
+
+
+-- public.product_variant definition
+
+-- Drop table
+
+-- DROP TABLE public.product_variant;
+
+CREATE TABLE public.product_variant (
+                                        id uuid NOT NULL,
+                                        product_id uuid NOT NULL,
+                                        variant_sku varchar(64) NOT NULL,
+                                        volume_ml numeric(6, 2) NOT NULL,
+                                        package_type varchar(60) NULL,
+                                        price numeric(15, 2) NOT NULL,
+                                        compare_at_price numeric(15, 2) NULL,
+                                        currency_code varchar(10) DEFAULT 'VND'::character varying NOT NULL,
+                                        stock_quantity int4 DEFAULT 0 NOT NULL,
+                                        low_stock_threshold int4 DEFAULT 0 NOT NULL,
+                                        image_public_id varchar(255) NULL,
+                                        image_url text NULL,
+                                        is_active bool DEFAULT true NOT NULL,
+                                        created_at timestamptz DEFAULT now() NOT NULL,
+                                        updated_at timestamptz DEFAULT now() NOT NULL,
+                                        CONSTRAINT product_variant_pkey PRIMARY KEY (id),
+                                        CONSTRAINT product_variant_variant_sku_key UNIQUE (variant_sku),
+                                        CONSTRAINT fk_variant_product FOREIGN KEY (product_id) REFERENCES public.product(id)
+);
+CREATE INDEX idx_variant_is_active ON public.product_variant USING btree (is_active);
+CREATE INDEX idx_variant_product ON public.product_variant USING btree (product_id);
+
+
+-- public.user_roles definition
+
+-- Drop table
+
+-- DROP TABLE public.user_roles;
+
+CREATE TABLE public.user_roles (
+                                   user_id uuid NOT NULL,
+                                   role_id int8 NOT NULL,
+                                   CONSTRAINT user_roles_pkey PRIMARY KEY (user_id, role_id),
+                                   CONSTRAINT user_roles_role_id_fkey FOREIGN KEY (role_id) REFERENCES public.roles(id),
+                                   CONSTRAINT user_roles_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
 );
 
-alter table public.users
-    owner to postgres;
 
-create table public.user_roles
-(
-    user_id uuid   not null
-        references public.users
-            on delete cascade,
-    role_id bigint not null
-        references public.roles,
-    primary key (user_id, role_id)
+-- public.user_tokens definition
+
+-- Drop table
+
+-- DROP TABLE public.user_tokens;
+
+CREATE TABLE public.user_tokens (
+                                    id uuid NOT NULL,
+                                    "token" varchar(255) NOT NULL,
+                                    "type" varchar(50) NOT NULL,
+                                    user_id uuid NOT NULL,
+                                    expires_at timestamptz NOT NULL,
+                                    consumed_at timestamptz NULL,
+                                    revoked bool DEFAULT false NOT NULL,
+                                    created_at timestamptz DEFAULT now() NOT NULL,
+                                    updated_at timestamptz DEFAULT now() NOT NULL,
+                                    CONSTRAINT user_tokens_pkey PRIMARY KEY (id),
+                                    CONSTRAINT user_tokens_token_key UNIQUE (token),
+                                    CONSTRAINT user_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE
 );
+CREATE INDEX idx_user_tokens_token_type ON public.user_tokens USING btree (token, type);
+CREATE INDEX idx_user_tokens_user_type ON public.user_tokens USING btree (user_id, type);
 
-alter table public.user_roles
-    owner to postgres;
 
-create table public.user_tokens
-(
-    id          uuid                                   not null
-        primary key,
-    token       varchar(255)                           not null
-        unique,
-    type        varchar(50)                            not null,
-    user_id     uuid                                   not null
-        references public.users
-            on delete cascade,
-    expires_at  timestamp with time zone               not null,
-    consumed_at timestamp with time zone,
-    revoked     boolean                  default false not null,
-    created_at  timestamp with time zone default now() not null,
-    updated_at  timestamp with time zone default now() not null
+-- public.cart_item definition
+
+-- Drop table
+
+-- DROP TABLE public.cart_item;
+
+CREATE TABLE public.cart_item (
+                                  id uuid NOT NULL,
+                                  cart_id uuid NOT NULL,
+                                  product_id uuid NOT NULL,
+                                  variant_id uuid NOT NULL,
+                                  quantity int4 DEFAULT 1 NOT NULL,
+                                  price numeric(15, 2) DEFAULT 0 NOT NULL,
+                                  sub_total_amount numeric(15, 2) DEFAULT 0 NOT NULL,
+                                  created_at timestamptz DEFAULT now() NOT NULL,
+                                  updated_at timestamptz DEFAULT now() NOT NULL,
+                                  CONSTRAINT cart_item_pkey PRIMARY KEY (id),
+                                  CONSTRAINT fk_cart_item_cart FOREIGN KEY (cart_id) REFERENCES public.cart(id) ON DELETE CASCADE,
+                                  CONSTRAINT fk_cart_item_product FOREIGN KEY (product_id) REFERENCES public.product(id),
+                                  CONSTRAINT fk_cart_item_variant FOREIGN KEY (variant_id) REFERENCES public.product_variant(id)
 );
+CREATE INDEX idx_cart_item_cart ON public.cart_item USING btree (cart_id);
+CREATE INDEX idx_cart_item_product ON public.cart_item USING btree (product_id);
+CREATE INDEX idx_cart_item_variant ON public.cart_item USING btree (variant_id);
+CREATE UNIQUE INDEX uq_cart_item_cart_variant ON public.cart_item USING btree (cart_id, variant_id);
 
-alter table public.user_tokens
-    owner to postgres;
 
-create index idx_user_tokens_token_type
-    on public.user_tokens (token, type);
+-- public.order_item definition
 
-create index idx_user_tokens_user_type
-    on public.user_tokens (user_id, type);
+-- Drop table
 
-create table public.media_assets
-(
-    id                uuid                                   not null
-        primary key,
-    asset_id          varchar(150)                           not null,
-    public_id         varchar(255)                           not null
-        unique,
-    folder            varchar(255),
-    resource_type     varchar(32)                            not null,
-    format            varchar(50),
-    mime_type         varchar(100),
-    url               text                                   not null,
-    secure_url        text                                   not null,
-    bytes             bigint                                 not null,
-    width             integer,
-    height            integer,
-    duration          double precision,
-    original_filename varchar(255),
-    etag              varchar(100),
-    signature         varchar(255),
-    version           varchar(50),
-    cloud_created_at  timestamp with time zone,
-    created_at        timestamp with time zone default now() not null,
-    updated_at        timestamp with time zone default now() not null
+-- DROP TABLE public.order_item;
+
+CREATE TABLE public.order_item (
+                                   id uuid NOT NULL,
+                                   order_id uuid NOT NULL,
+                                   product_id uuid NOT NULL,
+                                   variant_id uuid NOT NULL,
+                                   product_name text NOT NULL,
+                                   variant_sku varchar(64) NOT NULL,
+                                   quantity int4 NOT NULL,
+                                   unit_price numeric(15, 2) NOT NULL,
+                                   sub_total_amount numeric(15, 2) NOT NULL,
+                                   currency_code varchar(10) DEFAULT 'VND'::character varying NOT NULL,
+                                   created_at timestamptz DEFAULT now() NOT NULL,
+                                   CONSTRAINT order_item_pkey PRIMARY KEY (id),
+                                   CONSTRAINT fk_order_item_order FOREIGN KEY (order_id) REFERENCES public."order"(id) ON DELETE CASCADE,
+                                   CONSTRAINT fk_order_item_product FOREIGN KEY (product_id) REFERENCES public.product(id),
+                                   CONSTRAINT fk_order_item_variant FOREIGN KEY (variant_id) REFERENCES public.product_variant(id)
 );
-
-alter table public.media_assets
-    owner to postgres;
-
-create index idx_media_assets_public_id
-    on public.media_assets (public_id);
-
-create index idx_media_assets_resource_type
-    on public.media_assets (resource_type);
-
-create table public.brand
-(
-    id              uuid                                   not null
-        primary key,
-    name            varchar(150)                           not null
-        constraint uq_brand_name
-            unique,
-    description     text,
-    website_url     text,
-    founded_year    integer,
-    image_public_id varchar(255),
-    image_url       text,
-    is_active       boolean                  default true  not null,
-    created_at      timestamp with time zone default now() not null,
-    updated_at      timestamp with time zone default now() not null
-);
-
-alter table public.brand
-    owner to postgres;
-
-create index idx_brand_is_active
-    on public.brand (is_active);
-
-create table public.category
-(
-    id              uuid                                   not null
-        primary key,
-    name            varchar(150)                           not null
-        constraint uq_category_name
-            unique,
-    description     text,
-    descriptions    text,
-    image_public_id varchar(255),
-    image_url       text,
-    is_active       boolean                  default true  not null,
-    created_at      timestamp with time zone default now() not null,
-    updated_at      timestamp with time zone default now() not null
-);
-
-alter table public.category
-    owner to postgres;
-
-create index idx_category_is_active
-    on public.category (is_active);
-
-create table public.made_id
-(
-    id              uuid                                   not null
-        primary key,
-    name            varchar(120)                           not null
-        constraint uq_made_id_name
-            unique,
-    iso_code        varchar(10),
-    region          varchar(120),
-    description     text,
-    image_public_id varchar(255),
-    image_url       text,
-    is_active       boolean                  default true  not null,
-    created_at      timestamp with time zone default now() not null,
-    updated_at      timestamp with time zone default now() not null
-);
-
-alter table public.made_id
-    owner to postgres;
-
-create index idx_made_id_is_active
-    on public.made_id (is_active);
-
-create table public.product
-(
-    id                 uuid                                   not null
-        primary key,
-    brand_id           uuid                                   not null
-        constraint fk_product_brand
-            references public.brand,
-    category_id        uuid                                   not null
-        constraint fk_product_category
-            references public.category,
-    made_in_id         uuid                                   not null
-        constraint fk_product_made_in
-            references public.made_id,
-    name               varchar(255)                           not null,
-    short_description  varchar(600),
-    description        text,
-    launch_year        integer,
-    image_public_id    varchar(255),
-    image_url          text,
-    fragrance_family   varchar(80),
-    gender             varchar(20),
-    sillage            varchar(30),
-    longevity          varchar(30),
-    seasonality        varchar(80),
-    occasion           varchar(120),
-    is_limited_edition boolean                  default false not null,
-    is_discontinued    boolean                  default false not null,
-    is_active          boolean                  default true  not null,
-    created_at         timestamp with time zone default now() not null,
-    updated_at         timestamp with time zone default now() not null
-);
-
-alter table public.product
-    owner to postgres;
-
-create index idx_product_brand
-    on public.product (brand_id);
-
-create index idx_product_category
-    on public.product (category_id);
-
-create index idx_product_made_in
-    on public.product (made_in_id);
-
-create index idx_product_is_active
-    on public.product (is_active);
-
-create table public.product_variant
-(
-    id                  uuid                                                      not null
-        primary key,
-    product_id          uuid                                                      not null
-        constraint fk_variant_product
-            references public.product,
-    variant_sku         varchar(64)                                               not null
-        unique,
-    volume_ml           numeric(6, 2)                                             not null,
-    package_type        varchar(60),
-    price               numeric(15, 2)                                            not null,
-    compare_at_price    numeric(15, 2),
-    currency_code       varchar(10)              default 'VND'::character varying not null,
-    stock_quantity      integer                  default 0                        not null,
-    low_stock_threshold integer                  default 0                        not null,
-    image_public_id     varchar(255),
-    image_url           text,
-    is_active           boolean                  default true                     not null,
-    created_at          timestamp with time zone default now()                    not null,
-    updated_at          timestamp with time zone default now()                    not null
-);
-
-alter table public.product_variant
-    owner to postgres;
-
-create index idx_variant_product
-    on public.product_variant (product_id);
-
-create index idx_variant_is_active
-    on public.product_variant (is_active);
-
-create table public.cart
-(
-    id              uuid                                                         not null
-        primary key,
-    user_id         uuid                                                         not null
-        constraint fk_cart_user
-            references public.users
-            on delete cascade,
-    total_items     integer                  default 0                           not null,
-    subtotal_amount numeric(15, 2)           default 0                           not null,
-    discount_amount numeric(15, 2)           default 0                           not null,
-    total_amount    numeric(15, 2)           default 0                           not null,
-    status          varchar(20)              default 'ACTIVE'::character varying not null,
-    created_at      timestamp with time zone default now()                       not null,
-    updated_at      timestamp with time zone default now()                       not null
-);
-
-alter table public.cart
-    owner to postgres;
-
-create unique index uq_cart_user_active
-    on public.cart (user_id, status)
-    where ((status)::text = 'ACTIVE'::text);
-
-create table public.cart_item
-(
-    id               uuid                                   not null
-        primary key,
-    cart_id          uuid                                   not null
-        constraint fk_cart_item_cart
-            references public.cart
-            on delete cascade,
-    product_id       uuid                                   not null
-        constraint fk_cart_item_product
-            references public.product,
-    variant_id       uuid                                   not null
-        constraint fk_cart_item_variant
-            references public.product_variant,
-    quantity         integer                  default 1     not null,
-    price            numeric(15, 2)           default 0     not null,
-    sub_total_amount numeric(15, 2)           default 0     not null,
-    created_at       timestamp with time zone default now() not null,
-    updated_at       timestamp with time zone default now() not null
-);
-
-alter table public.cart_item
-    owner to postgres;
-
-create unique index uq_cart_item_cart_variant
-    on public.cart_item (cart_id, variant_id);
-
-create index idx_cart_item_cart
-    on public.cart_item (cart_id);
-
-create index idx_cart_item_product
-    on public.cart_item (product_id);
-
-create index idx_cart_item_variant
-    on public.cart_item (variant_id);
-
-create table public."order"
-(
-    id               uuid                                                                  not null
-        primary key,
-    user_id          uuid                                                                  not null
-        constraint fk_order_user
-            references public.users
-            on delete restrict,
-    order_code       bigint                                                                not null
-        unique,
-    total_items      integer                  default 0                                    not null,
-    subtotal_amount  numeric(15, 2)           default 0                                    not null,
-    discount_amount  numeric(15, 2)           default 0                                    not null,
-    shipping_fee     numeric(15, 2)           default 0                                    not null,
-    grand_total      numeric(15, 2)           default 0                                    not null,
-    currency_code    varchar(10)              default 'VND'::character varying             not null,
-    receiver_name    varchar(180),
-    receiver_phone   varchar(32),
-    shipping_address text,
-    note             text,
-    status           varchar(32)              default 'PENDING_PAYMENT'::character varying not null,
-    created_at       timestamp with time zone default now()                                not null,
-    updated_at       timestamp with time zone default now()                                not null
-);
-
-alter table public."order"
-    owner to postgres;
-
-create index idx_order_user
-    on public."order" (user_id);
-
-create index idx_order_status
-    on public."order" (status);
-
-create table public.order_item
-(
-    id               uuid                                                      not null
-        primary key,
-    order_id         uuid                                                      not null
-        constraint fk_order_item_order
-            references public."order"
-            on delete cascade,
-    product_id       uuid                                                      not null
-        constraint fk_order_item_product
-            references public.product,
-    variant_id       uuid                                                      not null
-        constraint fk_order_item_variant
-            references public.product_variant,
-    product_name     text                                                      not null,
-    variant_sku      varchar(64)                                               not null,
-    quantity         integer                                                   not null,
-    unit_price       numeric(15, 2)                                            not null,
-    sub_total_amount numeric(15, 2)                                            not null,
-    currency_code    varchar(10)              default 'VND'::character varying not null,
-    created_at       timestamp with time zone default now()                    not null
-);
-
-alter table public.order_item
-    owner to postgres;
-
-create index idx_order_item_order
-    on public.order_item (order_id);
-
-create index idx_order_item_variant
-    on public.order_item (variant_id);
-
-create table public.payment
-(
-    id              uuid                                                          not null
-        primary key,
-    user_id         uuid
-        constraint fk_payment_user
-            references public.users
-            on delete set null,
-    order_id        uuid                                                          not null
-        constraint fk_payment_order
-            references public."order"
-            on delete cascade,
-    order_code      bigint                                                        not null
-        unique,
-    payment_link_id varchar(128)                                                  not null
-        unique,
-    amount          numeric(15, 2)                                                not null,
-    currency_code   varchar(10)              default 'VND'::character varying     not null,
-    description     text,
-    checkout_url    text,
-    status          varchar(32)              default 'PENDING'::character varying not null,
-    expired_at      timestamp with time zone,
-    created_at      timestamp with time zone default now()                        not null,
-    updated_at      timestamp with time zone default now()                        not null
-);
-
-alter table public.payment
-    owner to postgres;
-
-create index idx_payment_order_id
-    on public.payment (order_id);
-
-create index idx_payment_status
-    on public.payment (status);
-
-create table public.payment_transaction
-(
-    id                     uuid                                                            not null
-        primary key,
-    payment_id             uuid                                                            not null
-        constraint fk_payment_txn_payment
-            references public.payment
-            on delete cascade,
-    reference              varchar(128)
-        constraint uq_payment_transaction_reference
-            unique,
-    amount                 numeric(15, 2)                                                  not null,
-    status                 varchar(16)              default 'SUCCEEDED'::character varying not null,
-    transaction_date_time  timestamp with time zone,
-    currency_code          varchar(10)              default 'VND'::character varying       not null,
-    account_number         varchar(64),
-    counter_account_number varchar(64),
-    counter_account_name   varchar(255),
-    raw_payload            jsonb                    default '{}'::jsonb                    not null,
-    created_at             timestamp with time zone default now()                          not null
-);
-
-alter table public.payment_transaction
-    owner to postgres;
-
-create index idx_payment_transaction_payment_id
-    on public.payment_transaction (payment_id);
-
-create index idx_payment_transaction_status
-    on public.payment_transaction (status);
-
+CREATE INDEX idx_order_item_order ON public.order_item USING btree (order_id);
+CREATE INDEX idx_order_item_variant ON public.order_item USING btree (variant_id);
