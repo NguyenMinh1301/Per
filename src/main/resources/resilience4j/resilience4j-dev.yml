@@ -49,13 +49,18 @@ resilience4j:
         registerHealthIndicator: true
 
       # Public
-      mediumTraffic:
+      lowTraffic:
         limitForPeriod: 10
         limitRefreshPeriod: 30s
         timeoutDuration: 5s
         registerHealthIndicator: true
-      highTraffic:
+      mediumTraffic:
         limitForPeriod: 20
+        limitRefreshPeriod: 30s
+        timeoutDuration: 5s
+        registerHealthIndicator: true
+      highTraffic:
+        limitForPeriod: 30
         limitRefreshPeriod: 30s
         timeoutDuration: 5s
         registerHealthIndicator: true
