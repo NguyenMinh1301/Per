@@ -1,24 +1,28 @@
-# Per E-commerce Backend
-
-<h1 align="center">
-  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="140" alt="Spring Boot" /></a>
-  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="140" alt="PostgreSQL" /></a>
-  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="140" alt="Redis" /></a>
-  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="140" alt="Kafka" /></a>
-  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="140" alt="Elasticsearch" /></a>
-  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="140" alt="Docker" /></a>
-</h1>
-
 <p align="center">
-  <a href="./">
-    <img src="/document/Per.svg" alt="Per" width="160">
-  </a>
+  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="120" alt="Spring Boot" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/postgresql/postgresql-icon.svg" height="120" alt="PostgreSQL" /></a>
+  &nbsp;&nbsp;
+  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="120" alt="Redis" /></a>
+  &nbsp;&nbsp;
+  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="120" alt="Kafka" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="120" alt="Elasticsearch" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="120" alt="Docker" /></a>
 </p>
+
+
 
 ## Introduction
 
 Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Elasticsearch full-text search, Redis caching with transactional consistency, event-driven processing via Kafka, and resilience patterns for external service integration.
 
+<p align="center">
+  <a href="./">
+    <img src="https://raw.githubusercontent.com/NguyenMinh1301/Per/refs/heads/main/document/Per.svg?token=GHSAT0AAAAAADRUX2YSICW5LUL7LR7GPPCE2KKMB2A" alt="Per" width="160">
+  </a>
+</p>
 ## Key Features
 
 - **Full-Text Search**: Elasticsearch-powered search across Products, Brands, Categories, and Made In with fuzzy matching and prefix support.
