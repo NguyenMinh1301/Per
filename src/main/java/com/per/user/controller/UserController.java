@@ -2,6 +2,7 @@ package com.per.user.controller;
 
 import java.util.UUID;
 
+import com.per.common.base.BaseController;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ import com.per.user.dto.request.UserUpdateRequest;
 import com.per.user.dto.response.UserResponse;
 import com.per.user.service.UserService;
 
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -37,11 +39,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(name = "User", description = "User Management APIs")
-public class UserController {
+public class UserController extends BaseController {
 
     private final UserService userService;
 
     @GetMapping(ApiConstants.User.SEARCH)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<PageResponse<UserResponse>>> getUsers(
             @RequestParam(value = "q", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
@@ -51,12 +54,14 @@ public class UserController {
     }
 
     @GetMapping(ApiConstants.User.GET)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable("id") UUID id) {
         UserResponse response = userService.getUser(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_FETCH_SUCCESS, response));
     }
 
     @PostMapping(ApiConstants.User.CREATE)
+    @RateLimiter(name = "lowTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<UserResponse>> createUser(
             @Valid @RequestBody UserCreateRequest request) {
         UserResponse response = userService.createUser(request);
@@ -65,6 +70,7 @@ public class UserController {
     }
 
     @PutMapping(ApiConstants.User.UPDATE)
+    @RateLimiter(name = "lowTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<UserResponse>> updateUser(
             @PathVariable("id") UUID id, @Valid @RequestBody UserUpdateRequest request) {
         UserResponse response = userService.updateUser(id, request);
@@ -72,8 +78,10 @@ public class UserController {
     }
 
     @DeleteMapping(ApiConstants.User.DELETE)
+    @RateLimiter(name = "lowTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable("id") UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_DELETE_SUCCESS));
     }
 }
+
