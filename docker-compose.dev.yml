@@ -64,6 +64,7 @@ services:
 
       # --- Elasticsearch ---
       - ELASTICSEARCH_URI=http://elasticsearch:9200
+      - APP_ELASTICSEARCH_AUTO_REINDEX=${APP_ELASTICSEARCH_AUTO_REINDEX}
 
       # --- Admin Account ---
       - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
