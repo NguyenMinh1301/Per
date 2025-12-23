@@ -72,4 +72,4 @@ public class ElasticsearchInitializer implements CommandLineRunner {
             log.info("Index '{}' already has {} documents, skipping reindex", indexName, count);
         }
     }
-} 
+}

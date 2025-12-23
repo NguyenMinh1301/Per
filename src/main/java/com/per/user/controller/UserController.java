@@ -2,7 +2,6 @@ package com.per.user.controller;
 
 import java.util.UUID;
 
-import com.per.common.base.BaseController;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.per.common.ApiConstants;
+import com.per.common.base.BaseController;
 import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
@@ -84,4 +84,3 @@ public class UserController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.USER_DELETE_SUCCESS));
     }
 }
-
