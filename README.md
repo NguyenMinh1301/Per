@@ -1,18 +1,16 @@
 <p align="center">
-  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="120" alt="Spring Boot" /></a>
+  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="100" alt="Spring Boot" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/postgresql/postgresql-icon.svg" height="120" alt="PostgreSQL" /></a>
+  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/postgresql/postgresql-icon.svg" height="100" alt="PostgreSQL" /></a>
   &nbsp;&nbsp;
-  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="120" alt="Redis" /></a>
+  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="100" alt="Redis" /></a>
   &nbsp;&nbsp;
-  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="120" alt="Kafka" /></a>
+  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="100" alt="Kafka" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="120" alt="Elasticsearch" /></a>
+  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="100" alt="Elasticsearch" /></a>
   &nbsp;&nbsp;
-  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="120" alt="Docker" /></a>
+  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="100" alt="Docker" /></a>
 </p>
-
-
 
 ## Introduction
 
@@ -23,6 +21,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
     <img src="https://raw.githubusercontent.com/NguyenMinh1301/Per/refs/heads/main/document/Per.svg?token=GHSAT0AAAAAADRUX2YSICW5LUL7LR7GPPCE2KKMB2A" alt="Per" width="160">
   </a>
 </p>
+
 ## Key Features
 
 - **Full-Text Search**: Elasticsearch-powered search across Products, Brands, Categories, and Made In with fuzzy matching and prefix support.
@@ -53,7 +52,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
 | --- | --- | --- |
 | PostgreSQL | 16 | Primary database |
 | Redis | 7 | Caching and session storage |
-| Elasticsearch | 8.x | Full-text search engine |
+| Elasticsearch | 7.x | Full-text search engine |
 | Kafka | 3.9 | Asynchronous event processing |
 | Flyway | 11.10 | Database migrations |
 
@@ -136,8 +135,8 @@ The application follows a modular monolith structure. Each domain module resides
 
 | Endpoint | Description |
 | --- | --- |
-| `http://localhost:8080/api/v1` | API base URL |
-| `http://localhost:8080/swagger-ui/index.html` | Swagger UI |
+| `http://localhost:8080/per` | API base URL |
+| `http://localhost:8080/per/api-docs` | Swagger UI |
 
 ### Search API
 
@@ -169,35 +168,6 @@ The project uses Spotless with Google Java Format:
 ./mvnw clean verify
 ```
 
-## Project Structure
-
-```
-Per/
-├── document/                    # Documentation
-│   ├── cache/                   # Cache module docs
-│   ├── elasticsearch/           # Elasticsearch search docs
-│   ├── kafka/                   # Kafka messaging docs
-│   ├── resilience-patterns/     # Rate limiting, circuit breaker docs
-│   └── module/                  # Per-module documentation
-├── src/main/
-│   ├── java/com/per/
-│   │   ├── auth/                # Authentication module
-│   │   ├── product/             # Product catalog module
-│   │   ├── order/               # Order management module
-│   │   ├── payment/             # Payment integration module
-│   │   ├── common/              # Shared components
-│   │   │   ├── cache/           # Redis caching infrastructure
-│   │   │   ├── config/          # Application configuration
-│   │   │   └── exception/       # Global exception handling
-│   │   └── ...
-│   └── resources/
-│       ├── db/migration/        # Flyway SQL migrations
-│       └── application.yml      # Application configuration
-├── docker-compose.yml           # Infrastructure services
-├── pom.xml                      # Maven dependencies
-└── README.md
-```
-
 ## Documentation
 
 Detailed documentation is available in the `document/` directory:
@@ -207,13 +177,10 @@ Detailed documentation is available in the `document/` directory:
 - [Kafka Messaging](document/kafka/README_en.md) - Asynchronous event processing
 - [Rate Limiting](document/resilience-patterns/rate-limit/README_en.md) - Request quota management
 - [Circuit Breaker](document/resilience-patterns/circuit-breaker/README_en.md) - External service protection
+- [Module](document/module) - External service protection
 
 Module-specific documentation is available under `document/module/`.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-**Author**: Nguyen Minh
