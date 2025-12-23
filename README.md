@@ -1,11 +1,16 @@
-<h1 align="center">
-  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="100" alt="Spring Boot" /></a>
-  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="100" alt="PostgreSQL" /></a>
-  <a href="https://redis.io/" target="_blank"><img src="https://raw.githubusercontent.com/redis/redis-io/refs/heads/main/public/images/redis-mark.svg" height="100" alt="Redis" /></a>
-  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="100" alt="Kafka" /></a>
-  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="100" alt="Elasticsearch" /></a>
-  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="100" alt="Docker" /></a>
-</h1>
+<p align="center">
+  <a href="https://spring.io/" target="_blank"><img src="document/img/springio.svg" height="100" alt="Spring Boot" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.postgresql.org/" target="_blank"><img src="document/img/postgresql.svg" height="100" alt="PostgreSQL" /></a>
+  &nbsp;&nbsp;
+  <a href="https://redis.io/" target="_blank"><img src="document/img/redis.svg" height="100" alt="Redis" /></a>
+  &nbsp;&nbsp;
+  <a href="https://kafka.apache.org/" target="_blank"><img src="document/img/kafka.svg" height="100" alt="Kafka" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.elastic.co/" target="_blank"><img src="document/img/elastic.svg" height="100" alt="Elasticsearch" /></a>
+  &nbsp;&nbsp;
+  <a href="https://www.docker.com/" target="_blank"><img src="document/img/docker.svg" height="100" alt="Docker" /></a>
+</p>
 
 ## Introduction
 
@@ -13,7 +18,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
 
 <p align="center">
   <a href="./">
-    <img src="/document/Per.svg" alt="Per" width="160">
+    <img src="/document/img/Per.svg" alt="Per" width="160">
   </a>
 </p>
 
