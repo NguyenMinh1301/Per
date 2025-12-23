@@ -34,35 +34,63 @@ public final class ApiConstants {
         private Brand() {}
 
         public static final String ROOT = API_VERSION + "/brands";
-        public static final String DETAILS = "/{id}";
+        public static final String LIST = "/list";
+        public static final String DETAIL = "/detail/{id}";
+        public static final String CREATE = "/create";
+        public static final String UPDATE = "/update/{id}";
+        public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class Category {
         private Category() {}
 
         public static final String ROOT = API_VERSION + "/categories";
-        public static final String DETAILS = "/{id}";
+        public static final String LIST = "/list";
+        public static final String DETAIL = "/detail/{id}";
+        public static final String CREATE = "/create";
+        public static final String UPDATE = "/update/{id}";
+        public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class MadeIn {
         private MadeIn() {}
 
         public static final String ROOT = API_VERSION + "/made-in";
-        public static final String DETAILS = "/{id}";
+        public static final String LIST = "/list";
+        public static final String DETAIL = "/detail/{id}";
+        public static final String CREATE = "/create";
+        public static final String UPDATE = "/update/{id}";
+        public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class Product {
         private Product() {}
 
         public static final String ROOT = API_VERSION + "/products";
-        public static final String DETAILS = "/{id}";
+        public static final String LIST = "/list";
+        public static final String DETAIL = "/detail/{id}";
+        public static final String CREATE = "/create";
+        public static final String UPDATE = "/update/{id}";
+        public static final String DELETE = "/delete/{id}";
+        public static final String SEARCH = "/search";
+        public static final String REINDEX = "/reindex";
     }
 
     public static final class ProductVariant {
         private ProductVariant() {}
 
         public static final String ROOT = Product.ROOT + "/{productId}/variants";
-        public static final String DETAILS = "/{variantId}";
+        public static final String LIST = "/list";
+        public static final String DETAIL = "/detail/{variantId}";
+        public static final String CREATE = "/create";
+        public static final String UPDATE = "/update/{variantId}";
+        public static final String DELETE = "/delete/{variantId}";
     }
 
     public static final class Payment {

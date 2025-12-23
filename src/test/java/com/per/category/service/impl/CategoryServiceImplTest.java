@@ -45,6 +45,10 @@ class CategoryServiceImplTest {
 
     @Mock private CacheEvictionHelper cacheEvictionHelper;
 
+    @Mock private com.per.category.mapper.CategoryDocumentMapper documentMapper;
+
+    @Mock private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+
     @InjectMocks private CategoryServiceImpl categoryService;
 
     private Category testCategory;

@@ -33,7 +33,7 @@ public class ProductVariantController {
 
     private final ProductService productService;
 
-    @PostMapping
+    @PostMapping(ApiConstants.ProductVariant.CREATE)
     public ResponseEntity<ApiResponse<ProductVariantResponse>> createVariant(
             @PathVariable("productId") UUID productId,
             @Valid @RequestBody ProductVariantCreateRequest request) {
@@ -42,7 +42,7 @@ public class ProductVariantController {
                 .body(ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_CREATE_SUCCESS, data));
     }
 
-    @PutMapping(ApiConstants.Product.DETAILS)
+    @PutMapping(ApiConstants.ProductVariant.UPDATE)
     public ResponseEntity<ApiResponse<ProductVariantResponse>> updateVariant(
             @PathVariable("productId") UUID productId,
             @PathVariable("variantId") UUID variantId,
@@ -52,7 +52,7 @@ public class ProductVariantController {
                 ApiResponse.success(ApiSuccessCode.PRODUCT_VARIANT_UPDATE_SUCCESS, data));
     }
 
-    @DeleteMapping(ApiConstants.Product.DETAILS)
+    @DeleteMapping(ApiConstants.ProductVariant.DELETE)
     public ResponseEntity<ApiResponse<Void>> deleteVariant(
             @PathVariable("productId") UUID productId, @PathVariable("variantId") UUID variantId) {
         productService.deleteVariant(productId, variantId);

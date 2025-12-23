@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,11 +13,14 @@ import com.per.category.dto.request.CategoryCreateRequest;
 import com.per.category.dto.request.CategoryUpdateRequest;
 import com.per.category.dto.response.CategoryResponse;
 import com.per.category.entity.Category;
+import com.per.category.mapper.CategoryDocumentMapper;
 import com.per.category.mapper.CategoryMapper;
 import com.per.category.repository.CategoryRepository;
 import com.per.category.service.CategoryService;
 import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.config.cache.CacheNames;
+import com.per.common.config.kafka.KafkaTopicNames;
+import com.per.common.event.CategoryIndexEvent;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -30,7 +34,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final CategoryDocumentMapper documentMapper;
     private final CacheEvictionHelper cacheEvictionHelper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional(readOnly = true)
@@ -72,6 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category saved = categoryRepository.save(category);
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
+        publishIndexEvent(saved, CategoryIndexEvent.Action.INDEX);
 
         return categoryMapper.toResponse(saved);
     }
@@ -101,6 +108,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
         cacheEvictionHelper.evictAfterCommit(CacheNames.CATEGORY, id);
+        publishIndexEvent(saved, CategoryIndexEvent.Action.INDEX);
 
         return categoryMapper.toResponse(saved);
     }
@@ -112,6 +120,23 @@ public class CategoryServiceImpl implements CategoryService {
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.CATEGORIES);
         cacheEvictionHelper.evictAfterCommit(CacheNames.CATEGORY, id);
+
+        kafkaTemplate.send(
+                KafkaTopicNames.CATEGORY_INDEX_TOPIC,
+                CategoryIndexEvent.builder()
+                        .action(CategoryIndexEvent.Action.DELETE)
+                        .categoryId(id.toString())
+                        .build());
+    }
+
+    private void publishIndexEvent(Category category, CategoryIndexEvent.Action action) {
+        kafkaTemplate.send(
+                KafkaTopicNames.CATEGORY_INDEX_TOPIC,
+                CategoryIndexEvent.builder()
+                        .action(action)
+                        .categoryId(category.getId().toString())
+                        .document(documentMapper.toDocument(category))
+                        .build());
     }
 
     private Category findById(UUID id) {

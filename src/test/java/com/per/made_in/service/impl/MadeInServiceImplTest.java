@@ -45,6 +45,10 @@ class MadeInServiceImplTest {
 
     @Mock private CacheEvictionHelper cacheEvictionHelper;
 
+    @Mock private com.per.made_in.mapper.MadeInDocumentMapper documentMapper;
+
+    @Mock private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+
     @InjectMocks private MadeInServiceImpl madeInService;
 
     private MadeIn testMadeIn;

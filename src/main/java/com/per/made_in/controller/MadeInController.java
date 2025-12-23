@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.per.common.ApiConstants;
@@ -16,12 +17,15 @@ import com.per.common.base.BaseController;
 import com.per.common.response.ApiResponse;
 import com.per.common.response.ApiSuccessCode;
 import com.per.common.response.PageResponse;
+import com.per.made_in.document.MadeInDocument;
 import com.per.made_in.dto.request.MadeInCreateRequest;
 import com.per.made_in.dto.request.MadeInUpdateRequest;
 import com.per.made_in.dto.response.MadeInResponse;
+import com.per.made_in.service.MadeInSearchService;
 import com.per.made_in.service.MadeInService;
 
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -32,10 +36,11 @@ import lombok.RequiredArgsConstructor;
 public class MadeInController extends BaseController {
 
     private final MadeInService madeInService;
+    private final MadeInSearchService madeInSearchService;
 
-    @GetMapping
+    @GetMapping(ApiConstants.MadeIn.LIST)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-    public ResponseEntity<ApiResponse<PageResponse<MadeInResponse>>> searchMadeIn(
+    public ResponseEntity<ApiResponse<PageResponse<MadeInResponse>>> getMadeIns(
             @RequestParam(value = "query", required = false) String query,
             @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
@@ -43,7 +48,19 @@ public class MadeInController extends BaseController {
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_LIST_SUCCESS, response));
     }
 
-    @GetMapping(ApiConstants.MadeIn.DETAILS)
+    @GetMapping(ApiConstants.MadeIn.SEARCH)
+    @RateLimiter(name = "highTraffic", fallbackMethod = "rateLimit")
+    @Operation(
+            summary = "Search made-in origins",
+            description = "Full-text search with fuzzy matching")
+    public ResponseEntity<ApiResponse<PageResponse<MadeInDocument>>> searchMadeIn(
+            @RequestParam(value = "q", required = false) String query,
+            @PageableDefault(size = 20) Pageable pageable) {
+        PageResponse<MadeInDocument> data = madeInSearchService.search(query, pageable);
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_LIST_SUCCESS, data));
+    }
+
+    @GetMapping(ApiConstants.MadeIn.DETAIL)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
     public ResponseEntity<ApiResponse<MadeInResponse>> getMadeIn(@PathVariable("id") UUID id) {
         MadeInResponse response = madeInService.getMadeIn(id);
@@ -51,7 +68,7 @@ public class MadeInController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.MADEIN_FETCH_SUCCESS, response));
     }
 
-    @PostMapping
+    @PostMapping(ApiConstants.MadeIn.CREATE)
     public ResponseEntity<ApiResponse<MadeInResponse>> create(
             @Valid @RequestBody MadeInCreateRequest request) {
         MadeInResponse response = madeInService.createMadeIn(request);
@@ -59,7 +76,7 @@ public class MadeInController extends BaseController {
                 .body(ApiResponse.success(ApiSuccessCode.MADEIN_CREATE_SUCCESS, response));
     }
 
-    @PutMapping(ApiConstants.MadeIn.DETAILS)
+    @PutMapping(ApiConstants.MadeIn.UPDATE)
     public ResponseEntity<ApiResponse<MadeInResponse>> update(
             @PathVariable("id") UUID id, @Valid @RequestBody MadeInUpdateRequest request) {
         MadeInResponse response = madeInService.updateMadeIn(id, request);
@@ -67,9 +84,19 @@ public class MadeInController extends BaseController {
                 ApiResponse.success(ApiSuccessCode.MADEIN_UPDATE_SUCCESS, response));
     }
 
-    @DeleteMapping(ApiConstants.MadeIn.DETAILS)
+    @DeleteMapping(ApiConstants.MadeIn.DELETE)
     public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("id") UUID id) {
         madeInService.deleteMadeIn(id);
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_DELETE_SUCCESS));
+    }
+
+    @PostMapping(ApiConstants.MadeIn.REINDEX)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Reindex all made-in entries",
+            description = "Admin operation to rebuild ES index")
+    public ResponseEntity<ApiResponse<Void>> reindexMadeIn() {
+        madeInSearchService.reindexAll();
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.MADEIN_UPDATE_SUCCESS));
     }
 }
