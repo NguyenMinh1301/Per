@@ -392,7 +392,7 @@
             "description": "Brand Management APIs",
             "item": [
                 {
-                    "name": "Search Brands",
+                    "name": "List Brands",
                     "request": {
                         "method": "GET",
                         "url": {
@@ -401,7 +401,8 @@
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "brands"
+                                "brands",
+                                "list"
                             ],
                             "query": [
                                 {
@@ -430,6 +431,40 @@
                     "response": []
                 },
                 {
+                    "name": "ES Search Brands",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/brands/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Get Brand",
                     "request": {
                         "method": "GET",
@@ -440,6 +475,7 @@
                             ],
                             "path": [
                                 "brands",
+                                "detail",
                                 ":id"
                             ],
                             "variable": [
@@ -474,12 +510,13 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/brands/list",
+                            "raw": "{{baseUrl}}/brands/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "brands"
+                                "brands",
+                                "create"
                             ]
                         },
                         "body": {
@@ -521,6 +558,7 @@
                             ],
                             "path": [
                                 "brands",
+                                "update",
                                 ":id"
                             ],
                             "variable": [
@@ -564,6 +602,7 @@
                             ],
                             "path": [
                                 "brands",
+                                "delete",
                                 ":id"
                             ],
                             "variable": [
@@ -576,6 +615,33 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Reindex Brands (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/brands/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "brands",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -584,7 +650,7 @@
             "description": "Category Management APIs",
             "item": [
                 {
-                    "name": "Search Categories",
+                    "name": "List Categories",
                     "request": {
                         "method": "GET",
                         "url": {
@@ -593,7 +659,8 @@
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "categories"
+                                "categories",
+                                "list"
                             ],
                             "query": [
                                 {
@@ -622,6 +689,40 @@
                     "response": []
                 },
                 {
+                    "name": "ES Search Categories",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Get Category",
                     "request": {
                         "method": "GET",
@@ -632,6 +733,7 @@
                             ],
                             "path": [
                                 "categories",
+                                "detail",
                                 ":id"
                             ],
                             "variable": [
@@ -666,12 +768,13 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/categories/list",
+                            "raw": "{{baseUrl}}/categories/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "categories"
+                                "categories",
+                                "create"
                             ]
                         },
                         "body": {
@@ -713,6 +816,7 @@
                             ],
                             "path": [
                                 "categories",
+                                "update",
                                 ":id"
                             ],
                             "variable": [
@@ -756,6 +860,7 @@
                             ],
                             "path": [
                                 "categories",
+                                "delete",
                                 ":id"
                             ],
                             "variable": [
@@ -768,6 +873,33 @@
                         }
                     },
                     "response": []
+                },
+                {
+                    "name": "Reindex Categories (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/categories/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "categories",
+                                "reindex"
+                            ]
+                        }
+                    },
+                    "response": []
                 }
             ]
         },
@@ -776,7 +908,7 @@
             "description": "Made In Origin Management APIs",
             "item": [
                 {
-                    "name": "Search Made In",
+                    "name": "List Made In",
                     "request": {
                         "method": "GET",
                         "url": {
@@ -785,7 +917,8 @@
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "made-in"
+                                "made-in",
+                                "list"
                             ],
                             "query": [
                                 {
@@ -814,6 +947,40 @@
                     "response": []
                 },
                 {
+                    "name": "ES Search Made In",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/search?q=&page=0&size=20",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "q",
+                                    "value": "",
+                                    "description": "Search query (fuzzy matching)"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "0",
+                                    "description": "Page number"
+                                },
+                                {
+                                    "key": "size",
+                                    "value": "20",
+                                    "description": "Page size"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
                     "name": "Get Made In",
                     "request": {
                         "method": "GET",
@@ -824,6 +991,7 @@
                             ],
                             "path": [
                                 "made-in",
+                                "detail",
                                 ":id"
                             ],
                             "variable": [
@@ -858,12 +1026,13 @@
                             }
                         ],
                         "url": {
-                            "raw": "{{baseUrl}}/made-in/list",
+                            "raw": "{{baseUrl}}/made-in/create",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "made-in"
+                                "made-in",
+                                "create"
                             ]
                         },
                         "body": {
@@ -905,6 +1074,7 @@
                             ],
                             "path": [
                                 "made-in",
+                                "update",
                                 ":id"
                             ],
                             "variable": [
@@ -948,6 +1118,7 @@
                             ],
                             "path": [
                                 "made-in",
+                                "delete",
                                 ":id"
                             ],
                             "variable": [
@@ -956,6 +1127,33 @@
                                     "value": "uuid-here",
                                     "description": "Made In ID"
                                 }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Reindex Made In (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/made-in/reindex",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "made-in",
+                                "reindex"
                             ]
                         }
                     },
