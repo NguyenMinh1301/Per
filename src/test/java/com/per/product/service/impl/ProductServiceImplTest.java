@@ -69,6 +69,10 @@ class ProductServiceImplTest {
 
     @Mock private CacheEvictionHelper cacheEvictionHelper;
 
+    @Mock private com.per.product.mapper.ProductDocumentMapper productDocumentMapper;
+
+    @Mock private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+
     @InjectMocks private ProductServiceImpl productService;
 
     private Product testProduct;

@@ -45,6 +45,10 @@ class BrandServiceImplTest {
 
     @Mock private CacheEvictionHelper cacheEvictionHelper;
 
+    @Mock private com.per.brand.mapper.BrandDocumentMapper documentMapper;
+
+    @Mock private org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+
     @InjectMocks private BrandServiceImpl brandService;
 
     private Brand testBrand;
