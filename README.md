@@ -1,12 +1,12 @@
 # Per E-commerce Backend
 
 <h1 align="center">
-  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="80" alt="Spring Boot" /></a>
-  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="80" alt="PostgreSQL" /></a>
-  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="80" alt="Redis" /></a>
-  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="80" alt="Kafka" /></a>
-  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="80" alt="Elasticsearch" /></a>
-  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="80" alt="Docker" /></a>
+  <a href="https://spring.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/springio/springio-icon.svg" height="140" alt="Spring Boot" /></a>
+  <a href="https://www.postgresql.org/" target="_blank"><img src="https://www.postgresql.org/media/img/about/press/elephant.png" height="140" alt="PostgreSQL" /></a>
+  <a href="https://redis.io/" target="_blank"><img src="https://www.vectorlogo.zone/logos/redis/redis-icon.svg" height="140" alt="Redis" /></a>
+  <a href="https://kafka.apache.org/" target="_blank"><img src="https://www.vectorlogo.zone/logos/apache_kafka/apache_kafka-icon.svg" height="140" alt="Kafka" /></a>
+  <a href="https://www.elastic.co/" target="_blank"><img src="https://www.vectorlogo.zone/logos/elastic/elastic-icon.svg" height="140" alt="Elasticsearch" /></a>
+  <a href="https://www.docker.com/" target="_blank"><img src="https://www.vectorlogo.zone/logos/docker/docker-icon.svg" height="140" alt="Docker" /></a>
 </h1>
 
 <p align="center">
