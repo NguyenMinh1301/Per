@@ -2,7 +2,7 @@ target
 /postman
 /database
 /document
-/scirpt
+/scripts
 /data
 /grafana-storage
 /elk
