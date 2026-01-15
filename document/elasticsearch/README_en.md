@@ -1,251 +1,143 @@
-# Elasticsearch Search
+# Search Engine Architecture: Elasticsearch Implementation
 
-The application uses Elasticsearch for full-text search across Products, Brands, Categories, and Made In entities. Search features include fuzzy matching, prefix support, and multi-field filtering.
+## 1. Introduction
 
-## Architecture
+The application leverages **Elasticsearch** as a secondary datastore to provide high-performance, full-text search capabilities. This implementation follows the **Command Query Responsibility Segregation (CQRS)** pattern, where write operations are handled by the primary relational database (PostgreSQL) and read/search operations are offloaded to the search engine.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Search Architecture                                  │
-│                                                                              │
-│  User ──► GET /search ──► SearchService ──► Elasticsearch                   │
-│                                                                              │
-│  ServiceImpl ──► Kafka(index-topic) ──► IndexConsumer ──► Elasticsearch     │
-│  (create/update/delete)                                                      │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+### 1.1 Core Capabilities
 
-## Supported Modules
+*   **Inverted Index:** Utilizes Apache Lucene's inverted index for sub-second keyword retrieval.
+*   **Fuzzy Matching:** Implements Levenshtein edit distance logic for typo tolerance.
+*   **Relevance Scoring:** Employs BM25 (Best Matching 25) algorithm for ranking results based on Term Frequency (TF) and Inverse Document Frequency (IDF).
+*   **Eventual Consistency:** Synchronizes data via asynchronous event streams.
 
-| Module | Search Fields | Search Endpoint | Reindex Endpoint |
-| --- | --- | --- | --- |
-| Product | name, description, brandName, categoryName | `GET /per/products/search` | `POST /per/products/reindex` |
-| Brand | name, description | `GET /per/brands/search` | `POST /per/brands/reindex` |
-| Category | name, description | `GET /per/categories/search` | `POST /per/categories/reindex` |
-| Made In | name, region, description | `GET /per/made-in/search` | `POST /per/made-in/reindex` |
+---
 
-## Key Features
+## 2. System Architecture
 
-| Feature | Description |
-| --- | --- |
-| Multi-field Search | Searches across multiple fields with relevance boosting |
-| Fuzzy Matching | Finds results with typos (e.g., "savge" matches "Sauvage") |
-| Prefix Matching | Partial input matches (e.g., "parf" matches "Parfum") |
-| Relevance Scoring | Results sorted by relevance with field boosting |
-| Real-time Sync | Data synchronized via Kafka for eventual consistency |
+The search subsystem operates on a dual-path architecture: the synchronization path (Write) and the query path (Read).
 
-## Search Query Strategy
+### 2.1 CQRS Data Flow
 
-The search implementation combines multiple query types for optimal results:
+```mermaid
+graph TD
+    subgraph Write Path / Synchronization
+        Client[Client/API] -->|CUD Operations| SQL[(PostgreSQL)]
+        SQL -.->|CDC / Event Trigger| Service[Entity Service]
+        Service -->|Publish Event| Kafka{Kafka}
+        Kafka -->|Consume| Indexer[IndexConsumer]
+        Indexer -->|Upsert Document| ES[(Elasticsearch)]
+    end
 
-1. **Prefix Query**: Highest priority for exact prefix matches
-2. **Wildcard Query**: Flexible partial matching
-3. **Fuzzy Multi-Match**: Typo tolerance across multiple fields
-
-```
-Query: "parf"
-├── 1. Prefix: parf* → name (boost 3x)
-├── 2. Wildcard: parf* → name (boost 2x)
-├── 3. Fuzzy: parf → name, description (AUTO fuzziness)
-└── 4. Wildcard: parf* → description
+    subgraph Read Path / Query
+        User[End User] -->|GET /search| SearchAPI[SearchController]
+        SearchAPI -->|Build Query| SearchService[SearchService]
+        SearchService -->|Execute Query| ES
+        ES -->|Return Hits| SearchService
+        SearchService -->|DTO Projection| User
+    end
 ```
 
-Fuzzy matching uses `fuzziness: AUTO`:
-- 1-2 character words: exact match only
-- 3-5 character words: 1 edit allowed
-- 6+ character words: 2 edits allowed
+### 2.2 Component Roles
 
-## Product Search API
+| Component | Responsibility | Pattern |
+| :--- | :--- | :--- |
+| `PostgreSQL` | Source of Truth (Canonical Data Store) | DBMS |
+| `Kafka` | Synchronization Message Bus | Evalual Consistency |
+| `Elasticsearch` | Read-Optimized View | Search Engine |
+| `IndexConsumer` | Projection Updater | Event Handler |
 
-### Endpoint
+---
 
-```
-GET /per/products/search
-```
+## 3. Search Strategy & Algorithms
 
-### Query Parameters
+The system employs a composite query strategy to balance precision (exact matches) and recall (broad matches).
+
+### 3.1 Query Construction Priority
+
+When a user submits a query term $t$, the system constructs a Boolean Disjunction (`OR`) query with boosting factors $\beta$:
+
+$$ Score(doc) = \sum (\beta_{field} \cdot Score_{match}(t, doc.field)) $$
+
+**Implementation logic:**
+
+| Query Type | Field Target | Boosting ($\beta$) | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Prefix Match** | `name` | `3.0` (High) | Auto-complete behavior, exact start matches. |
+| **Wildcard** | `name` | `2.0` (Medium) | Substring matching. |
+| **Fuzzy Match** | `name`, `desc` | `1.0` (Base) | Tolerance for user typographical errors. |
+
+### 3.2 Fuzziness Configuration
+
+Fuzziness is set to `AUTO`, which dynamically adjusts edit distance based on token length:
+*   Length $0..2$: Must match exactly.
+*   Length $3..5$: One edit allowed.
+*   Length $>5$: Two edits allowed.
+
+---
+
+## 4. API Specification
+
+### 4.1 Product Search: `GET /per/products/search`
+
+Provides multifaceted search with filtering capabilities.
+
+**Parameters:**
 
 | Parameter | Type | Description |
-| --- | --- | --- |
-| `query` | String | Full-text search query |
-| `brandId` | UUID | Filter by brand |
-| `categoryId` | UUID | Filter by category |
-| `gender` | Enum | MALE, FEMALE, UNISEX |
-| `fragranceFamily` | Enum | WOODY, FLORAL, ORIENTAL, FRESH, etc. |
-| `sillage` | Enum | SOFT, LIGHT, MODERATE, STRONG, HEAVY |
-| `longevity` | Enum | SHORT, MODERATE, LONG_LASTING, VERY_LONG_LASTING |
-| `seasonality` | Enum | SPRING, SUMMER, FALL, WINTER, ALL_SEASONS |
-| `occasion` | Enum | DAILY, EVENING, FORMAL, CASUAL, PARTY |
-| `minPrice` | BigDecimal | Minimum price filter |
-| `maxPrice` | BigDecimal | Maximum price filter |
-| `page` | Integer | Page number (default: 0) |
-| `size` | Integer | Page size (default: 20) |
+| :--- | :--- | :--- |
+| `query` | `string` | The full-text search term. |
+| `minPrice`, `maxPrice` | `decimal` | Price range strict filter. |
+| `gender` | `enum` | Categorical filter (MALE, FEMALE, UNISEX). |
+| `sillage`, `longevity` | `enum` | Attribute filters. |
 
-### Example Requests
+**Example Request:**
 
-```bash
-# Text search
-curl "/per/products/search?query=dior"
-
-# Fuzzy search (typo tolerance)
-curl "/per/products/search?query=savge"
-
-# Prefix search
-curl "/per/products/search?query=parf"
-
-# Search with filters
-curl "/per/products/search?query=eau&gender=MALE&minPrice=100000"
-
-# Filter only
-curl "/per/products/search?brandId=xxx&fragranceFamily=WOODY"
+```http
+GET /per/products/search?query=sauvage&minPrice=2000000&gender=MALE
 ```
 
-## Brand, Category, Made In Search API
+---
 
-### Endpoint
+## 5. Synchronization & Consistency
 
-```
-GET /per/brands/search?q=<query>
-GET /per/categories/search?q=<query>
-GET /per/made-in/search?q=<query>
-```
+### 5.1 Eventual Consistency Model
 
-### Query Parameters
+Data is not instantly available in search results upon creation. The propagation delay is defined by:
+$$ T_{propagation} = T_{kafka\_latency} + T_{consumer\_processing} + T_{es\_refresh\_interval} $$
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `q` | String | Full-text search query |
-| `page` | Integer | Page number (default: 0) |
-| `size` | Integer | Page size (default: 20) |
+Typically $T_{propagation} < 1000ms$.
 
-### Example Requests
+### 5.2 Indexing Events
 
-```bash
-# Brand search
-curl "/per/brands/search?q=dior"
+Synchronization is driven by domain events:
 
-# Category search
-curl "/per/categories/search?q=parfum"
+*   `PRODUCT_CREATED`: Triggers document creation.
+*   `PRODUCT_UPDATED`: Triggers full document update.
+*   `PRODUCT_DELETED`: Triggers document removal by ID.
 
-# Made In search
-curl "/per/made-in/search?q=france"
-```
+### 5.3 Dead Letter Handling
 
-## Data Synchronization
+If an indexing operation fails (e.g., Elasticsearch downtime), the message retries 3 times before moving to a Dead Letter Topic (DLT) to prevent queue blocking.
 
-Entities are synchronized to Elasticsearch via Kafka events:
+---
 
-### Event Flow
+## 6. Operational Procedures
 
-```
-ServiceImpl ──► KafkaTemplate.send() ──► [index-topic]
-                                               │
-                                               ▼
-                                         IndexConsumer
-                                               │
-                                               ▼
-                                         SearchRepository.save()
-```
+### 6.1 Full Re-indexing
 
-### Kafka Topics
+In cases of schema changes or data drift, a full re-index is required.
 
-| Module | Topic |
-| --- | --- |
-| Product | `product-index-topic` |
-| Brand | `brand-index-topic` |
-| Category | `category-index-topic` |
-| Made In | `made-in-index-topic` |
+**Endpoint:** `POST /per/products/reindex`
+**Authentication:** ADMIN role required.
+**Process:**
+1.  Iterates all entities in PostgreSQL (Batched/Paged).
+2.  Publishes synthetic `INDEX` events to Kafka.
+3.  Consumers update Elasticsearch asynchronously.
 
-### Event Types
+### 6.2 Monitoring
 
-| Action | Trigger | Result |
-| --- | --- | --- |
-| INDEX | Entity created/updated | Document indexed |
-| DELETE | Entity deleted | Document removed |
-
-### Retry and DLQ
-
-Failed index events follow the retry pattern:
-- 3 retries with exponential backoff (1s, 2s, 4s)
-- Failed events sent to Dead Letter Topic (`*-index-topic-dlt`)
-
-## Auto-Reindex on Startup
-
-The application can automatically reindex empty Elasticsearch indexes on startup:
-
-- Enabled by default in development profile
-- Disabled by default in production profile
-- Configurable via environment variable
-
-Only triggers when an index is empty, preventing unnecessary reindexing on normal restarts.
-
-## Key Components
-
-| File | Purpose |
-| --- | --- |
-| `*Document.java` | Elasticsearch document mapping |
-| `*SearchRepository.java` | Spring Data Elasticsearch repository |
-| `*DocumentMapper.java` | Entity to Document conversion |
-| `*SearchService.java` | Search service interface |
-| `*SearchServiceImpl.java` | Search implementation |
-| `*IndexEvent.java` | Kafka event for index sync |
-| `*IndexConsumer.java` | Kafka consumer for Elasticsearch sync |
-| `ElasticsearchInitializer.java` | Auto-reindex on startup |
-
-## Development
-
-### Local Development
-
-Start Elasticsearch via Docker Compose:
-
-```bash
-docker compose up -d elasticsearch
-```
-
-### Initial Indexing
-
-After first startup, call reindex endpoints to populate Elasticsearch:
-
-```bash
-curl -X POST "/per/products/reindex"
-curl -X POST "/per/brands/reindex"
-curl -X POST "/per/categories/reindex"
-curl -X POST "/per/made-in/reindex"
-```
-
-### Monitoring
-
-Access Kibana at `http://localhost:5601` to:
-- View indexes
-- Analyze search queries
-- Debug relevance scoring
-
-## Extending Search
-
-### Adding New Searchable Fields
-
-1. Add field to `*Document.java`:
-   ```java
-   @Field(type = FieldType.Text, analyzer = "standard")
-   private String newField;
-   ```
-
-2. Update `*DocumentMapper.java` to map the field
-
-3. Add field to search query in `*SearchServiceImpl.java`:
-   ```java
-   .fields("name^3", "newField^2", ...)
-   ```
-
-4. Reindex all entities
-
-### Adding New Filters
-
-1. Add field to search request DTO
-
-2. Add filter logic in `buildSearchQuery()`:
-   ```java
-   if (request.getNewFilter() != null) {
-       boolQuery.filter(f -> f.term(t -> t.field("newField").value(...)));
-   }
-   ```
+Kibana (`localhost:5601`) should be used to monitor:
+*   Index health (Green/Yellow/Red).
+*   Search latency/throughput.
+*   Unassigned shards.
