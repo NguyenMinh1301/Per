@@ -2228,6 +2228,175 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "RAG",
+            "description": "RAG (Retrieval-Augmented Generation) APIs for AI-powered product recommendations",
+            "item": [
+                {
+                    "name": "Chat (Non-streaming)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/chat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "chat"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"question\": \"What perfumes do you recommend for summer?\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "description": "Get AI-powered product recommendations based on natural language queries"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Chat (Streaming)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/chat/stream?question=Tell me about floral perfumes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "chat",
+                                "stream"
+                            ],
+                            "query": [
+                                {
+                                    "key": "question",
+                                    "value": "Tell me about floral perfumes",
+                                    "description": "User question for AI assistant"
+                                }
+                            ]
+                        },
+                        "description": "Stream AI responses in real-time using Server-Sent Events"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Index Products (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/index",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "index"
+                            ]
+                        },
+                        "description": "Admin operation to rebuild RAG vector database with all active products. Requires ADMIN role."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Index Knowledge Base (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/index/knowledge",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "index",
+                                "knowledge"
+                            ]
+                        },
+                        "description": "Index all markdown files from document/rag/knowledge/ directory. Admin only."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Clear Knowledge Base (Admin)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/knowledge",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "knowledge"
+                            ]
+                        },
+                        "description": "Remove all knowledge base documents from vector store. Admin only."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Knowledge Base Status",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/rag/knowledge/status",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "rag",
+                                "knowledge",
+                                "status"
+                            ]
+                        },
+                        "description": "Check knowledge base indexing status and view document counts. Public endpoint."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }
