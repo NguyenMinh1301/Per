@@ -13,7 +13,7 @@
   &nbsp;&nbsp;
    <a href="https://prometheus.io/" target="_blank"><img src="document/img/prometheus.svg" height="140" alt="Prometheus" /></a>
   &nbsp;&nbsp;
-   <a href="https://grafana.com/" target="_blank"><img src="document/img/grafana.svg" height="140" alt="Grafana" /></a>
+   <a href="https://ollama.com/" target="_blank"><img src="document/img/ollama.svg" height="140" alt="Ollama" /></a>
 </p>
 
 ## Introduction
@@ -26,165 +26,116 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
   </a>
 </p>
 
-## Key Features
+## System Architecture
 
-- **Full-Text Search**: Elasticsearch-powered search across Products, Brands, Categories, and Made In with fuzzy matching and prefix support.
-- **Real-Time Sync**: Kafka-based event-driven synchronization between PostgreSQL and Elasticsearch for CUD operations.
-- **JWT Authentication**: Access and refresh token rotation with Redis-backed session management. Supports registration, login, email verification, and password recovery.
-- **Redis Caching**: Cache-Aside pattern with post-commit eviction ensures data consistency between cache and database.
-- **Resilience Patterns**: Rate limiting and circuit breaker patterns protect endpoints from abuse and external service failures.
-- **Payment Integration**: PayOS integration with webhook support for order checkout and payment status synchronization.
-- **Media Management**: Cloudinary-backed file uploads with metadata persistence.
-- **Database Migrations**: Flyway manages schema versioning across environments.
-- **API Documentation**: OpenAPI/Swagger UI provides interactive API exploration.
+The application is architected as a **Modular Monolith** driven by Domain-Driven Design (DDD) principles. It leverages an event-driven backbone (Kafka) to synchronize state between the transactional core (PostgreSQL) and the search capability (Elasticsearch).
 
-## Technology Stack
+```mermaid
+graph TD
+    Client[Client Apps] -->|REST API| LB[Load Balancer]
+    LB -->|HTTPS| Core[Spring Boot Core]
+    
+    subgraph "Data Persistence"
+        Core -->|Transactional| DB[(PostgreSQL)]
+        Core -->|Cache-Aside| Redis[(Redis)]
+    end
+    
+    subgraph "Search & Analytics"
+        Core -->|Query| ES[(Elasticsearch)]
+        Core -.->|Event Pub| Kafka{Apache Kafka}
+        Kafka -.->|Log Compacted| ES
+    end
+    
+    subgraph "External Integration"
+        Core -->|Upload| Cloudinary[Cloudinary]
+        Core -->|Payment| PayOS[PayOS Gateway]
+        Core -->|SMTP| MailAuth[Gmail SMTP]
+    end
+```
 
-### Core
+### Core Capabilities
 
-| Technology | Version | Purpose |
-| --- | --- | --- |
-| Java | 21 | Language runtime |
-| Spring Boot | 3.5.6 | Application framework |
-| Spring Security | 6.x | Authentication and authorization |
-| Spring Data JPA | 3.x | ORM and data access |
-| Spring Data Elasticsearch | 3.x | Full-text search |
+*   **Transactional Integrity**: ACID compliance via PostgreSQL for critical paths (Order, Payment).
+*   **High-Performance Search**: CQRS implementation offloading complex queries to Elasticsearch.
+*   **Resilience**: Circuit Breakers and Rate Limiters (Resilience4j) protecting against external outages.
+*   **Scalability**: Stateless authentication (JWT) and distributed caching (Redis) enable horizontal scaling.
 
-### Data and Messaging
+---
 
-| Technology | Version | Purpose |
-| --- | --- | --- |
-| PostgreSQL | 16 | Primary database |
-| Redis | 7 | Caching and session storage |
-| Elasticsearch | 7.x | Full-text search engine |
-| Kafka | 3.9 | Asynchronous event processing |
-| Flyway | 11.10 | Database migrations |
+## Technical Stack
 
-### External Services
-
-| Technology | Purpose |
-| --- | --- |
-| Cloudinary | Media storage and delivery |
-| PayOS | Payment gateway |
-| SMTP | Email delivery |
-
-### Infrastructure
-
-| Technology | Purpose |
-| --- | --- |
-| Docker Compose | Local development environment |
-| Maven | Build and dependency management |
-| Spotless | Code formatting (Google Java Format) |
-| JUnit 5 / Mockito | Testing framework |
-
-## Architecture Overview
-
-The application follows a modular monolith structure. Each domain module resides in `src/main/java/com/per` with its own controller, service, repository, and DTO layers.
-
-| Module | Responsibility |
-| --- | --- |
-| `auth` | Authentication, JWT management, email verification |
-| `user` | User profile and role management (admin) |
-| `product` | Product catalog, variant inventory, search |
-| `brand` | Brand master data, search |
-| `category` | Product categorization, search |
-| `made_in` | Product origin metadata, search |
-| `cart` | Shopping cart management |
-| `order` | Order snapshot and lifecycle |
-| `payment` | PayOS integration and checkout |
-| `media` | File upload and Cloudinary integration |
-| `common` | Shared utilities, caching, resilience, configuration |
-
-### Cross-Cutting Concerns
-
-- **Search**: Elasticsearch indexes for Products, Brands, Categories, and Made In with real-time Kafka sync.
-- **Caching**: Redis-based caching for products and master data with configurable TTL per cache type.
-- **Rate Limiting**: Resilience4j rate limiters protect authentication, media, and API endpoints.
-- **Circuit Breaker**: Prevents cascading failures when external services are unavailable.
-- **Exception Handling**: Global exception handler provides consistent API error responses.
-
+| Category | Technology | Version | Purpose |
+| :--- | :--- | :--- | :--- |
+| **Runtime** | Java | 21 (LTS) | Core Platform |
+| **Framework** | Spring Boot | 3.5.x | Application Skeleton |
+| **Database** | PostgreSQL | 16 | Primary Data Store |
+| **Cache** | Redis | 7.x | L2 Cache & Session Store |
+| **Search** | Elasticsearch | 7.x | Full-text Engine |
+| **Messaging** | Kafka | 3.x | Event Bus |
 ## Getting Started
 
 ### Prerequisites
 
-- Java 21 SDK
-- Docker and Docker Compose
-- Maven (optional, wrapper included)
+*   **Docker Desktop** (or Engine + Compose)
+*   **Java 21**
+*   **Maven**
 
-### Installation
+### Infrastructure Provisioning
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/NguyenMinh1301/Per.git
-   cd Per
-   ```
+The entire dependent infrastructure (DB, Cache, Broker, Search) is containerized.
 
-2. Configure environment variables:
-   ```bash
-   cp .env.example .env
-   ```
-   Update `.env` with your configuration values.
-
-3. Start infrastructure services:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. Build and run the application:
-   ```bash
-   ./mvnw spring-boot:run
-   ```
-
-### Endpoints
-
-| Endpoint | Description |
-| --- | --- |
-| `http://localhost:8080/per` | API base URL |
-| `http://localhost:8080/per/api-docs` | Swagger UI |
-
-### Search API
-
-| Module | Search Endpoint | Reindex Endpoint |
-| --- | --- | --- |
-| Product | `GET /per/products/search` | `POST /per/products/reindex` |
-| Brand | `GET /per/brands/search` | `POST /per/brands/reindex` |
-| Category | `GET /per/categories/search` | `POST /per/categories/reindex` |
-| Made In | `GET /per/made-in/search` | `POST /per/made-in/reindex` |
-
-## Development
-
-### Code Formatting
-
-The project uses Spotless with Google Java Format:
 ```bash
-./mvnw spotless:apply
+# Start all dependencies
+docker-compose up -d
+
+# Verify container status
+docker-compose ps
 ```
 
-### Running Tests
+### Configuration
+
+Copy the example configuration to a local environment file.
 
 ```bash
+cp .env.example .env
+```
+> **Note**: Populate critical secrets (Payment Keys, Cloudinary Credentials) in `.env` before starting the application.
+
+### Build & Run
+
+```bash
+# Verify code quality and build
+./mvnw clean verify
+
+# Run the application
+./mvnw spring-boot:run
+```
+
+The API will be available at `http://localhost:8080/per`.
+
+---
+
+## Developer Guide
+
+### Quality Assurance
+
+The project enforces strict code style guidelines using **Spotless**.
+
+```bash
+# Apply formatting
+./mvnw spotless:apply
+
+# Run Unit & Integration Tests
 ./mvnw test
 ```
 
-### Build Validation
+### API Documentation
 
-```bash
-./mvnw clean verify
-```
+Interactive OpenAPI 3.0 documentation is available at:
+`http://localhost:8080/per/swagger-ui/index.html`
 
-## Documentation
-
-Detailed documentation is available in the `document/` directory:
-
-- [Elasticsearch Search](document/elasticsearch/README_en.md) - Full-text search implementation
-- [Cache Module](document/cache/README_en.md) - Redis caching strategy and implementation
-- [Kafka Messaging](document/kafka/README_en.md) - Asynchronous event processing
-- [Rate Limiting](document/resilience-patterns/rate-limit/README_en.md) - Request quota management
-- [Circuit Breaker](document/resilience-patterns/circuit-breaker/README_en.md) - External service protection
-- [Module](document/module) - External service protection
-
-Module-specific documentation is available under `document/module/`.
+---
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
