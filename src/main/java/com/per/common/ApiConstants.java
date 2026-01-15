@@ -111,6 +111,18 @@ public final class ApiConstants {
         public static final String ITEM_DETAILS = "/items/{itemId}";
     }
 
+    public static final class Rag {
+        private Rag() {}
+
+        public static final String ROOT = API_VERSION + "/rag";
+        public static final String CHAT = "/chat";
+        public static final String CHAT_STREAM = "/chat/stream";
+        public static final String INDEX = "/index";
+        public static final String INDEX_KNOWLEDGE = "/index/knowledge";
+        public static final String DELETE_KNOWLEDGE = "/knowledge";
+        public static final String KNOWLEDGE_STATUS = "/knowledge/status";
+    }
+
     public static final class User {
         private User() {}
 
