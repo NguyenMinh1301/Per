@@ -1,450 +1,418 @@
-RAG Shopping Assistant Overview
-================================
+# RAG Shopping Assistant - Complete Guide
 
-The RAG (Retrieval-Augmented Generation) module provides AI-powered product recommendations using semantic search and local LLM inference. It combines vector embeddings with natural language processing to deliver context-aware shopping assistance.
+## Overview
 
-Architecture
-------------
+The RAG (Retrieval-Augmented Generation) module provides AI-powered fragrance recommendations using semantic search and local LLM inference. It returns **structured JSON responses** optimized for modern frontend frameworks (Generative UI).
+
+### Key Features
+
+- ✅ **Structured JSON Output** - ProductRecommendation objects with id, name, price, reason
+- ✅ **Semantic Search** - PgVector-powered similarity matching  
+- ✅ **No Hallucination** - Only recommends products from actual inventory
+- ✅ **Generative UI Ready** - Auto-generate product cards, CTA buttons from response
+- ✅ **Bilingual** - Auto-detect Vietnamese/English queries
+
+---
+
+## Architecture
+
+### RAG Pipeline Flow
 
 ```
-┌───────────────────────────────────────────────────────────────────────┐
-│                         RAG Pipeline Flow                             │
-│                                                                       │
-│  User Question → VectorStoreService (Semantic Search, PgVector) →     │
-│    Retrieve Top-K Products → Build Context → ChatService →            │
-│    Inject into Prompt → Ollama LLM → Generate Response                │
-└───────────────────────────────────────────────────────────────────────┘
-
-┌───────────────────────────────────────────────────────────────────────┐
-│                      Indexing Flow                                    │
-│                                                                       │
-│  Admin Trigger → VectorStoreService →                                 │
-│    Fetch Products → Convert to Documents → Embed (nomic-embed-text) → │
-│    Store in PgVector                                                  │
-└───────────────────────────────────────────────────────────────────────┘
+User Question
+    ↓
+Semantic Search (PgVector)
+    ↓
+Top-K Products (context)
+    ↓
+Load System Prompt (src/main/resources/prompt/system-prompt.txt)
+    ↓
+Build Prompt (context + question + JSON schema)
+    ↓
+Ollama LLM (llama3.2)
+    ↓
+BeanOutputConverter parses JSON
+    ↓
+ShopAssistantResponse
 ```
 
-Key Components
---------------
+### Indexing Flow
 
-| File | Purpose |
-| --- | --- |
-| `RagController.java` | REST endpoints for chat and indexing |
-| `VectorStoreService.java` | Product indexing and semantic search |
-| `ChatService.java` | RAG pipeline orchestration and LLM generation |
-| `ChatRequest/Response.java` | DTOs for AI interactions |
+```
+Admin Trigger
+    ↓
+Fetch Products from Database
+    ↓
+Convert to Documents (id, name, description, metadata)
+    ↓
+Embed (nomic-embed-text, 768-dim)
+    ↓
+Store in vector_store table (PgVector)
+```
 
-Technology Stack
-----------------
+---
+
+## Response Structure
+
+### ShopAssistantResponse
+
+```json
+{
+  "summary": "Short 1-2 sentence answer",
+  "detailedResponse": "**Hero Recommendation:** Dior Sauvage...",
+  "products": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Dior Sauvage EDP 100ml",
+      "price": 3500000,
+      "reasonForRecommendation": "Fresh summer scent with excellent longevity"
+    }
+  ],
+  "nextSteps": [
+    "Would you like to check availability?",
+    "Shall I show you similar products?",
+    "Would you like to add this to your cart?"
+  ]
+}
+```
+
+### Frontend Integration
+
+```typescript
+// Auto-generate UI from structured response
+response.products.map(product => (
+  <ProductCard 
+    id={product.id}
+    name={product.name}
+    price={product.price}
+    reason={product.reasonForRecommendation}
+  />
+))
+
+// CTA buttons from nextSteps
+response.nextSteps.map(step => (
+  <Button onClick={() => handleStep(step)}>{step}</Button>
+))
+```
+
+---
+
+## Technology Stack
 
 | Component | Technology | Purpose |
-| --- | --- | --- |
-| Vector Database | PgVector (PostgreSQL extension) | Store and search 768-dim embeddings |
-| Embedding Model | nomic-embed-text (Ollama) | Convert text to vectors |
-| Chat Model | llama3.2 (Ollama) | Generate natural language responses |
-| Framework | Spring AI | LLM integration abstractions |
+|-----------|-----------|---------|
+| **Vector DB** | PgVector | 768-dim embeddings storage |
+| **Embedding Model** | nomic-embed-text | Text → Vector conversion |
+| **Chat Model** | llama3.2 | Natural language generation |
+| **Framework** | Spring AI 1.0.0-M6 | LLM abstractions |
+| **Output Parser** | BeanOutputConverter | JSON schema enforcement |
 
-Configuration
--------------
+---
 
-### Environment Variables
+## Configuration
 
-```yaml
-# Ollama LLM Service
+### Environment Variables (`.env`)
+
+```bash
+# Ollama Service
 OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_CHAT_MODEL=llama3.2
 OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 
-# RAG Parameters (optional, has defaults)
-RAG_SEARCH_TOP_K=5
-RAG_SIMILARITY_THRESHOLD=0.7
+# RAG Parameters
+RAG_SEARCH_TOP_K=5              # Number of similar products to retrieve
+RAG_SIMILARITY_THRESHOLD=0.3    # Cosine similarity threshold (0-1)
 ```
 
-Setup Instructions
-------------------
+### Application Config (`application-dev.yml`)
+
+```yaml
+spring:
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL}
+      chat:
+        model: ${OLLAMA_CHAT_MODEL}
+      embedding:
+        model: ${OLLAMA_EMBEDDING_MODEL}
+
+app:
+  rag:
+    search-top-k: ${RAG_SEARCH_TOP_K:5}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+```
+
+---
+
+## Setup Instructions
 
 ### 1. Start Infrastructure
 
 ```bash
-# Start PostgreSQL with pgvector and Ollama
+# Start PostgreSQL + Ollama
 docker-compose up -d db ollama
-
-# Wait for Ollama to be healthy
-docker ps | grep ollama
 
 # Pull required models (first time only)
 ./scripts/setup-ollama.sh
 ```
 
-### 2. Verify Models
+**Verify models:**
 
 ```bash
 docker exec ollama ollama list
-# Expected output:
-# llama3.2          latest   ...
-# nomic-embed-text  latest   ...
+# Expected:
+# llama3.2:latest
+# nomic-embed-text:latest
 ```
 
-### 3. Start Application
+### 2. Start Application
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-### 4. Index Products
-
-Admin authentication required:
+### 3. Index Products (Admin Only)
 
 ```bash
 curl -X POST http://localhost:8080/per/rag/index \
-  -H "Authorization: Bearer <ADMIN_JWT_TOKEN>"
+  -H "Authorization: Bearer <ADMIN_JWT>"
 ```
 
-Response:
+**Response:**
+
 ```json
 {
   "success": true,
   "code": "RAG_INDEX_SUCCESS",
   "data": {
-    "status": "Indexing completed successfully",
-    "documentsIndexed": 0
+    "totalIndexed": 150,
+    "timeMs": 2341
   }
 }
 ```
 
-REST API Reference
-------------------
+---
 
-### POST /per/rag/chat
+## API Reference
 
-Get AI product recommendations (non-streaming).
+### POST `/per/rag/chat`
 
-**Auth:** None (public endpoint)  
-**Rate Limit:** `highTraffic`
+**Chat with AI assistant (non-streaming)**
 
 **Request:**
+
 ```json
 {
-  "question": "What perfumes do you recommend for summer?"
+  "question": "Nước hoa cho mùa hè?"
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "code": "RAG_CHAT_SUCCESS",
   "data": {
-    "answer": "For summer, I recommend light and fresh fragrances...",
-    "sourceDocuments": [
-      "Dior Sauvage",
-      "Versace Dylan Blue",
-      "Acqua di Gio"
+    "summary": "Tôi gợi ý Dior Sauvage - hoàn hảo cho mùa hè với hương tươi mát.",
+    "detailedResponse": "**Hero Recommendation:**\nDior Sauvage Eau de Parfum...",
+    "products": [
+      {
+        "id": "uuid-123",
+        "name": "Dior Sauvage EDP 100ml",
+        "price": 3500000,
+        "reasonForRecommendation": "Fresh bergamot perfect for hot weather"
+      }
+    ],
+    "nextSteps": [
+      "Bạn muốn biết thêm về họ hương này không?",
+      "Tôi có thể gợi ý sản phẩm tương tự?",
+      "Bạn muốn thêm vào giỏ hàng không?"
     ]
   }
 }
 ```
 
-### GET /per/rag/chat/stream
+### GET `/per/rag/chat/stream`
 
-Stream AI responses in real-time using Server-Sent Events.
-
-**Auth:** None  
-**Rate Limit:** `highTraffic`
-
-**Query Params:**
-- `question` (string, required): User question
-
-**Response:** SSE stream
+**Streaming text response (SSE)**
 
 ```bash
-curl -N http://localhost:8080/per/rag/chat/stream?question=Tell%20me%20about%20floral%20perfumes
+curl -N http://localhost:8080/per/rag/chat/stream?question=Summer%20fragrance
+
+# Response (text/event-stream):
+data: I recommend
+data: Dior Sauvage
+data: ...
 ```
 
-### POST /per/rag/index
+### POST `/per/rag/index` (Admin)
 
-Rebuild vector database with all active products.
+**Index all products into vector store**
 
-**Auth:** `hasRole('ADMIN')`  
-**Rate Limit:** None
+### POST `/per/rag/index/knowledge` (Admin)
 
-**Response:**
+**Index prompt templates from `src/main/resources/prompt/`**
+
+> **Note:** Now deprecated. Prompts are loaded directly from classpath, no indexing needed.
+
+### DELETE `/per/rag/knowledge` (Admin)
+
+**Clear knowledge base documents**
+
+### GET `/per/rag/knowledge/status`
+
+**Check knowledge base indexing status**
+
 ```json
 {
-  "success": true,
-  "code": "RAG_INDEX_SUCCESS",
-  "data": {
-    "status": "Indexing completed successfully",
-    "documentsIndexed": 0
-  }
+  "totalDocuments": 150,
+  "knowledgeDocuments": 0,
+  "productDocuments": 150,
+  "knowledgeSources": [],
+  "isIndexed": false
 }
 ```
 
-Indexing Strategy
------------------
+---
 
-### Product-to-Document Conversion
+## Prompt Architecture
 
-Each active product with variants is converted to a `Document`:
+### Prompt Files Location
 
-**Content includes:**
-- Product name, brand, category, origin
-- Short description and full description
-- Perfume attributes (gender, fragrance family, sillage, longevity, seasonality, occasion)
-- Price range (min-max from variants)
-- Available volumes (from product variants)
-
-**Metadata includes:**
-- `productId`: UUID
-- `productName`: String
-- `brandName`: String
-- `categoryName`: String
-
-### Vector Dimensions
-
-Embeddings are 768-dimensional vectors matching the `nomic-embed-text` model output.
-
-### Index Type
-
-PgVector uses HNSW (Hierarchical Navigable Small World) index for fast approximate nearest neighbor search with cosine distance metric.
-
-Semantic Search Flow
---------------------
-
-1. **Embed Query**: User question → nomic-embed-text → 768-dim vector
-2. **Search PgVector**: Find top-K similar documents (default K=5) with similarity > threshold (default 0.7)
-3. **Filter Results**: Only return documents meeting similarity threshold
-4. **Build Context**: Concatenate document contents with separator `\n\n---\n\n`
-5. **Return Documents**: Extract `productName` from metadata for source attribution
-
-Chat Generation Flow
---------------------
-
-1. **Semantic Search**: Call `VectorStoreService.searchSimilar(question, topK, threshold)`
-2. **Check Results**: If no documents found, return "no relevant products" message
-3. **Build Prompt**: Replace `{context}` and `{question}` in system prompt template
-4. **LLM Call**: Send prompt to Ollama Chat Model (streaming or non-streaming)
-5. **Return Response**: Package answer + source document names
-
-Error Handling
---------------
-
-All RAG operations use `ApiException` with custom error codes:
-
-| Error Code | HTTP Status | Cause |
-| --- | --- | --- |
-| `RAG_INDEXING_FAILED` | 500 | Database or embedding error during indexing |
-| `RAG_SEARCH_FAILED` | 500 | Vector search query failure |
-| `RAG_CHAT_FAILED` | 500 | LLM generation error |
-| `RAG_OLLAMA_UNAVAILABLE` | 503 | Ollama service not reachable |
-
-Monitoring and Debugging
-------------------------
-
-### Check Vector Data
-
-```sql
--- Connect to PostgreSQL
-\c <database_name>
-
--- Verify pgvector extension
-\dx vector
-
--- Count indexed documents
-SELECT COUNT(*) FROM vector_store;
-
--- View sample documents
-SELECT id, metadata->>'productName' as product, 
-       metadata->>'brandName' as brand 
-FROM vector_store LIMIT 5;
-
--- Check embedding dimensions
-SELECT id, array_length(embedding, 1) as dimensions 
-FROM vector_store LIMIT 1;
+```
+src/main/resources/prompt/
+├── system-prompt.txt           # Main RAG prompt (loaded via classpath)
+├── ai-assistant-instructions.md
+├── customer-service-guide.md
+├── fragrance-guide.md
+├── policies.md
+└── fallback-response.md
 ```
 
-### Test Ollama Directly
+### Prompt Structure
 
-```bash
-# Test chat model
-curl http://localhost:11434/api/generate -d '{
-  "model": "llama3.2",
-  "prompt": "Hello, recommend a perfume",
-  "stream": false
-}'
+**system-prompt.txt** uses:
 
-# Test embedding model
-curl http://localhost:11434/api/embeddings -d '{
-  "model": "nomic-embed-text",
-  "prompt": "Dior Sauvage perfume"
-}'
+- `{context}` - Replaced with retrieved products
+- `{question}` - User's question
+- `{format}` - JSON schema from BeanOutputConverter
+
+**Example:**
+
+```
+# ROLE
+You are a smart fragrance Sales Assistant...
+
+INVENTORY:
+{context}
+
+USER QUERY:
+{question}
+
+# OUTPUT FORMAT
+{format}
 ```
 
-### Application Logs
+### XML Tags in Prompt Files (Reference Only)
 
-Enable debug logging in `application.yml`:
+Prompt reference files (`.md`) use XML structure for better AI comprehension:
+
+```xml
+<context type="ai_instructions">
+  # Content here (Markdown format)
+</context>
+
+<rules>
+  ## Rules and constraints
+</rules>
+
+<data type="fragrance_knowledge">
+  ## Knowledge base content
+</data>
+```
+
+---
+
+## Troubleshooting
+
+### Issue: "No relevant products found"
+
+**Cause:** Similarity threshold too high or no indexed products
+
+**Fix:**
+
+1. Check products are indexed: `GET /per/rag/knowledge/status`
+2. Lower `RAG_SIMILARITY_THRESHOLD` to 0.2
+3. Re-index: `POST /per/rag/index`
+
+### Issue: "LLM returns invalid JSON"
+
+**Cause:** Llama 3.2 wrapping JSON in markdown code blocks
+
+**Fix:** `cleanMarkdownCodeBlocks()` method automatically strips ` ```json ` wrappers
+
+### Issue: "Empty products array despite relevant inventory"
+
+**Cause:** LLM filtering too strictly based on seasonality/occasion in prompt
+
+**Fix:** Adjust filtering rules in `system-prompt.txt`
+
+---
+
+## Performance Tuning
+
+### Vector Search
+
+- **Top-K**: Higher = more context but slower (default: 5)
+- **Threshold**: Lower = more lenient matching (default: 0.3)
 
 ```yaml
-logging:
-  level:
-    com.per.rag: DEBUG
-    org.springframework.ai: DEBUG
+app:
+  rag:
+    search-top-k: 10          # More products in context
+    similarity-threshold: 0.2  # More lenient matching
 ```
 
-Performance Tuning
-------------------
+### LLM Response Time
 
-### Search Parameters
+- **Model size**: llama3.2 (~2GB, fast inference)
+- **Streaming**: Use `/chat/stream` for perceived speed
+- **GPU**: Ollama uses GPU if available (10x faster)
 
-| Parameter | Default | Impact |
-| --- | --- | --- |
-| `search-top-k` | 5 | Higher = more context, slower search |
-| `similarity-threshold` | 0.7 | Lower = more results, less relevant |
+---
 
-### Model Selection
+## FAQ
 
-Change chat model via environment variable:
+**Q: Can I use GPT-4 instead of Ollama?**
 
-```bash
-OLLAMA_CHAT_MODEL=mistral  # 7B params, better reasoning
-OLLAMA_CHAT_MODEL=llama3   # 8B params, higher quality
-OLLAMA_CHAT_MODEL=gemma2   # 9B params, strong instruction following
-```
+A: Yes, swap OllamaChatModel for OpenAiChatModel. Change `spring.ai.openai.api-key`.
 
-Pull models: `docker exec ollama ollama pull <model-name>`
+**Q: How to add custom prompts?**
 
-### Context Window
+A: Edit files in `src/main/resources/prompt/`. Restart app (prompts loaded at runtime).
 
-Default Ollama context: 2048 tokens. Adjust if needed:
+**Q: Why structured output instead of plain text?**
 
-```bash
-docker exec ollama ollama show llama3.2 --modelfile
-# Add: PARAMETER num_ctx 4096
-```
+A: Enables Generative UI - frontend can auto-render ProductCards, CTAs, etc.
 
-Extending the Module
---------------------
+**Q: How to prevent hallucinations?**
 
-### Indexing External Documents
+A: Prompt explicitly states "Do NOT invent products". BeanOutputConverter enforces UUID format.
 
-To add customer service documents (FAQs, policies):
+---
 
-**Option 1: Extend VectorStoreService**
+## Next Steps
 
-```java
-public interface VectorStoreService {
-    void indexCustomDocument(String content, Map<String, Object> metadata);
-}
-```
+1. **Customize Prompts**: Edit `system-prompt.txt` for your domain
+2. **Tune Parameters**: Adjust top-K and threshold for your catalog size
+3. **Monitor Performance**: Check LLM response times via logs
+4. **A/B Test**: Compare structured vs streaming for user experience
 
-**Option 2: Create DocumentService**
+---
 
-```java
-@Service
-public class DocumentService {
-    
-    public void indexMarkdownFile(Path filePath) throws IOException {
-        String content = Files.readString(filePath);
-        Map<String, Object> metadata = Map.of(
-            "type", "policy",
-            "filename", filePath.getFileName().toString()
-        );
-        
-        Document doc = new Document(
-            filePath.getFileName().toString(),
-            content,
-            metadata
-        );
-        vectorStore.add(List.of(doc));
-    }
-}
-```
+## Related Documentation
 
-**Option 3: Admin Upload Endpoint**
-
-```java
-@PostMapping(ApiConstants.Rag.UPLOAD_DOCUMENT)
-@PreAuthorize("hasRole('ADMIN')")
-public ResponseEntity<?> uploadDocument(
-    @RequestParam("file") MultipartFile file
-) {
-    // Read file, create Document, add to vector store
-}
-```
-
-### Conversation History
-
-To add chat history tracking:
-
-1. Create `Conversation` entity with user, messages, timestamps
-2. Store in PostgreSQL
-3. Inject previous turns into prompt context
-4. Implement conversation ID in `ChatRequest`
-
-Security Considerations
------------------------
-
-| Aspect | Implementation |
-| --- | --- |
-| Rate Limiting | Applied via `@RateLimiter(name = "highTraffic")` |
-| Admin Endpoints | Index operation requires `ADMIN` role |
-| Input Validation | `@NotBlank` on question field |
-| Prompt Injection | System prompt separates context from user input |
-| Public Access | Chat endpoints are public (no auth required) |
-
-Troubleshooting
----------------
-
-### Ollama Not Responding
-
-```bash
-# Check logs
-docker logs ollama
-
-# Verify service
-curl http://localhost:11434/api/tags
-
-# Restart if needed
-docker-compose restart ollama
-```
-
-### No Search Results
-
-Possible causes:
-- Products not indexed (call `/per/rag/index`)
-- Similarity threshold too high (lower `RAG_SIMILARITY_THRESHOLD`)
-- Empty vector_store table (check with SQL query)
-
-### Poor Response Quality
-
-Improvements:
-- Increase `search-top-k` for more context
-- Lower `similarity-threshold` for more candidates
-- Enhance system prompt with specific instructions
-- Use larger model (e.g., `llama3:70b`)
-
-### SerializationException
-
-Ensure DTOs have `@NoArgsConstructor` for Jackson deserialization.
-
-Testing Recommendations
------------------------
-
-- Unit test `VectorStoreService` with mock repositories
-- Integration test with embedded PgVector (Testcontainers)
-- Mock `OllamaChatModel` for `ChatService` unit tests
-- End-to-end test full pipeline: index → search → chat
-
-Run tests:
-```bash
-mvn -Dtest=VectorStoreServiceImplTest,ChatServiceImplTest test
-```
-
-Operational Notes
------------------
-
-- Ollama models stored in volume: `ollama_data:/root/.ollama`
-- Vector data persists in PostgreSQL volume: `db:/var/lib/postgresql/data`
-- First model pull can take 5-10 minutes depending on network
-- HNSW index builds automatically when documents exceed threshold
-- Rebuild index via `/per/rag/index` after bulk product updates
+- [Vietnamese README](./README_vi.md)
+- [API Collection](../../postman/per-api-collection.json)
+- [Spring AI Docs](https://docs.spring.io/spring-ai/reference/)

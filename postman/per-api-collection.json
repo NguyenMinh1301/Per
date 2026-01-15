@@ -2345,7 +2345,7 @@
                                 "knowledge"
                             ]
                         },
-                        "description": "Index all markdown files from document/rag/knowledge/ directory. Admin only."
+                        "description": "Index all markdown files from src/main/resources/prompt directory. Admin only."
                     },
                     "response": []
                 },

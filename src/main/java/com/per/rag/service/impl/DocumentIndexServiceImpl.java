@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class DocumentIndexServiceImpl implements DocumentIndexService {
 
-    private static final String KNOWLEDGE_BASE_PATH = "document/rag/knowledge";
+    private static final String KNOWLEDGE_BASE_PATH = "src/main/resources/prompt";
     private static final String KNOWLEDGE_TYPE = "knowledge";
 
     private final VectorStore vectorStore;

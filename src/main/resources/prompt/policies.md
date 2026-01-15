@@ -1,3 +1,5 @@
+<data type="store_policies">
+
 # Chính Sách Cửa Hàng
 
 ## Chính Sách Vận Chuyển
@@ -114,6 +116,10 @@ Không bảo hành:
 - Ưu tiên mua sản phẩm mới
 - Tư vấn cá nhân hóa
 
+</data>
+
+<rules type="contact_and_support">
+
 ## Chính Sách Bảo Mật
 
 ### Thông Tin Cá Nhân
@@ -146,3 +152,5 @@ Không bảo hành:
 3. Đưa ra phương án giải quyết
 4. Thực hiện và theo dõi
 5. Lấy phản hồi từ khách hàng
+
+</rules>

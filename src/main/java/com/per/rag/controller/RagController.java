@@ -44,9 +44,10 @@ public class RagController extends BaseController {
 
     @PostMapping(ApiConstants.Rag.CHAT)
     @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-    public ResponseEntity<ApiResponse<com.per.rag.dto.response.ChatResponse>> chat(
+    public ResponseEntity<ApiResponse<com.per.rag.dto.response.ShopAssistantResponse>> chat(
             @Valid @RequestBody com.per.rag.dto.request.ChatRequest request) {
-        com.per.rag.dto.response.ChatResponse response = chatService.chat(request.getQuestion());
+        com.per.rag.dto.response.ShopAssistantResponse response =
+                chatService.chat(request.getQuestion());
         return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.RAG_CHAT_SUCCESS, response));
     }
 

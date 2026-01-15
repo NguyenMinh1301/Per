@@ -1,480 +1,418 @@
-# Trợ Lý Mua Sắm AI - Tài Liệu Tiếng Việt
+# Hệ Thống RAG Shopping Assistant - Hướng Dẫn Đầy Đủ
 
 ## Tổng Quan
 
-Module Trợ Lý AI cung cấp gợi ý sản phẩm thông minh sử dụng công nghệ RAG (Retrieval-Augmented Generation), kết hợp tìm kiếm ngữ nghĩa với mô hình ngôn ngữ lớn (LLM) để trả lời câu hỏi khách hàng một cách chính xác và theo ngữ cảnh.
+Module RAG (Retrieval-Augmented Generation) cung cấp tính năng gợi ý nước hoa thông minh sử dụng semantic search và LLM chạy local. Trả về **JSON có cấu trúc** tối ưu cho Generative UI.
+
+### Tính Năng Chính
+
+- ✅ **Structured JSON Output** - Đối tượng ProductRecommendation với id, name, price, lý do
+- ✅ **Semantic Search** - Tìm kiếm tương đồng bằng PgVector
+- ✅ **Không Hallucination** - Chỉ gợi ý sản phẩm có thật trong kho
+- ✅ **Generative UI Ready** - Tự động tạo product cards, nút CTA từ response
+- ✅ **Bilingual** - Tự động detect câu hỏi Tiếng Việt/English
+
+---
 
 ## Kiến Trúc
 
+### Luồng RAG Pipeline
+
 ```
-┌───────────────────────────────────────────────────────────────────────┐
-│                      Luồng Xử Lý AI Assistant                         │
-│                                                                       │
-│  Câu Hỏi User → Tìm Kiếm Ngữ Nghĩa (PgVector) →                       │
-│    Lấy Top-K Sản Phẩm → Xây Dựng Context → ChatService →             │
-│    Tạo Prompt → Ollama LLM → Sinh Câu Trả Lời                        │
-└───────────────────────────────────────────────────────────────────────┘
-
-┌───────────────────────────────────────────────────────────────────────┐
-│                      Luồng Indexing                                   │
-│                                                                       │
-│  Admin Kích Hoạt → VectorStoreService →                               │
-│    Lấy Sản Phẩm → Chuyển Thành Documents → Embedding →               │
-│    Lưu Vào PgVector                                                  │
-└───────────────────────────────────────────────────────────────────────┘
+Câu Hỏi User
+    ↓
+Semantic Search (PgVector)
+    ↓
+Top-K Products (context)
+    ↓
+Load System Prompt (src/main/resources/prompt/system-prompt.txt)
+    ↓
+Build Prompt (context + question + JSON schema)
+    ↓
+Ollama LLM (llama3.2)
+    ↓
+BeanOutputConverter parse JSON
+    ↓
+ShopAssistantResponse
 ```
 
-## Thành Phần Chính
+### Luồng Indexing
 
-| File | Chức Năng |
-| --- | --- |
-| `RagController.java` | REST endpoints cho chat và indexing |
-| `VectorStoreService.java` | Indexing sản phẩm và tìm kiếm ngữ nghĩa |
-| `DocumentIndexService.java` | Indexing tài liệu markdown (FAQ, chính sách) |
-| `ChatService.java` | Tổ chức pipeline RAG và sinh câu trả lời từ LLM |
+```
+Admin Trigger
+    ↓
+Lấy Products từ Database
+    ↓
+Convert sang Documents (id, name, description, metadata)
+    ↓
+Embed (nomic-embed-text, 768-chiều)
+    ↓
+Lưu vào bảng vector_store (PgVector)
+```
 
-## Công Nghệ Sử Dụng
+---
 
-| Component | Công Nghệ | Mục Đích |
-| --- | --- | --- |
-| Vector Database | PgVector (PostgreSQL extension) | Lưu trữ và tìm kiếm embeddings 768 chiều |
-| Embedding Model | nomic-embed-text (Ollama) | Chuyển đổi text thành vectors |
-| Chat Model | llama3.2 (Ollama) | Sinh câu trả lời ngôn ngữ tự nhiên |
-| Framework | Spring AI | Tích hợp LLM và abstractions |
+## Cấu Trúc Response
+
+### ShopAssistantResponse
+
+```json
+{
+  "summary": "Câu trả lời ngắn gọn 1-2 câu",
+  "detailedResponse": "**Gợi Ý Chính:** Dior Sauvage...",
+  "products": [
+    {
+      "id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Dior Sauvage EDP 100ml",
+      "price": 3500000,
+      "reasonForRecommendation": "Hương tươi mát cho hè, độ bền cao"
+    }
+  ],
+  "nextSteps": [
+    "Bạn muốn kiểm tra tồn kho không?",
+    "Tôi có thể gợi ý sản phẩm tương tự?",
+    "Bạn muốn thêm vào giỏ hàng không?"
+  ]
+}
+```
+
+### Tích Hợp Frontend
+
+```typescript
+// Tự động tạo UI từ structured response
+response.products.map(product => (
+  <ProductCard 
+    id={product.id}
+    name={product.name}
+    price={product.price}
+    reason={product.reasonForRecommendation}
+  />
+))
+
+// Nút CTA từ nextSteps
+response.nextSteps.map(step => (
+  <Button onClick={() => handleStep(step)}>{step}</Button>
+))
+```
+
+---
+
+## Stack Công Nghệ
+
+| Thành Phần | Công Nghệ | Mục Đích |
+|-----------|-----------|---------|
+| **Vector DB** | PgVector | Lưu embeddings 768-chiều |
+| **Embedding Model** | nomic-embed-text | Chuyển text → vector |
+| **Chat Model** | llama3.2 | Sinh ngôn ngữ tự nhiên |
+| **Framework** | Spring AI 1.0.0-M6 | Abstractions cho LLM |
+| **Output Parser** | BeanOutputConverter | Ép JSON schema |
+
+---
 
 ## Cấu Hình
 
-### Biến Môi Trường
-
-Thêm vào file `.env`:
+### Biến Môi Trường (`.env`)
 
 ```bash
-# Ollama LLM Service
+# Ollama Service
 OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_CHAT_MODEL=llama3.2
 OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 
-# Tham Số RAG (tùy chọn)
-RAG_SEARCH_TOP_K=5
-RAG_SIMILARITY_THRESHOLD=0.3
+# Tham Số RAG
+RAG_SEARCH_TOP_K=5              # Số sản phẩm tương đồng lấy về
+RAG_SIMILARITY_THRESHOLD=0.3    # Ngưỡng cosine similarity (0-1)
 ```
 
-## Hướng Dẫn Cài Đặt
+### Config Ứng Dụng (`application-dev.yml`)
+
+```yaml
+spring:
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL}
+      chat:
+        model: ${OLLAMA_CHAT_MODEL}
+      embedding:
+        model: ${OLLAMA_EMBEDDING_MODEL}
+
+app:
+  rag:
+    search-top-k: ${RAG_SEARCH_TOP_K:5}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+```
+
+---
+
+## Hướng Dẫn Setup
 
 ### 1. Khởi Động Infrastructure
 
 ```bash
-# Start PostgreSQL và Ollama
+# Start PostgreSQL + Ollama
 docker-compose up -d db ollama
 
-# Kiểm tra Ollama đã sẵn sàng
-docker ps | grep ollama
-
-# Pull models (chỉ lần đầu tiên)
-chmod +x scripts/setup-ollama.sh
+# Pull models (lần đầu tiên)
 ./scripts/setup-ollama.sh
 ```
 
-### 2. Xác Minh Models
+**Kiểm tra models:**
 
 ```bash
 docker exec ollama ollama list
-# Output mong muốn:
-# llama3.2          latest   ...
-# nomic-embed-text  latest   ...
+# Kết quả mong đợi:
+# llama3.2:latest
+# nomic-embed-text:latest
 ```
 
-### 3. Khởi Động Application
+### 2. Khởi Động Ứng Dụng
 
 ```bash
 ./mvnw spring-boot:run
 ```
 
-### 4. Index Sản Phẩm
-
-Cần JWT token admin:
+### 3. Index Products (Chỉ Admin)
 
 ```bash
 curl -X POST http://localhost:8080/per/rag/index \
-  -H "Authorization: Bearer <ADMIN_JWT_TOKEN>"
+  -H "Authorization: Bearer <ADMIN_JWT>"
 ```
 
-Response:
+**Response:**
+
 ```json
 {
   "success": true,
   "code": "RAG_INDEX_SUCCESS",
   "data": {
-    "status": "Product catalog indexed successfully",
-    "documentsIndexed": 0
+    "totalIndexed": 150,
+    "timeMs": 2341
   }
 }
 ```
 
-### 5. Index Knowledge Base (Tùy Chọn)
+---
 
-Để AI có thể trả lời câu hỏi về chính sách, hướng dẫn:
+## Tham Chiếu API
 
-```bash
-curl -X POST http://localhost:8080/per/rag/index/knowledge \
-  -H "Authorization: Bearer <ADMIN_JWT_TOKEN>"
-```
+### POST `/per/rag/chat`
 
-## REST API
-
-### POST /per/rag/chat
-
-Nhận gợi ý sản phẩm từ AI (không streaming).
-
-**Auth:** Không cần  
-**Rate Limit:** `highTraffic`
+**Chat với AI assistant (non-streaming)**
 
 **Request:**
+
 ```json
 {
-  "question": "Nước hoa nào phù hợp cho mùa hè?"
+  "question": "Nước hoa cho mùa hè?"
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
   "code": "RAG_CHAT_SUCCESS",
   "data": {
-    "answer": "Cho mùa hè, tôi gợi ý các hương nước hoa tươi mát...",
-    "sourceDocuments": [
-      "Dior Sauvage",
-      "Versace Dylan Blue"
+    "summary": "Tôi gợi ý Dior Sauvage - hoàn hảo cho mùa hè với hương tươi mát.",
+    "detailedResponse": "**Gợi Ý Chính:**\nDior Sauvage Eau de Parfum...",
+    "products": [
+      {
+        "id": "uuid-123",
+        "name": "Dior Sauvage EDP 100ml",
+        "price": 3500000,
+        "reasonForRecommendation": "Hương bergamot tươi mát hoàn hảo cho trời nóng"
+      }
+    ],
+    "nextSteps": [
+      "Bạn muốn biết thêm về họ hương này không?",
+      "Tôi có thể gợi ý sản phẩm tương tự?",
+      "Bạn muốn thêm vào giỏ hàng không?"
     ]
   }
 }
 ```
 
-### GET /per/rag/chat/stream
+### GET `/per/rag/chat/stream`
 
-Stream câu trả lời AI real-time (Server-Sent Events).
+**Streaming text response (SSE)**
 
-**Auth:** Không cần  
-**Query Params:**
-- `question` (string, required)
-
-**Example:**
 ```bash
-curl -N "http://localhost:8080/per/rag/chat/stream?question=Nước%20hoa%20hoa%20cỏ"
+curl -N http://localhost:8080/per/rag/chat/stream?question=Nước%20hoa%20mùa%20hè
+
+# Response (text/event-stream):
+data: Tôi gợi ý
+data: Dior Sauvage
+data: ...
 ```
 
-### POST /per/rag/index
+### POST `/per/rag/index` (Admin)
 
-Rebuild vector database với tất cả sản phẩm active.
+**Index toàn bộ products vào vector store**
 
-**Auth:** `hasRole('ADMIN')`
+### POST `/per/rag/index/knowledge` (Admin)
 
-### POST /per/rag/index/knowledge
+**Index prompt templates từ `src/main/resources/prompt/`**
 
-Index tất cả file markdown từ `document/rag/knowledge/`.
+> **Lưu ý:** Hiện đã deprecated. Prompts được load trực tiếp từ classpath, không cần index.
 
-**Auth:** `hasRole('ADMIN')`
+### DELETE `/per/rag/knowledge` (Admin)
 
-### DELETE /per/rag/knowledge
+**Xóa knowledge base documents**
 
-Xóa tất cả knowledge base documents khỏi vector store.
+### GET `/per/rag/knowledge/status`
 
-**Auth:** `hasRole('ADMIN')`
+**Kiểm tra trạng thái indexing knowledge base**
 
-## Chiến Lược Indexing
+```json
+{
+  "totalDocuments": 150,
+  "knowledgeDocuments": 0,
+  "productDocuments": 150,
+  "knowledgeSources": [],
+  "isIndexed": false
+}
+```
 
-### Product → Document
+---
 
-Mỗi sản phẩm active được chuyển thành `Document`:
+## Kiến Trúc Prompt
 
-**Content bao gồm:**
-- Tên sản phẩm, thương hiệu, danh mục, xuất xứ
-- Mô tả ngắn và mô tả đầy đủ
-- Thuộc tính nước hoa (giới tính, họ hương, độ tỏa, độ bền, mùa, dịp)
-- Khoảng giá (min-max từ variants)
-- Dung tích có sẵn
-
-**Metadata bao gồm:**
-- `productId`, `productName`, `brandName`, `categoryName`
-- `type: "product"` (để phân biệt với knowledge base)
-
-### Knowledge Base → Document
-
-File `.md` từ `document/rag/knowledge/` được chuyển thành `Document`:
-
-**Metadata bao gồm:**
-- `type: "knowledge"`
-- `source: "filename.md"`
-- `category: "general"` hoặc tên subdirectory
-- Deterministic UUID từ filename
-
-### Vector Dimensions
-
-Embeddings là vectors 768 chiều phù hợp với model `nomic-embed-text`.
-
-### Index Type
-
-PgVector sử dụng HNSW (Hierarchical Navigable Small World) index cho tìm kiếm xấp xỉ nhanh với metric khoảng cách cosine.
-
-## Knowledge Base
-
-### Cấu Trúc Thư Mục
+### Vị Trí Files Prompt
 
 ```
-document/rag/knowledge/
+src/main/resources/prompt/
+├── system-prompt.txt           # Main RAG prompt (load qua classpath)
+├── ai-assistant-instructions.md
 ├── customer-service-guide.md
-├── policies.md
 ├── fragrance-guide.md
-└── [custom-documents].md
+├── policies.md
+└── fallback-response.md
 ```
 
-### Cách Thêm Tài Liệu Mới
+### Cấu Trúc Prompt
 
-1. Tạo file `.md` trong `document/rag/knowledge/`
-2. Viết nội dung bằng Markdown
-3. Call `POST /per/rag/index/knowledge` với admin token
-4. AI sẽ tự động sử dụng tài liệu khi trả lời
+**system-prompt.txt** sử dụng:
 
-**Best Practices:**
-- File ngắn gọn, tập trung một chủ đề
-- Sử dụng heading rõ ràng
-- Nội dung đúng format markdown chuẩn
-- Tránh thông tin trùng lặp
+- `{context}` - Thay bằng products đã retrieve
+- `{question}` - Câu hỏi của user
+- `{format}` - JSON schema từ BeanOutputConverter
 
-### Ví Dụ Knowledge Base Document
+**Ví dụ:**
 
-`policies.md`:
-```markdown
-# Chính Sách Vận Chuyển
+```
+# ROLE
+You are a smart fragrance Sales Assistant...
 
-## Phí Ship
-- Miễn phí cho đơn từ 2,000,000 VNĐ
-- Đơn dưới 2M: 30,000 VNĐ
+INVENTORY:
+{context}
 
-## Thời Gian Giao
-- Nội thành HN, HCM: 24 giờ
-- Tỉnh khác: 2-3 ngày
+USER QUERY:
+{question}
+
+# OUTPUT FORMAT
+{format}
 ```
 
-Sau khi index, AI có thể trả lời: "Chính sách vận chuyển của bạn như thế nào?"
+### XML Tags trong Prompt Files (Reference)
 
-## Luồng Tìm Kiếm Ngữ Nghĩa
+Các file prompt reference (`.md`) dùng XML structure để AI hiểu rõ hơn:
 
-1. **Embed Query**: Câu hỏi → nomic-embed-text → vector 768 chiều
-2. **Search PgVector**: Tìm top-K documents tương tự (K=5) với similarity > threshold (0.3)
-3. **Filter Results**: Chỉ giữ documents đạt similarity threshold
-4. **Build Context**: Ghép nội dung documents với separator `\n\n---\n\n`
-5. **Return**: Trích xuất `productName`/`source` từ metadata
+```xml
+<context type="ai_instructions">
+  # Content (định dạng Markdown)
+</context>
 
-## Luồng Sinh Câu Trả Lời
+<rules>
+  ## Rules và constraints
+</rules>
 
-1. **Semantic Search**: Tìm documents liên quan
-2. **Check Results**: Nếu không có → trả về "không tìm thấy thông tin"
-3. **Build Prompt**: Thay `{context}` và `{question}` trong system prompt
-4. **LLM Call**: Gửi prompt tới Ollama (streaming hoặc no streaming)
-5. **Return**: Package answer + source documents
-
-## Xử Lý Lỗi
-
-| Error Code | HTTP Status | Nguyên Nhân |
-| --- | --- | --- |
-| `RAG_INDEXING_FAILED` | 500 | Lỗi database hoặc embedding khi indexing |
-| `RAG_SEARCH_FAILED` | 500 | Lỗi vector search query |
-| `RAG_CHAT_FAILED` | 500 | Lỗi LLM generation |
-| `RAG_OLLAMA_UNAVAILABLE` | 503 | Ollama service không truy cập được |
-| `RAG_KNOWLEDGE_INDEX_FAILED` | 500 | Lỗi indexing knowledge base |
-
-## Monitoring và Debug
-
-### Kiểm Tra Vector Data
-
-```sql
--- Kết nối PostgreSQL
-\c <database_name>
-
--- Đếm documents đã index
-SELECT COUNT(*) FROM vector_store;
-
--- Xem sample documents
-SELECT id, metadata->>'productName' as product,
-       metadata->>'type' as type
-FROM vector_store LIMIT 10;
-
--- Kiểm tra dimensions
-SELECT id, array_length(embedding, 1) as dimensions
-FROM vector_store LIMIT 1;
-
--- List knowledge base documents
-SELECT metadata->>'source' as filename
-FROM vector_store
-WHERE metadata->>'type' = 'knowledge';
+<data type="fragrance_knowledge">
+  ## Knowledge base content
+</data>
 ```
 
-### Test Ollama Trực Tiếp
+---
 
-```bash
-# Test chat model
-curl http://localhost:11434/api/generate -d '{
-  "model": "llama3.2",
-  "prompt": "Gợi ý nước hoa cho mùa hè",
-  "stream": false
-}'
+## Xử Lý Sự Cố
 
-# Test embedding model
-curl http://localhost:11434/api/embeddings -d '{
-  "model": "nomic-embed-text",
-  "prompt": "Dior Sauvage perfume"
-}'
-```
+### Vấn Đề: "No relevant products found"
 
-### Application Logs
+**Nguyên nhân:** Threshold quá cao hoặc chưa index products
 
-Enable debug logging:
+**Giải pháp:**
+
+1. Check products đã index: `GET /per/rag/knowledge/status`
+2. Giảm `RAG_SIMILARITY_THRESHOLD` xuống 0.2
+3. Re-index: `POST /per/rag/index`
+
+### Vấn Đề: "LLM trả về JSON không hợp lệ"
+
+**Nguyên nhân:** Llama 3.2 wrap JSON trong markdown code blocks
+
+**Giải pháp:** Method `cleanMarkdownCodeBlocks()` tự động loại bỏ ` ```json `
+
+### Vấn Đề: "Products array rỗng dù có sản phẩm phù hợp"
+
+**Nguyên nhân:** LLM filter quá strict theo seasonality/occasion trong prompt
+
+**Giải pháp:** Điều chỉnh filtering rules trong `system-prompt.txt`
+
+---
+
+## Tối Ưu Performance
+
+### Vector Search
+
+- **Top-K**: Cao hơn = nhiều context hơn nhưng chậm hơn (mặc định: 5)
+- **Threshold**: Thấp hơn = matching "dễ tính" hơn (mặc định: 0.3)
 
 ```yaml
-logging:
-  level:
-    com.per.rag: DEBUG
-    org.springframework.ai: DEBUG
+app:
+  rag:
+    search-top-k: 10          # Nhiều products trong context
+    similarity-threshold: 0.2  # Matching dễ tính hơn
 ```
 
-## Tối Ưu Hiệu Năng
+### Thời Gian Response LLM
 
-### Tham Số Tìm Kiếm
+- **Model size**: llama3.2 (~2GB, inference nhanh)
+- **Streaming**: Dùng `/chat/stream` cho perceived speed
+- **GPU**: Ollama tự dùng GPU nếu có (nhanh gấp 10x)
 
-| Tham Số | Mặc Định | Ảnh Hưởng |
-| --- | --- | --- |
-| `search-top-k` | 5 | Cao hơn = nhiều context, chậm hơn |
-| `similarity-threshold` | 0.3 | Thấp hơn = nhiều kết quả, kém liên quan |
+---
 
-**Khuyến nghị:**
-- `top-k = 5-10` cho câu hỏi chung
-- `threshold = 0.3-0.5` cho balance precision/recall
-- Giảm threshold nếu không tìm thấy kết quả
+## Câu Hỏi Thường Gặp
 
-### Chọn Model
+**Q: Có thể dùng GPT-4 thay Ollama không?**
 
-Thay đổi chat model qua environment variable:
+A: Có, thay OllamaChatModel bằng OpenAiChatModel. Đổi `spring.ai.openai.api-key`.
 
-```bash
-OLLAMA_CHAT_MODEL=mistral  # 7B params, reasoning tốt
-OLLAMA_CHAT_MODEL=llama3   # 8B params, chất lượng cao
-OLLAMA_CHAT_MODEL=gemma2   # 9B params, instruction following mạnh
-```
+**Q: Làm sao thêm custom prompts?**
 
-Pull models: `docker exec ollama ollama pull <model-name>`
+A: Edit files trong `src/main/resources/prompt/`. Restart app (prompts load lúc runtime).
 
-### Context Window
+**Q: Tại sao dùng structured output thay plain text?**
 
-Ollama mặc định context: 2048 tokens. Điều chỉnh nếu cần:
+A: Cho phép Generative UI - frontend tự động render ProductCards, CTAs, v.v.
 
-```bash
-docker exec ollama ollama show llama3.2 --modelfile
-# Thêm: PARAMETER num_ctx 4096
-```
+**Q: Làm sao prevent hallucinations?**
 
-## Bảo Mật
+A: Prompt nói rõ "KHÔNG invent products". BeanOutputConverter ép định dạng UUID.
 
-| Khía Cạnh | Triển Khai |
-| --- | --- |
-| Rate Limiting | `@RateLimiter(name = "highTraffic")` |
-| Admin Endpoints | Indexing cần `ADMIN` role |
-| Input Validation | `@NotBlank` trên question field |
-| Prompt Injection | System prompt tách biệt context và user input |
-| Public Access | Chat endpoints public (không cần auth) |
+---
 
-## Troubleshooting
+## Bước Tiếp Theo
 
-### Ollama Không Phản Hồi
+1. **Customize Prompts**: Edit `system-prompt.txt` cho domain của bạn
+2. **Tune Parameters**: Điều chỉnh top-K và threshold theo catalog size
+3. **Monitor Performance**: Check LLM response times qua logs
+4. **A/B Test**: So sánh structured vs streaming cho UX
 
-```bash
-# Kiểm tra logs
-docker logs ollama
+---
 
-# Verify service
-curl http://localhost:11434/api/tags
+## Tài Liệu Liên Quan
 
-# Restart nếu cần
-docker-compose restart ollama
-```
-
-### Không Có Kết Quả Tìm Kiếm
-
-Nguyên nhân:
-- Sản phẩm chưa được index → gọi `/per/rag/index`
-- Similarity threshold quá cao → giảm `RAG_SIMILARITY_THRESHOLD`
-- Bảng `vector_store` rỗng → check SQL
-
-### Chất Lượng Câu Trả Lời Kém
-
-Cải thiện:
-- Tăng `search-top-k` để nhiều context hơn
-- Giảm `similarity-threshold` để nhiều candidates
-- Cải thiện system prompt với instructions cụ thể hơn
-- Dùng model lớn hơn (e.g., `llama3:70b`)
-
-### Lỗi UUID Invalid
-
-Nếu gặp `invalid UUID string` khi index knowledge base:
-- Code đã sửa để generate deterministic UUID từ filename
-- Restart app sau khi update code
-
-## Testing
-
-### Manual Testing
-
-```bash
-# 1. Index products
-curl -X POST http://localhost:8080/per/rag/index \
-  -H "Authorization: Bearer $ADMIN_TOKEN"
-
-# 2. Index knowledge base
-curl -X POST http://localhost:8080/per/rag/index/knowledge \
-  -H "Authorization: Bearer $ADMIN_TOKEN"
-
-# 3. Test product question
-curl -X POST http://localhost:8080/per/rag/chat \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Nước hoa cho nam giới?"}'
-
-# 4. Test knowledge base question
-curl -X POST http://localhost:8080/per/rag/chat \
-  -H "Content-Type: application/json" \
-  -d '{"question": "Chính sách đổi trả của bạn?"}'
-
-# 5. Test streaming
-curl -N "http://localhost:8080/per/rag/chat/stream?question=Gợi%20ý%20hương%20hoa"
-```
-
-## Operational Notes
-
-- Ollama models lưu trong volume: `ollama_data:/root/.ollama`
-- Vector data persist trong PostgreSQL: `db:/var/lib/postgresql/data`
-- Pull model lần đầu mất 5-10 phút tùy network
-- HNSW index tự build khi documents vượt threshold
-- Rebuild index sau khi bulk update products
-
-## FAQ
-
-**Q: Làm sao để AI trả lời bằng tiếng Việt?**  
-A: Thay đổi system prompt trong `application-dev.yml` sang tiếng Việt. Model `llama3.2` hỗ trợ multilingual.
-
-**Q: Có thể dùng embedding model khác?**  
-A: Có, thay `OLLAMA_EMBEDDING_MODEL`. Lưu ý phải match với dimensions trong DB (768 cho nomic-embed-text).
-
-**Q: Knowledge base có giới hạn dung lượng?**  
-A: Không giới hạn cứng, nhưng context window của LLM giới hạn (2048 tokens mặc định). Nên giữ mỗi document ngắn gọn.
-
-**Q: Làm sao để disable knowledge base?**  
-A: `DELETE /per/rag/knowledge` với admin token để xóa tất cả. Hoặc filter theo metadata `type != "knowledge"` trong code.
-
-**Q: Performance impact khi index nhiều documents?**  
-A: HNSW index hiệu quả với hàng triệu vectors. Indexing ban đầu chậm, nhưng search rất nhanh sau khi có index.
-
-## Tham Khảo
-
-- [Spring AI Documentation](https://docs.spring.io/spring-ai/reference/)
-- [Ollama Models](https://ollama.com/library)
-- [PgVector Documentation](https://github.com/pgvector/pgvector)
-- [HNSW Index](https://arxiv.org/abs/1603.09320)
+- [English README](./README_en.md)
+- [API Collection](../../postman/per-api-collection.json)
+- [Spring AI Docs](https://docs.spring.io/spring-ai/reference/)

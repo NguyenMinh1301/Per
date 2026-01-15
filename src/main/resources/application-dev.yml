@@ -28,7 +28,7 @@ app:
     from: ${MAIL_FROM}
   rag:
     chat-model: ${OLLAMA_CHAT_MODEL:llama3.2}
-    search-top-k: ${RAG_SEARCH_TOP_K:5}
+    search-top-k: ${RAG_SEARCH_TOP_K:3}
     similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
 
 cloudinary:

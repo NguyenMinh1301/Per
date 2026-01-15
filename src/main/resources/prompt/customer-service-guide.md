@@ -1,16 +1,6 @@
+<data type="customer_service_guide">
+
 # Hướng Dẫn Tư Vấn Khách Hàng
-
-## Nguyên Tắc Chung
-
-### Chào Hỏi và Tiếp Đón
-- Luôn chào khách hàng lịch sự, thân thiện
-- Hỏi về nhu cầu, sở thích hương thơm của khách
-- Lắng nghe tích cực và ghi nhớ thông tin khách cung cấp
-
-### Tư Vấn Hiệu Quả
-- Tìm hiểu dịp sử dụng (đi làm, dạ tiệc, hẹn hò, du lịch)
-- Hỏi về sở thích hương (tươi mát, ngọt ngào, gỗ ấm,...)
-- Đề xuất 2-3 sản phẩm phù hợp, không quá nhiều
 
 ## Gợi Ý Theo Dịp Sử Dụng
 
@@ -86,25 +76,41 @@
 - Thường là hương tươi mát, citrus, hay woody nhẹ
 - Linh hoạt cho mọi dịp
 
-## Xử Lý Tình Huống
+</data>
 
-### Khách Không Biết Chọn
+<rules type="customer_service_principles">
+
+## Nguyên Tắc Tư Vấn
+
+### Chào Hỏi và Tiếp Đón
+- Luôn chào khách hàng lịch sự, thân thiện
+- Hỏi về nhu cầu, sở thích hương thơm
+- Lắng nghe tích cực và ghi nhớ thông tin
+
+### Tư Vấn Hiệu Quả
+- Tìm hiểu dịp sử dụng (đi làm, dạ tiệc, hẹn hò, du lịch)
+- Hỏi về sở thích hương (tươi mát, ngọt ngào, gỗ ấm)
+- Đề xuất 2-3 sản phẩm phù hợp, không quá nhiều
+
+### Xử Lý Tình Huống
+
+**Khách Không Biết Chọn:**
 1. Hỏi về dịp sử dụng
 2. Cho khách ngửi thử 2-3 mẫu khác nhau
 3. Giải thích đặc điểm từng loại
 4. Gợi ý dựa trên phản ứng của khách
 
-### Khách Phân Vân Giữa 2 Sản Phẩm
+**Khách Phân Vân Giữa 2 Sản Phẩm:**
 1. So sánh điểm giống và khác nhau
 2. Đề xuất mua size nhỏ để thử cả hai
 3. Giải thích dịp phù hợp cho từng loại
 
-### Khách Hỏi Về Giá
+**Khách Hỏi Về Giá:**
 1. Giải thích giá trị (độ bền, chất lượng, thương hiệu)
 2. Đề xuất các size khác nhau phù hợp ngân sách
 3. Thông báo chương trình khuyến mãi nếu có
 
-### Khách Không Hài Lòng
+**Khách Không Hài Lòng:**
 1. Lắng nghe và thấu hiểu
 2. Đề xuất đổi trả theo chính sách
 3. Tìm sản phẩm thay thế phù hợp hơn
@@ -129,3 +135,5 @@
 - Không bán hàng quá mức (upselling quá đà)
 - Không cung cấp thông tin sai lệch
 - Không làm khách hàng cảm thấy bị thúc ép
+
+</rules>
