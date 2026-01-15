@@ -1,98 +1,127 @@
-Made In Module Overview
-=======================
+# Domain Module: Origin Management (Made In)
 
-The made-in module tracks fragrance origin metadata (country/region of manufacture). It shares the same architectural pattern as brand and category modules, offering CRUD, pagination, and validation tailored to origin records.
+## 1. Overview
 
-Responsibilities
-----------------
+The **Made-In Module** manages geolocation metadata regarding the manufacturing origin of products. In the luxury fragrance domain, provenance (e.g., "France", "Italy") is a significant attribute of value and authenticity. This module standardizes these geographic designators.
 
-* Maintain `MadeIn` records (name, ISO code, region, description, imagery).
-* Provide pageable listing with optional text search.
-* Enforce unique origin names.
-* Supply DTOs for admin/back-office interfaces.
+---
 
-Key Packages
-------------
+## 2. Data Model Architecture
 
-| Package | Description |
-| --- | --- |
-| `controller` | `MadeInController` exposing `/api/v1/made-in` endpoints. |
-| `dto.request` | `MadeInCreateRequest`, `MadeInUpdateRequest`. |
-| `dto.response` | `MadeInResponse`. |
-| `entity` | `MadeIn` JPA entity backing the `made_id` table (`V3__init_brand_category_product.sql`). |
-| `mapper` | MapStruct mapper for conversions. |
-| `repository` | `MadeInRepository` with name uniqueness methods and `search`. |
-| `service` | `MadeInService` contract and `MadeInServiceImpl` implementation. |
+The `MadeIn` entity serves as a controlled vocabulary for geographical origins.
 
-Request Flow Summary
---------------------
+### 2.1 Entity Relationship Diagram
 
-* Controller delegates to `MadeInService`.
-* Service performs lookup, name uniqueness checks, mapping, and persistence.
-* Repository `search` performs case-insensitive matching on `name`, `region`, and `isoCode`.
-* Mapper ensures created/updated entities ignore immutable fields (IDs, timestamps).
+```mermaid
+classDiagram
+    class MadeIn {
+        +UUID id
+        +String name
+        +String isoCode
+        +String region
+        +String description
+        +String imageUrl
+        +String imageId
+        +Boolean isActive
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+    }
 
-API Contracts
--------------
+    class Product {
+        +UUID id
+        +String name
+    }
 
-### `GET /api/v1/made-in`
-* Optional `query` parameter.
-* Pageable with default `createdAt` desc.
-* Success code: `MADEIN_LIST_SUCCESS`.
-* Returns `PageResponse<MadeInResponse>`.
-
-### `GET /api/v1/made-in/{id}`
-* Success code: `MADEIN_FETCH_SUCCESS`.
-
-### `POST /api/v1/made-in`
-* Body: `MadeInCreateRequest` (name required, iso code/region optional, active flag).
-* Success code: `MADEIN_CREATE_SUCCESS`.
-* Errors: `MADEIN_NAME_CONFLICT` if duplicate.
-
-### `PUT /api/v1/made-in/{id}`
-* Body: `MadeInUpdateRequest` (partial update).
-* Success code: `MADEIN_UPDATE_SUCCESS`.
-* Unique name check triggered when `name` provided.
-
-### `DELETE /api/v1/made-in/{id}`
-* Removes record; success code `MADEIN_DELETE_SUCCESS`.
-
-Error Handling
---------------
-
-* `MADEIN_NOT_FOUND` – missing ID.
-* `MADEIN_NAME_CONFLICT` – duplicate origin name.
-* Validation errors propagate via the global handler (e.g., missing required fields).
-
-Testing Notes
--------------
-
-Tests should mock `MadeInRepository` and cover:
-* Retrieval/search flows.
-* Duplicate prevention on create/update.
-* Partial update path.
-
-Invocation example:
-```
-mvn -Dtest=MadeInServiceImplTest test
+    MadeIn "1" -- "0..*" Product : origin_of >
 ```
 
-Extending the Module
---------------------
+### 2.2 Schema Constraints
 
-* **Localized names**: add JSON/translation tables and extend DTOs accordingly.
-* **Association counts**: provide analytics for how many products reference an origin (requires repository query/join).
-* **Soft deletion**: leverage existing `isActive` flag to hide origins instead of hard delete; adjust queries to filter by active status.
+*   **Identity**: UUID v4 Primary Key.
+*   **Uniqueness**: `name` must be globally unique to ensure consistent labeling.
+*   **ISO Standardization**: The optional `isoCode` field is intended to adhere to ISO 3166-1 alpha-2 standards (e.g., "FR", "IT") where applicable.
 
-Caching
--------
+---
 
-Redis caching is enabled for read operations:
+## 3. Business Logic & Invariants
 
-* `getMadeIns` and `getMadeIn` are annotated with `@Cacheable`.
-* Cache names: `madeIns` (list), `madeIn` (single item by ID).
-* TTL: 30 minutes (master data).
-* Write operations (create, update, delete) trigger post-commit cache eviction via `CacheEvictionHelper`.
+### 3.1 Validation Rules
 
-See [Cache Module Documentation](../../cache/README.md) for details.
+1.  **Duplicate Prevention**: Name conflicts are intercepted before database insertion using `existsByNameIgnoreCase`. Raises `MADEIN_NAME_CONFLICT`.
+2.  **Data Consistency**: Used as a strict foreign key reference in `Product` entities to prevent "magic string" storage of country names.
 
+### 3.2 Caching Strategy
+
+*   **Patterns**: Read-Through / Write-Invalidate.
+*   **Keys**: `madeIns` (Listing) and `madeIn::{id}` (Detail).
+*   **TTL**: 30 Minutes (Standard Master Data TTL).
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/made-in`
+
+### 4.1 Retrieval Operations
+
+#### Get Origin Detail
+`GET /{id}`
+
+#### List & Search
+`GET /`
+
+Enables searching by `name`, `isoCode`, or `region`.
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `query` | `string` | Matches Name OR ISO Code OR Region. |
+| `page`, `size` | `int` | Pagination. |
+
+### 4.2 State Mutation Operations
+
+#### Create Origin
+`POST /`
+
+**Schema**: `MadeInCreateRequest`
+
+```json
+{
+  "name": "France",
+  "isoCode": "FR",
+  "region": "Europe",
+  "description": "The heart of modern perfumery."
+}
+```
+
+#### Update Origin
+`PUT /{id}`
+
+**Schema**: `MadeInUpdateRequest`
+Allows partial updates to metadata (e.g., updating the description or correcting an ISO code).
+
+#### Delete Origin
+`DELETE /{id}`
+
+Physical deletion. Requires reference checking in the Product module to avoid orphan records.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 MapStruct Integration
+
+The module utilizes MapStruct for zero-overhead bean mapping.
+
+```java
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface MadeInMapper {
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    MadeIn toEntity(MadeInCreateRequest request);
+}
+```
+
+### 5.2 External Integrations
+
+*   **Search Engine**: Origin data is replicated to Elasticsearch to allow users to filter products by country (e.g., "Show me perfumes made in Italy").
+*   **Frontend**: Used to render "Flag" icons or "Origin" badges on product cards.

@@ -1,88 +1,114 @@
-User Module Overview
-====================
+# Domain Module: User Management
 
-The user module provides admin-only management of application users. It extends the authentication core by exposing CRUD APIs, role assignment, and pagination/search functionality for administrators.
+## 1. Overview
 
-Responsibilities
-----------------
+The **User Module** handles the profile management and role-based access control (RBAC) foundation of the platform. While authentication provides identity, this module manages the **attributes** (profile data) and **permissions** (roles) associated with that identity. It differentiates between standard customer capabilities and administrative privileges.
 
-* Administer user accounts (create, update, delete).
-* Provide pageable search with optional query across username, email, first/last name.
-* Enforce uniqueness on usernames and emails.
-* Manage role assignments and password hashing.
-* Expose REST endpoints protected by `ROLE_ADMIN`.
+---
 
-Key Packages
-------------
+## 2. Architecture
 
-| Package | Description |
-| --- | --- |
-| `controller` | `UserController` (annotated with `@PreAuthorize("hasRole('ADMIN')")`). |
-| `dto.request` | `UserCreateRequest`, `UserUpdateRequest`. |
-| `dto.response` | `UserResponse`. |
-| `entity` | `User` JPA entity (defined in migration `V1__init_schema.sql`). |
-| `mapper` | `UserMapper` (static mapper methods to convert entities to DTOs). |
-| `repository` | `UserAdminRepository` (extends JPA for admin ops) and `RoleAdminRepository` for role lookup. |
-| `service` | `UserService` contract and `UserServiceImpl` implementation. |
+The user model allows for extensible profile data and flexible role assignments.
 
-Request Flow Summary
---------------------
+### 2.1 Entity Relationship Diagram
 
-1. Requests hit `UserController` under `/api/v1/users`. All endpoints require admin authentication.
-2. Controller delegates to `UserService`, wrapping results with `ApiResponse` and success codes (`USER_CREATE_SUCCESS`, etc.).
-3. Service layer operations:
-   * **Create** – validate unique username/email, resolve requested roles (default to `USER`), hash password via `PasswordEncoder`, persist the new user.
-   * **Update** – selective field updates, enforce unique username/email when changed, re-hash password when provided, reassign roles.
-   * **Search/List** – page through users with optional `q` parameter that feeds repository search.
-   * **Delete** – remove user by ID.
-4. Repository methods:
-   * `UserAdminRepository.search` – JPQL query across username/email/first/last name.
-   * `RoleAdminRepository.findByName` – ensures roles exist before assignment.
+```mermaid
+classDiagram
+    class User {
+        +UUID id
+        +String email
+        +String username
+        +String passwordHash
+        +Boolean emailVerified
+        +Boolean isActive
+    }
 
-API Contracts
--------------
+    class Role {
+        +Long id
+        +RoleType name
+        +String description
+    }
 
-| Endpoint | Description | Success Code |
-| --- | --- | --- |
-| `GET /api/v1/users/search` | Paginated search (optional `q`). | `USER_SEARCH_SUCCESS` |
-| `GET /api/v1/users/{id}` | Fetch single user. | `USER_FETCH_SUCCESS` |
-| `POST /api/v1/users` | Create new user. | `USER_CREATE_SUCCESS` |
-| `PUT /api/v1/users/{id}` | Update user. | `USER_UPDATE_SUCCESS` |
-| `DELETE /api/v1/users/{id}` | Remove user. | `USER_DELETE_SUCCESS` |
-
-Validation & Error Codes
-------------------------
-
-* `USER_USERNAME_CONFLICT` – username already exists.
-* `USER_EMAIL_CONFLICT` – email already exists.
-* `NOT_FOUND` – user not found for the given ID.
-* `BAD_REQUEST` – thrown when requested roles do not exist.
-* Bean validation annotations on DTOs ensure mandatory fields and formats.
-
-Security Considerations
------------------------
-
-* Controller-level `@PreAuthorize` restricts module access to administrators.
-* Passwords are hashed via the shared `PasswordEncoder` before persistence.
-* Role assignment uses `RoleType` enum to avoid arbitrary role strings.
-
-Testing
--------
-
-Unit tests should cover `UserServiceImpl`:
-* Create/update flows (including hashing and role resolution).
-* Duplicate detection for username/email.
-* Search and pagination using mocked repository responses.
-
-Run targeted tests with:
-```
-mvn -Dtest=UserServiceImplTest test
+    User "1" -- "0..*" Role : assigned_to
 ```
 
-Extending the Module
---------------------
+### 2.2 Role-Based Access Control (RBAC) Query Model
 
-* **Audit history** – add entity listeners or a separate audit table to track user changes.
-* **Bulk operations** – introduce batch endpoints to disable/activate multiple users at once.
-* **Advanced filters** – extend repository queries for role-based or status-based filtering.
-* **Soft delete** – leverage the existing `isActive` flag to deactivate accounts instead of hard deletion.
+| Role | Scope | Permissions |
+| :--- | :--- | :--- |
+| `USER` | Self | Read/Update own Profile, Manage own Address/Cart/Orders. |
+| `ADMIN` | Global | CRUD on all Users, Products, Categories, Brands. View System Metrics. |
+
+---
+
+## 3. Business Logic & Invariants
+
+### 3.1 Uniqueness Constraints
+
+To ensure distinct identities, the system enforces:
+1.  **Unique Email**: Case-insensitive check. Prevents multiple accounts with the same contact.
+2.  **Unique Username**: Case-insensitive check. Ensures unique display handles.
+
+### 3.2 Security Policies
+
+1.  **Immutable Identity**: Once created, the `id` (UUID) never changes.
+2.  **Password Safety**: Passwords are never returned in downstream DTOs (`UserResponse`). They are write-only fields during registration/reset.
+3.  **Role Escalation Prevention**: Only an administrator can assign the `ADMIN` role. Regular registration defaults to `USER` role.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/users`
+
+### 4.1 Administration (Admin Only)
+
+#### List Users
+`GET /search`
+Supports pagination and filtering (`q` for partial match on name/email).
+
+#### Create User (Admin)
+`POST /`
+Create accounts explicitly with specific roles (e.g., creating another admin).
+
+#### Update User
+`PUT /{id}`
+Modify sensitive attributes or roles.
+
+#### Delete User
+`DELETE /{id}`
+Hard delete. *Caution: Use soft-delete (isActive=false) for history preservation.*
+
+### 4.2 Profile Management (Self)
+
+Current user operations are handled via the `Auth` module (`/api/v1/auth/me`), which delegates to the `User` domain for data retrieval.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 Service Layer
+
+`UserServiceImpl` handles the raw entity manipulation.
+
+```java
+@Override
+public UserResponse createUser(UserCreateRequest request) {
+    if (repository.existsByUsername(request.username())) {
+        throw new ApiException(ApiErrorCode.USER_USERNAME_CONFLICT);
+    }
+    // ... hashing and persistence
+}
+```
+
+### 5.2 Persistence
+
+*   **Repository**: `UserAdminRepository` extends `JpaRepository` and `JpaSpecificationExecutor` for dynamic filtering.
+*   **Projections**: Data is always projected to `UserResponse` to prevent leaking JPA-managed entities to the controller.
+
+---
+
+## 6. Future Extensions
+
+*   **Address Book**: Extract addresses into a separate `UserAddress` entity (One-to-Many) for multi-address support.
+*   **Audit Logging**: Integrate with `Javers` or Hibernate Envers to track who changed what profile field and when.

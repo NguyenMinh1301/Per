@@ -1,140 +1,110 @@
-Media Module Overview
-=====================
+# Domain Module: Media Asset Management
 
-This module encapsulates all media storage concerns for the platform. It provides a Cloudinary-backed persistence layer, HTTP endpoints for uploading media files, and a database model capturing Cloudinary metadata. The goal is to abstract Cloudinary-specific logic away from other domains (e.g., product) so features can simply store the `secureUrl` returned by this module.
+## 1. Overview
 
-Key Components
---------------
+The **Media Module** provides a centralized abstraction for handling digital assets (images, videos). It decouples the core domain (Products, Brands) from the specific implementation details of the underlying storage provider (**Cloudinary**).
 
-* `CloudinaryProperties` (`config/CloudinaryProperties.java`)  
-  Binds to the `cloudinary.*` properties exposed via `.env` (cloud name, API key/secret, optional folder). Validation on required fields ensures startup fails fast if credentials are missing.
+---
 
-* `CloudinaryConfig` (`config/CloudinaryConfig.java`)  
-  Produces a singleton `Cloudinary` client configured with the properties above. All Cloudinary interactions go through this bean.
+## 2. Architecture
 
-* `MediaAsset` (`entity/MediaAsset.java`)  
-  JPA entity mirroring the metadata Cloudinary returns for an uploaded resource. Primary key is a generated UUID; `publicId` is unique to protect against duplicate persistence. The Flyway migration `V2__create_media_assets.sql` creates the corresponding table and indices.
+The module operates as a dedicated storage proxy, handling upload streaming and metadata persistence.
 
-* `MediaAssetRepository` (`repository/MediaAssetRepository.java`)  
-  Simple Spring Data repository for persisting and querying media assets. Currently exposes `existsByPublicId` for potential duplicate handling.
+### 2.1 Integration Pattern
 
-* `MediaUploadResponse` (`dto/response/MediaUploadResponse.java`)  
-  Outbound DTO returned to API consumers. It mirrors the persisted entity so clients can immediately work with the URL, dimensions, bytes, etc.
-
-* `MediaMapper` (`mapper/MediaMapper.java`)  
-  Transforms `MediaAsset` entities into `MediaUploadResponse` DTOs. Centralising mapping makes it easier to adjust the response in one place.
-
-* `MediaService` (`service/MediaService.java`)  
-  Contract for media operations. Currently exposes `uploadSingle` and `uploadBatch` to cover single/multi file flows.
-
-* `MediaServiceImpl` (`service/impl/MediaServiceImpl.java`)  
-  Implements upload logic:
-  - Validates inputs (presence, size < 10 MB, content type image/video).
-  - Resolves Cloudinary upload options (resource type, folder, filename behaviour).
-  - Streams bytes to Cloudinary and maps the response into `MediaAsset`.
-  - Saves the entity and returns the mapped DTO.
-  - Throws `ApiException` with error codes (`MEDIA_FILE_REQUIRED`, `MEDIA_FILE_TOO_LARGE`, `MEDIA_UNSUPPORTED_TYPE`, `MEDIA_UPLOAD_FAILED`) so the global exception handler can build consistent API responses.
-
-* `MediaController` (`controller/MediaController.java`)  
-  Exposes HTTP endpoints under `/api/v1/media` (see API contracts below). Each endpoint delegates to `MediaService` and wraps responses using the shared `ApiResponse` envelope and `ApiSuccessCode`.
-
-API Contracts
--------------
-
-All responses use the common structure:
+```mermaid
+graph LR
+    Client -->|Multipart File| MediaService
+    MediaService -->|Stream| Cloudinary[(Cloudinary)]
+    Cloudinary -->|Metadata (URL/ID)| MediaService
+    MediaService -->|Persist| DB[(PostgreSQL)]
+    MediaService -->|Public ID/URL| Client
 ```
-{
-  "success": true|false,
-  "code": "MEDIA_UPLOAD_SUCCESS",
-  "message": "Media uploaded successfully",
-  "data": { ... dto payload ... },
-  "timestamp": "2025-10-29T03:15:42.123Z"
+
+### 2.2 Entity Model
+
+The `MediaAsset` entity serves as a local registry of remote assets.
+
+*   `id` (UUID): Internal reference.
+*   `publicId` (String): Cloudinary's unique identifier.
+*   `secureUrl` (String): HTTPS delivery URL.
+*   `resourceType`: Asset type (IMAGE/VIDEO).
+
+---
+
+## 3. Business Logic & Invariants
+
+### 3.1 Validation Rules
+
+1.  **File Constraints**:
+    *   **Size**: Max **10MB** per file (`MEDIA_FILE_TOO_LARGE`).
+    *   **Type**: Must match `image/*` or `video/*` MIME types (`MEDIA_UNSUPPORTED_TYPE`).
+2.  **Duplicate Prevention**: Currently handled by Cloudinary's underlying deduplication or simple overwrite policy based on naming configuration.
+
+### 3.2 Resilience
+
+The upload process is protected by **Circuit Breaker** patterns.
+
+*   **Instance**: `media`
+*   **Behavior**: If Cloudinary API latency spikes or returns errors, the circuit opens to prevent thread pool exhaustion, failing fast with `SERVICE_UNAVAILABLE`.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/media`
+
+### 4.1 Upload Operations
+
+#### Single Upload
+`POST /upload`
+**Header**: `Content-Type: multipart/form-data`
+**Body**: `file` (Binary)
+**Response**: `MediaUploadResponse` containing the usable `secureUrl`.
+
+#### Batch Upload
+`POST /upload/batch`
+**Body**: `files` (Array of Binary)
+**Response**: List of `MediaUploadResponse`.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 Cloudinary Abstraction
+
+All vendor-specific logic is encapsulated in `MediaServiceImpl`.
+
+```java
+@CircuitBreaker(name = "media")
+public MediaUploadResponse uploadSingle(MultipartFile file) {
+    // 1. Validate
+    validateFile(file);
+    
+    // 2. Upload to Cloudinary
+    Map result = cloudinary.uploader().upload(file.getBytes(), options);
+    
+    // 3. Persist Metadata
+    MediaAsset asset = mapToEntity(result);
+    repository.save(asset);
+    
+    return mapper.toResponse(asset);
 }
 ```
 
-Endpoints
-~~~~~~~~~
+### 5.2 Configuration
 
-### Upload single file
-* **Method & Path:** `POST /api/v1/media/upload`
-* **Consumes:** `multipart/form-data`
-* **Part name:** `file`
-* **Success code:** `MEDIA_UPLOAD_SUCCESS`
-* **Payload (`data`):**
-  - `id`: UUID of the stored asset
-  - `publicId`: Cloudinary public identifier
-  - `secureUrl` / `url`: use `secureUrl` for HTTPS delivery
-  - `resourceType`: `image` or `video`
-  - `bytes`, `width`, `height`, `duration` (if available)
-  - Additional metadata: `originalFilename`, `format`, `mimeType`, `etag`, `signature`, `version`, `cloudCreatedAt`, `createdAt`, `updatedAt`
+Defined via `CloudinaryProperties`.
 
-### Upload multiple files
-* **Method & Path:** `POST /api/v1/media/upload/batch`
-* **Consumes:** `multipart/form-data`
-* **Part name:** `files` (repeat for each file)
-* **Success code:** `MEDIA_UPLOAD_BATCH_SUCCESS`
-* **Payload (`data`):** array of the same objects returned by the single upload endpoint, in upload order.
+| Property | Env Key |
+| :--- | :--- |
+| `cloud-name` | `CLOUDINARY_CLOUD_NAME` |
+| `api-key` | `CLOUDINARY_API_KEY` |
+| `api-secret` | `CLOUDINARY_API_SECRET` |
 
-Error Handling
---------------
+---
 
-Validation failures result in `success=false` responses with `code` set to the relevant `ApiErrorCode`:
-* `MEDIA_FILE_REQUIRED`: missing multipart part or empty file.
-* `MEDIA_FILE_TOO_LARGE`: file exceeds 10 MB.
-* `MEDIA_UNSUPPORTED_TYPE`: MIME type does not start with `image/` or `video/`.
-* `MEDIA_UPLOAD_FAILED`: Cloudinary threw an error or metadata was incomplete during persistence.
+## 6. Future Extensions
 
-Extending the Module
---------------------
-
-1. **Add new metadata fields:**  
-   - Update `MediaAsset` with the new columns.  
-   - Create a Flyway migration to alter the `media_assets` table.  
-   - Extend `MediaMapper` and `MediaUploadResponse` to expose the data.
-
-2. **Support delete operations:**  
-   - Add a method to `MediaService` (e.g., `deleteByPublicId`) that invokes `cloudinary.uploader().destroy(...)`.  
-   - Remove the entity via `MediaAssetRepository` and return a success response with a new `ApiSuccessCode`.  
-   - Register a new endpoint in `MediaController`.
-
-3. **Generate signed URLs or transformations:**  
-   - Inject `Cloudinary` into a new helper service that invokes the relevant Cloudinary APIs.  
-   - Wrap outputs in DTOs and expose via additional service/controller methods.  
-   - Update `ApiConstants.Media` with new endpoint constants.
-
-4. **Client-side direct uploads:**  
-   - Provide an endpoint to generate signed upload parameters (`Cloudinary#apiSignRequest`).  
-   - Consumers can upload directly to Cloudinary and still persist metadata by calling a separate endpoint with the upload result.
-
-Resilience Patterns
--------------------
-
-Media endpoints are protected by both rate limiting and circuit breaker patterns:
-
-### Rate Limiting
-
-| Instance | Endpoint | Description |
-| --- | --- | --- |
-| `mediaSingle` | `/upload` | Limits single file uploads |
-| `mediaMultipart` | `/upload/batch` | Limits batch uploads |
-
-Rate limiters prevent abuse and protect server resources. When exceeded, endpoints return `429 Too Many Requests`.
-
-### Circuit Breaker
-
-The `media` circuit breaker protects against Cloudinary service failures:
-
-* When Cloudinary is unavailable, the circuit opens after threshold failures.
-* Subsequent requests fail fast with `503 Service Unavailable` instead of timing out.
-* After a wait period, test requests are allowed to check recovery.
-
-See [Rate Limiting](../../resilience-patterns/rate-limit/README.md) and [Circuit Breaker](../../resilience-patterns/circuit-breaker/README.md) documentation for configuration details.
-
-Development Notes
------------------
-
-* Tests/builds: `mvn -q -DskipTests compile` (Spotless must pass).  
-* Database migrations run automatically on startup via Flyway.  
-* Ensure Cloudinary secrets are present in `.env`; otherwise, application startup fails due to `@Validated` properties.
-
-This structure is intended to keep Cloudinary usage concentrated in the `media` module. Other domains should depend only on the DTO (URLs/metadata) rather than calling Cloudinary directly. To implement new features, follow the existing patterns: define contract in `MediaService`, implement in `MediaServiceImpl`, expose through the controller, and register any additional constants, success codes, or error codes in the shared common packages.
+*   **Transformations**: Expose API parameters to request on-the-fly resizing/cropping via Cloudinary URL transformation syntax.
+*   **Direct Upload**: Generate signed upload parameters to allow the frontend to upload directly to Cloudinary (saving backend bandwidth) and then callback to save metadata.
