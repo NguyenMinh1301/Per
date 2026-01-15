@@ -1,418 +1,157 @@
-# Hệ Thống RAG Shopping Assistant - Hướng Dẫn Đầy Đủ
+# RAG Shopping Assistant Module: Tài Liệu Kỹ Thuật
 
-## Tổng Quan
+## 1. Giới Thiệu
 
-Module RAG (Retrieval-Augmented Generation) cung cấp tính năng gợi ý nước hoa thông minh sử dụng semantic search và LLM chạy local. Trả về **JSON có cấu trúc** tối ưu cho Generative UI.
+Module RAG (Retrieval-Augmented Generation) Shopping Assistant là một hệ thống chuyên biệt được thiết kế để cung cấp các gợi ý sản phẩm theo ngữ cảnh và xác định (deterministic). Bằng cách tích hợp Mô hình Không gian Vector (Vector Space Modeling - VSM) với các Mô hình Ngôn ngữ Lớn (LLMs), hệ thống thu hẹp khoảng cách giữa các truy vấn ngôn ngữ tự nhiên phi cấu trúc và dữ liệu kho hàng có cấu trúc.
 
-### Tính Năng Chính
+Tài liệu này đóng vai trò là tham chiếu kỹ thuật chính thống cho kiến trúc, triển khai và mở rộng của module RAG.
 
-- ✅ **Structured JSON Output** - Đối tượng ProductRecommendation với id, name, price, lý do
-- ✅ **Semantic Search** - Tìm kiếm tương đồng bằng PgVector
-- ✅ **Không Hallucination** - Chỉ gợi ý sản phẩm có thật trong kho
-- ✅ **Generative UI Ready** - Tự động tạo product cards, nút CTA từ response
-- ✅ **Bilingual** - Tự động detect câu hỏi Tiếng Việt/English
+### 1.1 Các Khả Năng Chính
 
----
-
-## Kiến Trúc
-
-### Luồng RAG Pipeline
-
-```
-Câu Hỏi User
-    ↓
-Semantic Search (PgVector)
-    ↓
-Top-K Products (context)
-    ↓
-Load System Prompt (src/main/resources/prompt/system-prompt.txt)
-    ↓
-Build Prompt (context + question + JSON schema)
-    ↓
-Ollama LLM (llama3.2)
-    ↓
-BeanOutputConverter parse JSON
-    ↓
-ShopAssistantResponse
-```
-
-### Luồng Indexing
-
-```
-Admin Trigger
-    ↓
-Lấy Products từ Database
-    ↓
-Convert sang Documents (id, name, description, metadata)
-    ↓
-Embed (nomic-embed-text, 768-chiều)
-    ↓
-Lưu vào bảng vector_store (PgVector)
-```
+*   **Truy Xuất Thông Tin Ngữ Nghĩa (Semantic Information Retrieval):** Sử dụng vector embeddings (768 chiều) để xác định độ liên quan của sản phẩm vượt ra ngoài việc khớp từ khóa đơn thuần.
+*   **Đầu Ra Có Cấu Trúc Xác Định (Deterministic Structured Output):** Bắt buộc tuân thủ schema JSON nghiêm ngặt cho các phản hồi, cho phép tích hợp frontend mạnh mẽ (Generative UI).
+*   **Giảm Thiểu Ảo Giác (Hallucination Mitigation):** Thực hiện các ranh giới context nghiêm ngặt để đảm bảo các gợi ý được trích xuất độc quyền từ kho hàng hiện có.
+*   **Kỹ Thuật Prompt (Prompt Engineering):** Tận dụng chain-of-thought prompting và context cấu trúc XML để định hướng suy luận của LLM.
 
 ---
 
-## Cấu Trúc Response
+## 2. Kiến Trúc Hệ Thống
 
-### ShopAssistantResponse
+Hệ thống tuân theo mẫu kiến trúc hướng vi dịch vụ (micro-service oriented), điều phối sự tương tác giữa lớp ứng dụng, cơ sở dữ liệu vector và công cụ suy luận (inference engine).
 
-```json
-{
-  "summary": "Câu trả lời ngắn gọn 1-2 câu",
-  "detailedResponse": "**Gợi Ý Chính:** Dior Sauvage...",
-  "products": [
-    {
-      "id": "550e8400-e29b-41d4-a716-446655440000",
-      "name": "Dior Sauvage EDP 100ml",
-      "price": 3500000,
-      "reasonForRecommendation": "Hương tươi mát cho hè, độ bền cao"
-    }
-  ],
-  "nextSteps": [
-    "Bạn muốn kiểm tra tồn kho không?",
-    "Tôi có thể gợi ý sản phẩm tương tự?",
-    "Bạn muốn thêm vào giỏ hàng không?"
-  ]
-}
-```
+### 2.1 Quy Trình Luồng Thông Tin (Information Flow Pipeline)
 
-### Tích Hợp Frontend
+Pipeline RAG thực thi chuỗi sau cho mỗi tương tác người dùng:
 
-```typescript
-// Tự động tạo UI từ structured response
-response.products.map(product => (
-  <ProductCard 
-    id={product.id}
-    name={product.name}
-    price={product.price}
-    reason={product.reasonForRecommendation}
-  />
-))
+1.  **Phân Rã Truy Vấn (Query Decomposition):** Nhận đầu vào ngôn ngữ tự nhiên từ người dùng.
+2.  **Vector Embedding:** Đầu vào được chuyển đổi thành biểu diễn vector sử dụng mô hình `nomic-embed-text`.
+3.  **Truy Xuất Ngữ Nghĩa (Semantic Retrieval):** Thực hiện tìm kiếm Cosine Similarity đối với `vector_store` trong PostgreSQL để truy xuất top $K$ tài liệu sản phẩm liên quan.
+4.  **Xây Dựng Context (Context Construction):** Các sản phẩm được truy xuất được định dạng thành khối context `INVENTORY` có cấu trúc.
+5.  **Tổng Hợp Prompt (Prompt Synthesis):** Một system prompt động được xây dựng, kết hợp context `INVENTORY`, truy vấn người dùng và hướng dẫn schema đầu ra.
+6.  **Suy Luận & Phân Tích (Inference & Parsing):** Mô hình `llama3.2` tạo phản hồi, sau đó được parse bởi `BeanOutputConverter` thành đối tượng `ShopAssistantResponse` định kiểu mạnh (strongly-typed).
 
-// Nút CTA từ nextSteps
-response.nextSteps.map(step => (
-  <Button onClick={() => handleStep(step)}>{step}</Button>
-))
+### 2.2 Sơ Đồ Thành Phần (Component Diagram)
+
+```mermaid
+graph TD
+    Client[Client Application] -->|POST /chat| Controller[RagController]
+    Controller --> Service[ChatService]
+    
+    subgraph Data Layer
+        DB[(PostgreSQL + PgVector)]
+    end
+    
+    subgraph Inference Layer
+        Ollama[Ollama Inference Engine]
+    end
+    
+    Service -->|1. Store/Retrieve| VectorService[VectorStoreService]
+    VectorService -->|2. Similarity Search| DB
+    Service -->|3. Generate Prompt| PromptTemplate[Prompt Template Engine]
+    PromptTemplate -->|4. Inference Request| Ollama
+    Ollama -->|5. Raw Token Stream| PromptTemplate
+    PromptTemplate -->|6. JSON Parsing| Service
 ```
 
 ---
 
-## Stack Công Nghệ
+## 3. Đặc Tả Dữ Liệu (Data Specification)
 
-| Thành Phần | Công Nghệ | Mục Đích |
-|-----------|-----------|---------|
-| **Vector DB** | PgVector | Lưu embeddings 768-chiều |
-| **Embedding Model** | nomic-embed-text | Chuyển text → vector |
-| **Chat Model** | llama3.2 | Sinh ngôn ngữ tự nhiên |
-| **Framework** | Spring AI 1.0.0-M6 | Abstractions cho LLM |
-| **Output Parser** | BeanOutputConverter | Ép JSON schema |
+### 3.1 Schema Phản Hồi (`ShopAssistantResponse`)
+
+API đảm bảo phản hồi có cấu trúc tuân thủ schema sau. Việc định kiểu nghiêm ngặt này tạo điều kiện ánh xạ trực tiếp tới các thành phần UI.
+
+| Trường | Kiểu | Mô Tả |
+| :--- | :--- | :--- |
+| `summary` | `String` | Bản tóm tắt ngôn ngữ tự nhiên súc tích về gợi ý (1-2 câu). |
+| `detailedResponse` | `String` (Markdown) | Diễn giải toàn diện bao gồm gợi ý "Hero", các lựa chọn thay thế và mô tả cảm quan. |
+| `products` | `List<ProductRecommendation>` | Danh sách có cấu trúc các sản phẩm riêng biệt được tham chiếu trong phản hồi. |
+| `nextSteps` | `List<String>` | Ba hành động hoặc câu hỏi tiếp theo riêng biệt để hướng dẫn người dùng tương tác. |
+
+### 3.2 Thực Thể Sản Phẩm (`ProductRecommendation`)
+
+| Trường | Kiểu | Ràng Buộc | Mô Tả |
+| :--- | :--- | :--- | :--- |
+| `id` | `UUID` | **Immutable** | Định danh duy nhất của sản phẩm như được index trong cơ sở dữ liệu. |
+| `name` | `String` | **Immutable** | Tên hiển thị chính xác của sản phẩm. |
+| `price` | `BigDecimal` | `> 0` | Giá bán lẻ hiện tại. |
+| `reasonForRecommendation` | `String` | | Biện chứng được tạo ra giải thích sự liên quan ngữ nghĩa với truy vấn. |
 
 ---
 
-## Cấu Hình
+## 4. Chi Tiết Triển Khai (Implementation Details)
 
-### Biến Môi Trường (`.env`)
+### 4.1 Cấu Hình Vector Store
+
+Hệ thống sử dụng `pgvector` cho các hoạt động vector hiệu năng cao trong PostgreSQL.
+
+*   **Metric:** Cosine Similarity
+*   **Dimensions:** 768
+*   **Index Type:** HNSW (Hierarchical Navigable Small World) cho tìm kiếm láng giềng gần nhất xấp xỉ hiệu quả.
+
+### 4.2 Chiến Lược Kỹ Thuật Prompt (Prompt Engineering Strategy)
+
+Các prompt được quản lý dưới dạng tài nguyên bên ngoài trong `src/main/resources/prompt/` để cho phép lặp lại (iteration) mà không cần biên dịch lại code.
+
+*   **Cô Lập Context (Context Isolation):** Dữ liệu kho hàng được đóng gói trong các dấu phân cách rõ ràng (ví dụ: `INVENTORY:`) để ngăn rò rỉ dữ liệu.
+*   **Tinh Chỉnh Hướng Dẫn (Instruction Tuning):** Logic "Chain of thought" được nhúng trong system prompt để hướng dẫn mô hình qua các bước lọc, lựa chọn và định dạng.
+*   **Thực Thi Schema (Schema Enforcement):** `BeanOutputConverter` tiêm định nghĩa JSON schema trực tiếp vào prompt để ràng buộc định dạng đầu ra.
+
+---
+
+## 5. Triển Khai & Cấu Hình
+
+### 5.1 Yêu Cầu Môi Trường
+
+Việc triển khai dựa trên các định nghĩa biến sau (`.env`):
 
 ```bash
-# Ollama Service
+# Cấu hình Inference Engine
 OLLAMA_BASE_URL=http://ollama:11434
 OLLAMA_CHAT_MODEL=llama3.2
 OLLAMA_EMBEDDING_MODEL=nomic-embed-text
 
-# Tham Số RAG
-RAG_SEARCH_TOP_K=5              # Số sản phẩm tương đồng lấy về
-RAG_SIMILARITY_THRESHOLD=0.3    # Ngưỡng cosine similarity (0-1)
+# Các Siêu Tham Số RAG (Hyperparameters)
+RAG_SEARCH_TOP_K=5              # Cardinality của tập truy xuất
+RAG_SIMILARITY_THRESHOLD=0.3    # Điểm liên quan tối thiểu (0.0 - 1.0)
 ```
 
-### Config Ứng Dụng (`application-dev.yml`)
+### 5.2 Thiết Lập Hạ Tầng
 
-```yaml
-spring:
-  ai:
-    ollama:
-      base-url: ${OLLAMA_BASE_URL}
-      chat:
-        model: ${OLLAMA_CHAT_MODEL}
-      embedding:
-        model: ${OLLAMA_EMBEDDING_MODEL}
-
-app:
-  rag:
-    search-top-k: ${RAG_SEARCH_TOP_K:5}
-    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
-```
-
----
-
-## Hướng Dẫn Setup
-
-### 1. Khởi Động Infrastructure
+Việc điều phối được định nghĩa qua `docker-compose.yml`. Đảm bảo dịch vụ `ollama` ở trạng thái healthy trước khi khởi động ứng dụng.
 
 ```bash
-# Start PostgreSQL + Ollama
-docker-compose up -d db ollama
-
-# Pull models (lần đầu tiên)
+# Khởi Tạo Mô Hình (Thiết lập một lần)
 ./scripts/setup-ollama.sh
 ```
 
-**Kiểm tra models:**
+---
 
-```bash
-docker exec ollama ollama list
-# Kết quả mong đợi:
-# llama3.2:latest
-# nomic-embed-text:latest
-```
+## 6. Quy Trình Vận Hành
 
-### 2. Khởi Động Ứng Dụng
+### 6.1 Chiến Lược Indexing
 
-```bash
-./mvnw spring-boot:run
-```
+Indexing là một hoạt động quản trị không đồng bộ (asynchronous). Nó liên quan đến việc lặp qua danh mục sản phẩm, tạo embeddings và upsert vào vector store.
 
-### 3. Index Products (Chỉ Admin)
+**Endpoint:** `POST /per/rag/index`
+**Xác Thực:** Yêu cầu vai trò `ADMIN`.
 
-```bash
-curl -X POST http://localhost:8080/per/rag/index \
-  -H "Authorization: Bearer <ADMIN_JWT>"
-```
+### 6.2 Bảo Trì & Xử Lý Sự Cố
 
-**Response:**
+**Bất Thường Phổ Biến: Truy Vấn Không Có Kết Quả**
+*   *Chẩn Đoán:* `RAG_SIMILARITY_THRESHOLD` cao hoặc vector store trống.
+*   *Giải Pháp:* Xác minh trạng thái index qua `GET /per/rag/knowledge/status` và điều chỉnh ngưỡng trong `application.yml`.
 
-```json
-{
-  "success": true,
-  "code": "RAG_INDEX_SUCCESS",
-  "data": {
-    "totalIndexed": 150,
-    "timeMs": 2341
-  }
-}
-```
+**Bất Thường Phổ Biến: Đầu Ra JSON Sai Định Dạng**
+*   *Chẩn Đoán:* LLM có thể bao đóng JSON thô trong các khối mã Markdown (` ```json `).
+*   *Giải Pháp:* Middleware `cleanMarkdownCodeBlocks()` tự động làm sạch chuỗi đầu ra trước khi parse.
 
 ---
 
-## Tham Chiếu API
+## 7. Hướng Dẫn Mở Rộng (Extensibility Guidelines)
 
-### POST `/per/rag/chat`
+Để mở rộng khả năng của module:
 
-**Chat với AI assistant (non-streaming)**
-
-**Request:**
-
-```json
-{
-  "question": "Nước hoa cho mùa hè?"
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "code": "RAG_CHAT_SUCCESS",
-  "data": {
-    "summary": "Tôi gợi ý Dior Sauvage - hoàn hảo cho mùa hè với hương tươi mát.",
-    "detailedResponse": "**Gợi Ý Chính:**\nDior Sauvage Eau de Parfum...",
-    "products": [
-      {
-        "id": "uuid-123",
-        "name": "Dior Sauvage EDP 100ml",
-        "price": 3500000,
-        "reasonForRecommendation": "Hương bergamot tươi mát hoàn hảo cho trời nóng"
-      }
-    ],
-    "nextSteps": [
-      "Bạn muốn biết thêm về họ hương này không?",
-      "Tôi có thể gợi ý sản phẩm tương tự?",
-      "Bạn muốn thêm vào giỏ hàng không?"
-    ]
-  }
-}
-```
-
-### GET `/per/rag/chat/stream`
-
-**Streaming text response (SSE)**
-
-```bash
-curl -N http://localhost:8080/per/rag/chat/stream?question=Nước%20hoa%20mùa%20hè
-
-# Response (text/event-stream):
-data: Tôi gợi ý
-data: Dior Sauvage
-data: ...
-```
-
-### POST `/per/rag/index` (Admin)
-
-**Index toàn bộ products vào vector store**
-
-### POST `/per/rag/index/knowledge` (Admin)
-
-**Index prompt templates từ `src/main/resources/prompt/`**
-
-> **Lưu ý:** Hiện đã deprecated. Prompts được load trực tiếp từ classpath, không cần index.
-
-### DELETE `/per/rag/knowledge` (Admin)
-
-**Xóa knowledge base documents**
-
-### GET `/per/rag/knowledge/status`
-
-**Kiểm tra trạng thái indexing knowledge base**
-
-```json
-{
-  "totalDocuments": 150,
-  "knowledgeDocuments": 0,
-  "productDocuments": 150,
-  "knowledgeSources": [],
-  "isIndexed": false
-}
-```
-
----
-
-## Kiến Trúc Prompt
-
-### Vị Trí Files Prompt
-
-```
-src/main/resources/prompt/
-├── system-prompt.txt           # Main RAG prompt (load qua classpath)
-├── ai-assistant-instructions.md
-├── customer-service-guide.md
-├── fragrance-guide.md
-├── policies.md
-└── fallback-response.md
-```
-
-### Cấu Trúc Prompt
-
-**system-prompt.txt** sử dụng:
-
-- `{context}` - Thay bằng products đã retrieve
-- `{question}` - Câu hỏi của user
-- `{format}` - JSON schema từ BeanOutputConverter
-
-**Ví dụ:**
-
-```
-# ROLE
-You are a smart fragrance Sales Assistant...
-
-INVENTORY:
-{context}
-
-USER QUERY:
-{question}
-
-# OUTPUT FORMAT
-{format}
-```
-
-### XML Tags trong Prompt Files (Reference)
-
-Các file prompt reference (`.md`) dùng XML structure để AI hiểu rõ hơn:
-
-```xml
-<context type="ai_instructions">
-  # Content (định dạng Markdown)
-</context>
-
-<rules>
-  ## Rules và constraints
-</rules>
-
-<data type="fragrance_knowledge">
-  ## Knowledge base content
-</data>
-```
-
----
-
-## Xử Lý Sự Cố
-
-### Vấn Đề: "No relevant products found"
-
-**Nguyên nhân:** Threshold quá cao hoặc chưa index products
-
-**Giải pháp:**
-
-1. Check products đã index: `GET /per/rag/knowledge/status`
-2. Giảm `RAG_SIMILARITY_THRESHOLD` xuống 0.2
-3. Re-index: `POST /per/rag/index`
-
-### Vấn Đề: "LLM trả về JSON không hợp lệ"
-
-**Nguyên nhân:** Llama 3.2 wrap JSON trong markdown code blocks
-
-**Giải pháp:** Method `cleanMarkdownCodeBlocks()` tự động loại bỏ ` ```json `
-
-### Vấn Đề: "Products array rỗng dù có sản phẩm phù hợp"
-
-**Nguyên nhân:** LLM filter quá strict theo seasonality/occasion trong prompt
-
-**Giải pháp:** Điều chỉnh filtering rules trong `system-prompt.txt`
-
----
-
-## Tối Ưu Performance
-
-### Vector Search
-
-- **Top-K**: Cao hơn = nhiều context hơn nhưng chậm hơn (mặc định: 5)
-- **Threshold**: Thấp hơn = matching "dễ tính" hơn (mặc định: 0.3)
-
-```yaml
-app:
-  rag:
-    search-top-k: 10          # Nhiều products trong context
-    similarity-threshold: 0.2  # Matching dễ tính hơn
-```
-
-### Thời Gian Response LLM
-
-- **Model size**: llama3.2 (~2GB, inference nhanh)
-- **Streaming**: Dùng `/chat/stream` cho perceived speed
-- **GPU**: Ollama tự dùng GPU nếu có (nhanh gấp 10x)
-
----
-
-## Câu Hỏi Thường Gặp
-
-**Q: Có thể dùng GPT-4 thay Ollama không?**
-
-A: Có, thay OllamaChatModel bằng OpenAiChatModel. Đổi `spring.ai.openai.api-key`.
-
-**Q: Làm sao thêm custom prompts?**
-
-A: Edit files trong `src/main/resources/prompt/`. Restart app (prompts load lúc runtime).
-
-**Q: Tại sao dùng structured output thay plain text?**
-
-A: Cho phép Generative UI - frontend tự động render ProductCards, CTAs, v.v.
-
-**Q: Làm sao prevent hallucinations?**
-
-A: Prompt nói rõ "KHÔNG invent products". BeanOutputConverter ép định dạng UUID.
-
----
-
-## Bước Tiếp Theo
-
-1. **Customize Prompts**: Edit `system-prompt.txt` cho domain của bạn
-2. **Tune Parameters**: Điều chỉnh top-K và threshold theo catalog size
-3. **Monitor Performance**: Check LLM response times qua logs
-4. **A/B Test**: So sánh structured vs streaming cho UX
-
----
-
-## Tài Liệu Liên Quan
-
-- [English README](./README_en.md)
-- [API Collection](../../postman/per-api-collection.json)
-- [Spring AI Docs](https://docs.spring.io/spring-ai/reference/)
+1.  **Nguồn Dữ Liệu Mới:** Triển khai các giao diện `DocumentReader` để nhập dữ liệu phi sản phẩm (ví dụ: bài viết blog, chính sách).
+2.  **Mô Hình Tùy Chỉnh:** Triển khai giao diện `ChatModel` để hoán đổi Ollama cho OpenAI hoặc Azure tương đương.
+3.  **Lặp Lại Prompt:** Sửa đổi `system-prompt.txt` để điều chỉnh giọng điệu, các hạn chế hoặc quy tắc định dạng. Thay đổi có hiệu lực trong yêu cầu tiếp theo (runtime loading).
