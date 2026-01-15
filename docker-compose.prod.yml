@@ -61,17 +61,17 @@ services:
       - elasticsearch
 
   db:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports: ["127.0.0.1:5432:5432"]
+    ports: [ "127.0.0.1:5432:5432" ]
     networks:
       - per-network
-    volumes: ["db:/var/lib/postgresql/data"]
+    volumes: [ "db:/var/lib/postgresql/data" ]
 
   redis:
     image: redis:7-alpine
@@ -246,6 +246,7 @@ services:
 volumes:
   db:
   kafka_data:
+
 
 networks:
   per-network:
