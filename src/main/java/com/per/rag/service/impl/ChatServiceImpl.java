@@ -43,7 +43,6 @@ public class ChatServiceImpl implements ChatService {
                 return ChatResponse.builder()
                         .answer(
                                 "I apologize, but I couldn't find relevant information about that. Could you please rephrase your question or ask about our available perfume products?")
-                        .sourceDocuments(List.of())
                         .build();
             }
 
@@ -53,14 +52,7 @@ public class ChatServiceImpl implements ChatService {
             // Generate response directly from context
             String answer = chatModel.call(context);
 
-            // Extract source document names
-            List<String> sources =
-                    similarDocs.stream()
-                            .map(doc -> (String) doc.getMetadata().get("productName"))
-                            .distinct()
-                            .collect(Collectors.toList());
-
-            return ChatResponse.builder().answer(answer).sourceDocuments(sources).build();
+            return ChatResponse.builder().answer(answer).build();
 
         } catch (ApiException e) {
             throw e;
