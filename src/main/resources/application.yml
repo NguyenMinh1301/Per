@@ -23,6 +23,20 @@ spring:
       password: ${REDIS_PASSWORD}
   elasticsearch:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+      embedding:
+        options:
+          model: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text}
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 768
   mail:
     host: smtp.gmail.com
     port: 587
