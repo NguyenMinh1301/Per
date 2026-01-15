@@ -13,7 +13,7 @@
   &nbsp;&nbsp;
    <a href="https://prometheus.io/" target="_blank"><img src="document/img/prometheus.svg" height="140" alt="Prometheus" /></a>
   &nbsp;&nbsp;
-   <a href="https://ollama.com/" target="_blank"><img src="document/img/ollama.svg" height="140" alt="Ollama" /></a>
+   <a href="https://ollama.com/" target="_blank"><img src="document/img/ollama.svg" height="65" alt="Ollama" /></a>
 </p>
 
 ## Introduction
