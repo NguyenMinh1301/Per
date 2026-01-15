@@ -1,99 +1,130 @@
-Category Module Overview
-========================
+# Domain Module: Category Management
 
-The category module manages product taxonomies (e.g., perfume families, collections). It mirrors the brand module in structure, providing CRUD APIs with pagination and query filtering while keeping category-specific validations encapsulated.
+## 1. Overview
 
-Responsibilities
-----------------
+The **Category Module** defines the taxonomical structure of the product catalog. It organizes products into hierarchical or flat families (e.g., "Floral", "Woody", "Summer Collection"). This classification is critical for navigation, filtering, and SEO. Like other master data modules, it emphasizes data integrity and high availability.
 
-* Create, update, list, and delete categories.
-* Provide pageable search with optional text filtering.
-* Enforce category name uniqueness.
-* Map between REST payloads and the `Category` JPA entity.
+---
 
-Key Packages
-------------
+## 2. Data Model Architecture
 
-| Package | Description |
-| --- | --- |
-| `controller` | `CategoryController` exposing `/api/v1/categories` endpoints. |
-| `dto.request` | `CategoryCreateRequest`, `CategoryUpdateRequest`. |
-| `dto.response` | `CategoryResponse` DTO returned to clients. |
-| `entity` | `Category` entity (see Flyway migration `V3__init_brand_category_product.sql`). |
-| `mapper` | MapStruct mapper for DTO ↔ entity transformations. |
-| `repository` | `CategoryRepository` with name uniqueness helpers and JPQL `search`. |
-| `service` | `CategoryService` contract and `CategoryServiceImpl` implementation. |
+The `Category` entity enforces the classification schema.
 
-Request Flow Summary
---------------------
+### 2.1 Entity Relationship Diagram
 
-1. Controller delegates to `CategoryService`.
-2. Service resolves operations: load category, validate uniqueness, call mapper for partial updates, persist via `CategoryRepository`.
-3. Mapper handles field-level ignores (IDs, timestamps) to keep persistence safe.
-4. Repository search matches category name using case-insensitive `LIKE`.
+```mermaid
+classDiagram
+    class Category {
+        +UUID id
+        +String name
+        +String description
+        +String imageUrl
+        +String imageId
+        +Boolean isActive
+        +LocalDateTime createdAt
+        +LocalDateTime updatedAt
+        +Long version
+    }
 
-API Contracts
--------------
+    class Product {
+        +UUID id
+        +String name
+    }
 
-### `GET /api/v1/categories`
-* Optional `query` parameter (name match).
-* Pageable with default `createdAt` desc.
-* Success code: `CATEGORY_LIST_SUCCESS`.
-* Returns `PageResponse<CategoryResponse>`.
-
-### `GET /api/v1/categories/{id}`
-* Success code: `CATEGORY_FETCH_SUCCESS`.
-* Returns a single `CategoryResponse`.
-
-### `POST /api/v1/categories`
-* Body: `CategoryCreateRequest` (name required, optional description fields, image metadata, active flag).
-* Success code: `CATEGORY_CREATE_SUCCESS`.
-* Errors: `CATEGORY_NAME_CONFLICT` when name already exists.
-
-### `PUT /api/v1/categories/{id}`
-* Body: `CategoryUpdateRequest` (partial update).
-* Success code: `CATEGORY_UPDATE_SUCCESS`.
-* Unique name validation occurs if `name` provided.
-
-### `DELETE /api/v1/categories/{id}`
-* Deletes category; success code `CATEGORY_DELETE_SUCCESS`.
-
-Error Handling
---------------
-
-* `CATEGORY_NOT_FOUND` – invalid ID.
-* `CATEGORY_NAME_CONFLICT` – duplicate name.
-* `VALIDATION_ERROR` – surfaced when `@Valid` fails (handled globally).
-
-Testing Notes
--------------
-
-Focus on `CategoryServiceImpl`:
-* Assert search delegates based on query presence.
-* Validate name conflict detection on create/update.
-* Verify partial updates preserve existing values when fields omitted.
-
-Example test invocation:
-```
-mvn -Dtest=CategoryServiceImplTest test
+    Category "1" -- "0..*" Product : contains >
 ```
 
-Extending the Module
---------------------
+### 2.2 Schema Constraints
 
-* **Nested categories**: add parent/child relationship fields in the entity and adjust mapper/service logic.
-* **Slugging/SEO**: populate the `slug` field from the name in the service layer (ensure uniqueness with dedicated repository method).
-* **Localization**: create additional DTO/entity fields for translated names, descriptions, and adapt responses accordingly.
+*   **Identity**: `id` is a UUID v4.
+*   **Uniqueness**: `name` must be unique (case-insensitive) to prevent taxonomical confusion.
+*   **Audit**: Auto-managed timestamps (`createdAt`, `updatedAt`).
 
-Caching
--------
+---
 
-Redis caching is enabled for read operations:
+## 3. Business Logic & Invariants
 
-* `getCategories` and `getCategory` are annotated with `@Cacheable`.
-* Cache names: `categories` (list), `category` (single item by ID).
-* TTL: 30 minutes (master data).
-* Write operations (create, update, delete) trigger post-commit cache eviction via `CacheEvictionHelper`.
+### 3.1 Validation Rules
 
-See [Cache Module Documentation](../../cache/README.md) for details.
+1.  **Unique Nomenclature**: The system forbids duplicate category names. This is enforced via a pre-persistence lookup (`existsByNameIgnoreCase`). Violation results in `CATEGORY_NAME_CONFLICT`.
+2.  **Referential Safety**: Deleting a Category containing active products may be restricted by Foreign Key constraints or application logic, necessitating reassignment or cascade deletion.
 
+### 3.2 Caching Strategy
+
+Optimized for read-heavy navigation menus and filters.
+
+*   **L2 Cache (Redis)**:
+    *   `GET /categories` → `categories::{hash}`
+    *   `GET /categories/{id}` → `category::{id}`
+*   **Invalidation Protocol**:
+    *   Any state change (Create/Update/Delete) triggers a holistic eviction of the `categories` list cache and the specific `category` key.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/categories`
+
+### 4.1 Retrieval Operations
+
+#### Get Single Category
+`GET /{id}`
+
+*   **Response**: `CategoryResponse`
+*   **Error**: `404` if not found.
+
+#### List & Search
+`GET /`
+
+Supports filtering by name or description.
+
+| Parameter | Type | Description |
+| :--- | :--- | :--- |
+| `query` | `string` | Text search (Name/Description). |
+| `page`, `size` | `int` | Pagination controls. |
+| `sort` | `string` | e.g. `name,asc`. |
+
+### 4.2 State Mutation Operations
+
+#### Create Category
+`POST /`
+
+**Schema**: `CategoryCreateRequest`
+
+```json
+{
+  "name": "Eau de Parfum",
+  "description": "Concentration of 15-20%",
+  "isActive": true
+}
+```
+
+#### Update Category
+`PUT /{id}`
+
+**Schema**: `CategoryUpdateRequest`
+Supports partial updates. Only non-null fields modify the state.
+
+#### Delete Category
+`DELETE /{id}`
+
+Removes the entity and invalidates associated caches.
+
+---
+
+## 5. Implementation Details
+
+### 5.1 Service Layer
+
+The `CategoryService` handles the orchestration of validation, mapping, and persistence.
+
+**Key Responsibilities:**
+*   Name collision detection.
+*   DTO/Entity mapping via MapStruct.
+*   Transaction management (`@Transactional`).
+*   Cache eviction calls.
+
+### 5.2 Extensions
+
+*   **Hierarchical Structures**: The module can be extended to support `parentId` for tree-based navigation (Sub-categories).
+*   **Search Sync**: Updates propagate to the Elasticsearch index via Kafka (`category-index-topic`) to enable faceted search.

@@ -1,113 +1,142 @@
-Product Module Overview
-=======================
+# Domain Module: Product Management
 
-The product module powers the merch catalogue for perfumes. It manages product master data, variant inventory/pricing, and exposes REST endpoints for admins to create, update, and curate the assortment. Products depend on related reference data (brand, category, made-in) and enforce business rules around uniqueness and stock configuration.
+## 1. Introduction
 
-Responsibilities
-----------------
+The **Product Module** acts as the core aggregation root for the e-commerce catalog. It orchestrates the lifecycle of merchandise, managing not only the core product definition but also its dimensional variants (SKUs), inventory states, and pricing strategies. It serves as the primary data source for the search engine indexer.
 
-* CRUD operations for products and their variants.
-* Provide pageable search, filtered by product name.
-* Maintain relationships to brand, category, and origin entities.
-* Validate product name uniqueness and variant SKU uniqueness.
-* Aggregate variant data into product detail responses.
+---
 
-Key Packages
-------------
+## 2. Data Model Architecture
 
-| Package | Description |
-| --- | --- |
-| `controller` | `ProductController` (`/api/v1/products`) and `ProductVariantController` (`/api/v1/products/{productId}/variants`). |
-| `dto.request` | Create/update payloads for products and variants (supports bulk add/update/delete on update). |
-| `dto.response` | `ProductResponse`, `ProductDetailResponse`, `ProductVariantResponse`. |
-| `entity` | `Product` and `ProductVariant` entities declared in Flyway migration `V3__init_brand_category_product.sql`. |
-| `enums` | Domain enumerations (fragrance family, gender, sillage, etc.). |
-| `mapper` | MapStruct mappers converting between DTOs and entities. |
-| `repository` | Spring Data repositories with additional lookup helpers (`findByNameContainingIgnoreCase`, `findByIdAndProductId`, SKU existence checks). |
-| `service` | `ProductService` interface and `ProductServiceImpl` implementation containing orchestration logic. |
+The domain model follows a parent-child hierarchy to support multi-variant products (e.g., different volumes of the same fragrance).
 
-Request Flow Summary
---------------------
+### 2.1 Entity Relationship Diagram
 
-1. **Product Listing (`GET /products`)**
-   * Controller delegates to `productService.getProducts`.
-   * Service queries `ProductRepository` using optional search text.
-   * Results mapped to `ProductResponse` and wrapped in `PageResponse`.
+```mermaid
+classDiagram
+    class Product {
+        +UUID id
+        +String name
+        +String description
+        +Gender gender
+        +Boolean isActive
+        +UUID brandId
+        +UUID categoryId
+        +UUID madeInId
+    }
 
-2. **Product Detail (`GET /products/{id}`)**
-   * Service loads product via `findProduct`, fetches variants, and builds a `ProductDetailResponse` with variant DTOs.
+    class ProductVariant {
+        +UUID id
+        +String sku
+        +BigDecimal price
+        +Integer stock
+        +Integer size
+        +Concentration concentration
+        +Boolean isActive
+        +UUID productId
+    }
 
-3. **Create Product (`POST /products`)**
-   * Validates brand/category/made-in references exist.
-   * Asserts product name uniqueness.
-   * Maps request to `Product` entity and persists.
-   * Optionally persists initial variants (batch create with duplicate SKU guard).
+    class Brand { +UUID id }
+    class Category { +UUID id }
+    class MadeIn { +UUID id }
 
-4. **Update Product (`PUT /products/{id}`)**
-   * Resolves optional association changes (brand/category/made-in).
-   * Handles product field updates through mapper.
-   * Applies variant mutations via `variantsToAdd`, `variantsToUpdate`, `variantsToDelete`.
-
-5. **Delete Product (`DELETE /products/{id}`)**
-   * Removes associated variants then deletes the product.
-
-6. **Variant Endpoints (`/products/{productId}/variants`)**
-   * Add/update/delete operations reuse validation helpers in `ProductServiceImpl` to ensure SKU uniqueness and correct product association.
-
-Validations
------------
-
-* `PRODUCT_NAME_CONFLICT` – when a product name already exists (case-insensitive).
-* `PRODUCT_VARIANT_SKU_CONFLICT` – duplicate SKU either in payload or persisted store.
-* `PRODUCT_NOT_FOUND`, `PRODUCT_VARIANT_NOT_FOUND` – invalid references.
-* `BRAND_NOT_FOUND`, `CATEGORY_NOT_FOUND`, `MADEIN_NOT_FOUND` – missing dependencies.
-* Default setters ensure variant currency (`VND`) and stock fields are non-null.
-
-API Contracts (Success Codes)
------------------------------
-
-| Endpoint | Success Code |
-| --- | --- |
-| `GET /api/v1/products` | `PRODUCT_LIST_SUCCESS` |
-| `GET /api/v1/products/{id}` | `PRODUCT_FETCH_SUCCESS` |
-| `POST /api/v1/products` | `PRODUCT_CREATE_SUCCESS` |
-| `PUT /api/v1/products/{id}` | `PRODUCT_UPDATE_SUCCESS` |
-| `DELETE /api/v1/products/{id}` | `PRODUCT_DELETE_SUCCESS` |
-| `POST /api/v1/products/{productId}/variants` | `PRODUCT_VARIANT_CREATE_SUCCESS` |
-| `PUT /api/v1/products/{productId}/variants/{variantId}` | `PRODUCT_VARIANT_UPDATE_SUCCESS` |
-| `DELETE /api/v1/products/{productId}/variants/{variantId}` | `PRODUCT_VARIANT_DELETE_SUCCESS` |
-
-Testing
--------
-
-`ProductServiceImplTest` exercises the service layer with mocks:
-* Retrieval & pagination logic.
-* Create/update workflows, including association checks and variant mutations.
-* Error handling for name/SKU conflicts and missing dependencies.
-
-Run module-specific tests with:
-```
-mvn -Dtest=ProductServiceImplTest test
+    Product "1" *-- "1..*" ProductVariant : composition
+    Product --> "1" Brand : belongs_to
+    Product --> "1" Category : classified_as
+    Product --> "1" MadeIn : originates_from
 ```
 
-Extending the Module
---------------------
+### 2.2 Schema Constraints
 
-* **Inventory integration**: augment `ProductVariant` with stock reservation data or integrate with external inventory APIs.
-* **Pricing tiers**: add multi-currency pricing or promotional fields; adjust DTOs/mappers accordingly.
-* **Search facets**: expose more filters (brand, category, gender) by extending repository queries and controller parameters.
-* **Media associations**: link variant images or galleries using the media module.
-* **Soft delete**: respect `isActive` flags for both product and variants, filtering results while retaining history.
+*   **Aggregation**: `ProductVariant` entities cannot exist independently of a `Product`.
+*   **Identification**:
+    *   `Product.name`: Unique within the catalog.
+    *   `ProductVariant.sku`: Globally unique Stock Keeping Unit identifier.
+*   **Referential Integrity**: Strict foreign key constraints bind products to their metadata (Brand, etc.).
 
-Caching
--------
+---
 
-Redis caching is enabled for read operations:
+## 3. Business Logic & Invariants
 
-* `getProducts` and `getProduct` are annotated with `@Cacheable`.
-* Cache names: `products` (list), `product` (single item by ID).
-* TTL: 10 minutes (product data changes more frequently than master data).
-* Write operations (create, update, delete) and variant modifications trigger post-commit cache eviction via `CacheEvictionHelper`.
+### 3.1 Lifecycle Management
 
-See [Cache Module Documentation](../../cache/README.md) for details.
+1.  **Creation Integrity**: A product cannot be created without valid references to existing `Brand`, `Category`, and `MadeIn` entities.
+2.  **Variant Enapsulation**: Variants are managed as a cohesive unit. Adding or updating a variant automatically updates the parent product's audit timestamps.
+3.  **SKU Uniqueness**: A mandatory check prevents SKU collisions across the entire inventory system (`PRODUCT_VARIANT_SKU_CONFLICT`).
 
+### 3.2 Synchronization (Event-Driven)
+
+Creating or modifying products triggers side-effects via the Event Bus (Kafka):
+
+*   **Event**: `ProductIndexEvent`
+*   **Payload**: Full product state including denormalized variant data.
+*   **Consumer**: Elasticsearch Service (for updating the search index).
+
+### 3.3 Caching Strategy
+
+*   **TTL**: 10 Minutes (Aggressive expiry due to inventory volatility).
+*   **Eviction Scope**: Modifying a variant evicts the parent product's cache (`product::{id}`).
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/products`
+
+### 4.1 Product Operations
+
+#### Retrieval
+`GET /{id}`
+Returns `ProductDetailResponse` (includes list of variants).
+
+`GET /`
+Standard pagination with name filtering.
+
+#### Creation
+`POST /`
+**Body**: `ProductCreateRequest`
+Can optionally include an initial list of variants for atomic creation.
+
+#### Update
+`PUT /{id}`
+**Body**: `ProductUpdateRequest`
+Supports updating core fields and managing variant lists (Add/Update/Delete) in a single transaction.
+
+### 4.2 Variant Sub-Resources
+
+Direct manipulation of variants is supported for granular inventory management.
+
+#### Manage Variants
+*   `POST /{id}/variants`: Append new variant.
+*   `PUT /{id}/variants/{variantId}`: Update price/stock.
+*   `DELETE /{id}/variants/{variantId}`: Deactivate/Remove variant.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 Service Orchestration
+
+`ProductService` encapsulates complex update logic:
+
+```java
+@Transactional
+public ProductResponse update(UUID id, ProductUpdateRequest request) {
+    // 1. Update Core Fields
+    mapper.updateEntity(product, request);
+    
+    // 2. Handle Variants
+    if (request.variantsToAdd() != null) addVariants(product, request.variantsToAdd());
+    if (request.variantsToUpdate() != null) updateVariants(request.variantsToUpdate());
+    if (request.variantsToDelete() != null) deleteVariants(request.variantsToDelete());
+    
+    // 3. Publish Event
+    eventPublisher.publishEvent(new ProductIndexEvent(product.getId()));
+}
+```
+
+### 5.2 Attributes & Enumerations
+
+The domain defines specific enums for fragrance characteristics:
+*   **Gender**: `MALE`, `FEMALE`, `UNISEX`.
+*   **Concentration**: `EDP` (Eau de Parfum), `EDT` (Eau de Toilette), `PARFUM`, etc.

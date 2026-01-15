@@ -1,73 +1,124 @@
-Order Module Overview
-=====================
+# Domain Module: Order Management
 
-The order module snapshots everything that leaves the cart: customer, shipping info, economic totals, and the exact product/variant/quantity/price being purchased. Payments, fulfilment, and refunds all depend on the data frozen here.
+## 1. Overview
 
-Responsibilities
-----------------
+The **Order Module** is the transactional heart of the e-commerce platform. It snapshots the volatile state of a cart into an immutable contract of sale. It tracks fulfillment status, payment reconciliation, and serves as the source of truth for revenue.
 
-* Persist checkout snapshots (`Order` + `OrderItem`) before hitting the payment gateway.
-* Store an immutable copy of the price, SKU, and quantity at checkout. Later adjustments should create compensating records (credit notes) rather than updating these rows.
-* Provide hooks for:
-  * `payment.order_id` – payments reconcile against orders.
-  * Inventory rollback – if a payment fails, we know exactly which variants to restock.
-  * Future fulfilment modules (shipping labels, invoices).
+---
 
-Schema Mapping
---------------
+## 2. Architecture
 
-* **Order (`public."order"`)**
-  * Mirrors `com.per.order.entity.Order`.
-  * Fields: `order_code` (9-digit random), totals (`subtotal_amount`, `discount_amount`, `shipping_fee`, `grand_total`), receiver details, `currency_code`, and timestamps.
-  * Status comes from `OrderStatus`:
-    * `PENDING_PAYMENT` – just created; waiting for payment.
-    * `PAID` – payment succeeded.
-    * `CANCELLED` – user cancelled before paying (either via return URL or webhook).
-    * `FAILED` – expired/no payment received and scheduler marked it as failed.
-* **OrderItem (`public.order_item`)**
-  * Mirrors `com.per.order.entity.OrderItem`.
-  * Contains FK to `order`, `product`, and `product_variant`.
-  * Stored columns include `product_name`, `variant_sku`, `quantity`, `unit_price`, `sub_total_amount` – all immutable once saved.
+Orders are immutable snapshots. Once created, line items (price, quantity) do not change even if the catalog product is updated.
 
-Lifecycle
----------
+### 2.1 Entity Relationship Diagram
 
-1. **Checkout** (`CheckoutServiceImpl`)
-   * Validates cart items, checks stock, decrements `product_variant.stockQuantity`.
-   * Creates an `Order` with `OrderItem` records and `PENDING_PAYMENT` status.
-2. **Payment** (PayOS)
-   * `Payment` references the order via `order_id`.
-   * Webhook/return endpoint updates both payment and order status; on failure/cancel it also calls `OrderInventoryService.restoreStock`.
-3. **Expiration** (`ExpiredPaymentScheduler`)
-   * Runs every minute: finds `Payment` rows with `status=PENDING` and `expired_at < now`, marks order/payment as `FAILED`, and restores stock.
-4. **Fulfilment (future)**
-   * Build additional tables keyed by `order.id` when you introduce shipping, invoices, etc.
+```mermaid
+classDiagram
+    class Order {
+        +UUID id
+        +String orderCode
+        +OrderStatus status
+        +PaymentStatus paymentStatus
+        +BigDecimal grandTotal
+        +Address shippingAddress
+    }
 
-Maintenance Guidelines
-----------------------
+    class OrderItem {
+        +UUID id
+        +String sku
+        +String productName
+        +BigDecimal unitPrice
+        +Integer quantity
+    }
 
-* Never mutate unit prices or quantities on existing `OrderItem` rows. Create adjustments/refunds separately.
-* Any new columns require:
-  1. Updating the entity builder defaults.
-  2. Adding a Flyway migration (don’t edit V8 in production).
-  3. Populating the value in checkout logic.
-* Use `OrderInventoryService` whenever you need to restore stock; do not hand-roll variant updates outside it to avoid inconsistencies.
-* When adding order APIs later, always filter by authenticated user (unless admin) and paginate results.
+    Order "1" *-- "1..*" OrderItem : composed_of
+```
 
-Testing
--------
+### 2.2 Lifecycle State Machine
 
-* Unit tests can mock `OrderRepository` and `ProductVariantRepository` to verify that totals and inventory adjustments happen in turn.
-* Integration tests should cover:
-  * Checkout success (order → payOS link).
-  * Webhook success (order state → `PAID`).
-  * Cancel/expiry (order state → `CANCELLED`/`FAILED` and inventory restored).
+The order status dictates the allowed operations.
 
-API Surface
------------
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING_PAYMENT : Checkout
+    
+    PENDING_PAYMENT --> PAID : Payment Success
+    PENDING_PAYMENT --> CANCELLED : User Cancel
+    PENDING_PAYMENT --> FAILED : Timeout/Expired
+    
+    PAID --> SHIPPED : Logistics Integration
+    SHIPPED --> DELIVERED : Confirmed
+```
 
-Orders currently don’t expose public REST endpoints. If you need them:
+---
 
-* Use `/api/v1/orders` (GET list, GET detail by `orderCode`).
-* Always return the `OrderStatus` and `PaymentStatus` so clients don’t need to cross-check elsewhere.
-* For admin dashboards, include filters (`status`, `date range`, `user`) and pagination.
+## 3. Business Logic & Invariants
+
+### 3.1 Immutable Snapshots
+
+When converting a Cart to an Order:
+1.  **Price Freeze**: The `unitPrice` is copied by value from the variant. Future price changes do not affect existing orders.
+2.  **Product Freeze**: `productName` and `sku` are de-normalized into `OrderItem` to preserve historical accuracy even if the product is deleted.
+
+### 3.2 Inventory Commit
+
+*   **Reservation**: Creation of an Order (PENDING) strictly decrements stock.
+*   **Rollback**: Transition to `CANCELLED` or `FAILED` triggers a compensating transaction (`restoreStock`) to return items to inventory.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/orders`
+
+### 4.1 Retrieval
+
+#### Get My Orders
+`GET /`
+Returns paginated orders for the authenticated user only.
+
+#### Get Order Detail
+`GET /{orderCode}`
+Lookup by user-friendly 9-digit code (e.g., `192837465`) rather than UUID for better UX.
+
+### 4.2 Administration
+
+#### Admin List
+`GET /admin`
+Filtered list (Status, Date Range) for back-office operations.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 Snapshot Logic
+
+```java
+// CheckoutServiceImpl.java
+OrderItem item = new OrderItem();
+item.setProductName(variant.getProduct().getName()); // Snapshot Name
+item.setSku(variant.getSku());                     // Snapshot SKU
+item.setUnitPrice(variant.getPrice());             // Snapshot Price
+item.setSubTotal(variant.getPrice().multiply(qty));
+```
+
+### 5.2 Stock Compensation
+
+`OrderInventoryService` handles the critical rollback logic.
+
+```java
+@Transactional
+public void restoreStock(Order order) {
+    for (OrderItem item : order.getItems()) {
+        productVariantRepository.incrementStock(item.getSku(), item.getQuantity());
+    }
+}
+```
+
+---
+
+## 6. Future Extensions
+
+*   **Logistics Integration**: Add `shipping_tracking_code` and integrate with carriers (GHTK, GHN).
+*   **Invoicing**: Generate PDF invoices snapshots upon `PAID` transition.
+*   **Return Management (RMA)**: Handle partial returns and refunds.
