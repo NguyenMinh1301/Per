@@ -26,6 +26,10 @@ app:
     auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:true}
   mail:
     from: ${MAIL_FROM}
+  rag:
+    chat-model: ${OLLAMA_CHAT_MODEL:llama3.2}
+    search-top-k: ${RAG_SEARCH_TOP_K:5}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
