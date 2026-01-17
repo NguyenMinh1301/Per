@@ -132,7 +132,7 @@ The project enforces strict code style guidelines using **Spotless**.
 ### API Documentation
 
 Interactive OpenAPI 3.0 documentation is available at:
-`http://localhost:8080/per/swagger-ui/index.html`
+`http://localhost:8080/per/api-docs`
 
 ---
 
