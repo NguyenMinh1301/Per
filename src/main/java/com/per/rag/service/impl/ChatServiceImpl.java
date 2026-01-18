@@ -35,7 +35,7 @@ public class ChatServiceImpl implements ChatService {
     @Value("${app.rag.similarity-threshold}")
     private double similarityThreshold;
 
-    @Value("classpath:prompt/system-prompt.txt")
+    @Value("classpath:knowledge/system-prompt.txt")
     private Resource systemPromptResource;
 
     private static final String SYSTEM_PROMPT_TEMPLATE =
