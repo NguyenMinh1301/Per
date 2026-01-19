@@ -1,156 +1,156 @@
 <data type="store_policies">
 
-# Chính Sách Cửa Hàng
+# Store Policies
 
-## Chính Sách Vận Chuyển
+## Shipping Policy
 
-### Phí Vận Chuyển
-- **Miễn phí** cho đơn hàng từ **2,000,000 VNĐ** trở lên
-- Đơn hàng dưới 2,000,000 VNĐ: phí ship **30,000 VNĐ**
-- Khu vực nội thành Hà Nội, TP.HCM: giao hàng trong **24 giờ**
-- Khu vực tỉnh thành khác: giao hàng trong **2-3 ngày làm việc**
+### Shipping Fees
+- **Free Shipping** for all orders over **2,000,000 VNĐ**
+- Orders under 2,000,000 VNĐ: Flat rate of **30,000 VNĐ**
+- Hanoi & HCM City: Delivery within **24 hours**
+- Other provinces: Delivery within **2-3 business days**
 
-### Đóng Gói
-- Tất cả sản phẩm được đóng gói cẩn thận
-- Kèm theo hóa đơn VAT (nếu khách yêu cầu)
-- Đóng gói quà tặng miễn phí (theo yêu cầu)
-- Có thẻ message cho người nhận
+### Packaging
+- All products are carefully and securely packaged
+- VAT invoice included (if requested)
+- Free gift wrapping (upon request)
+- Gift message cards available
 
-### Theo Dõi Đơn Hàng
-- Mã vận đơn gửi qua SMS/Email sau khi ship
-- Kiểm tra trạng thái qua website hoặc app vận chuyển
-- Hỗ trợ 24/7 qua hotline nếu có thắc mắc
+### Order Tracking
+- Tracking ID sent via SMS/Email after dispatch
+- Monitor status on our website or shipping partner's app
+- 24/7 hotline support for any inquiries
 
-## Chính Sách Đổi Trả
+## Returns and Exchange Policy
 
-### Điều Kiện Đổi Trả
-✅ **Được chấp nhận:**
-- Sản phẩm chưa sử dụng, còn nguyên seal
-- Trong vòng **30 ngày** kể từ ngày mua
-- Có hóa đơn mua hàng
-- Tem, nhãn, bao bì còn nguyên vẹn
+### Eligibility
+✅ **Accepted if:**
+- Product is unused and still sealed
+- Within **30 days** of purchase
+- Proof of purchase (invoice) is provided
+- Tags, labels, and packaging are intact
 
-❌ **Không được chấp nhận:**
-- Sản phẩm đã mở seal, đã sử dụng
-- Quá 30 ngày kể từ ngày mua
-- Không có hóa đơn
-- Sản phẩm bị hư hỏng do người dùng
+❌ **Not Accepted if:**
+- Seal is broken, product is used
+- Beyond 30 days of purchase
+- No proof of purchase
+- Product damaged by user
 
-### Quy Trình Đổi Trả
-1. Liên hệ hotline hoặc email trong 30 ngày
-2. Cung cấp: mã đơn hàng, hình ảnh sản phẩm, lý do đổi trả
-3. Nhận xác nhận từ bộ phận CSKH
-4. Gửi sản phẩm về (miễn phí ship nếu lỗi nhà cung cấp)
-5. Nhận hoàn tiền hoặc sản phẩm mới trong 3-5 ngày làm việc
+### Process
+1. Contact hotline or email within 30 days
+2. Provide: Order ID, product photos, reason for return
+3. Receive confirmation from Customer Service
+4. Ship back (free shipping for manufacturer defects)
+5. Receive refund or replacement within 3-5 business days
 
-### Hoàn Tiền
-- Hoàn tiền qua tài khoản ngân hàng: 3-5 ngày làm việc
-- Hoàn tiền vào ví điện tử: 1-2 ngày làm việc
-- Đổi sang voucher: Ngay lập tức + thêm 5% giá trị
+### Refunds
+- Bank Transfer: 3-5 business days
+- E-wallet: 1-2 business days
+- Voucher: Immediate + 5% bonus value
 
-## Chính Sách Bảo Hành
+## Warranty Policy
 
-### Sản Phẩm Chính Hãng
-- **100% hàng chính hãng** từ nhà phân phối ủy quyền
-- Tem chống hàng giả trên mỗi sản phẩm
-- Giấy chứng nhận nguồn gốc xuất xứ
-- Hóa đơn VAT đầy đủ
+### Authenticity Guarantee
+- **100% Authentic products** from authorized distributors
+- Anti-counterfeit stamp on every product
+- Certificate of origin available
+- Full VAT invoice
 
-### Bảo Hành Chất Lượng
-- Bảo hành **12 tháng** cho các lỗi do nhà sản xuất
-- Đổi mới nếu phát hiện hàng giả trong 30 ngày
-- Hoàn tiền 100% nếu sản phẩm không đúng mô tả
+### Quality Warranty
+- **12-month warranty** for manufacturing defects
+- Full replacement if counterfeit is detected within 30 days
+- 100% refund if product doesn't match description
 
-### Lỗi Kỹ Thuật
-Các trường hợp được bảo hành:
-- Vòi xịt bị hỏng (không do tác động vật lý)
-- Nắp chai bị lỗi
-- Sản phẩm bị rò rỉ (lỗi kỹ thuật)
+### Technical Defects
+Covered under warranty:
+- Broken sprayer (if not caused by physical impact)
+- Defective cap
+- Leaking (technical fault)
 
-Không bảo hành:
-- Hương thơm thay đổi do bảo quản sai cách
-- Sản phẩm bị vỡ do va đập
-- Hết hạn sử dụng
+Not covered:
+- Scent profile change due to improper storage
+- Broken bottle due to impact
+- Expired products
 
-## Chính Sách Thanh Toán
+## Payment Policy
 
-### Phương Thức Thanh Toán
-✅ **Chấp nhận:**
-- Tiền mặt (COD)
-- Chuyển khoản ngân hàng
-- Thẻ tín dụng/Thẻ ghi nợ (Visa, Mastercard, JCB)
-- Ví điện tử (MoMo, ZaloPay, VNPay)
-- Trả góp 0% (đơn từ 3,000,000 VNĐ)
+### Accepted Methods
+✅ **We accept:**
+- Cash on Delivery (COD)
+- Bank Transfer
+- Credit/Debit Cards (Visa, Mastercard, JCB)
+- E-wallets (MoMo, ZaloPay, VNPay)
+- 0% Installment (for orders over 3,000,000 VNĐ)
 
-### Bảo Mật Thanh Toán
-- Mã hóa SSL 256-bit
-- Không lưu trữ thông tin thẻ
+### Payment Security
+- 256-bit SSL encryption
+- No card information stored
 - PCI-DSS compliant
-- Xác thực 3D Secure
+- 3D Secure authentication
 
-### Hóa Đơn
-- Hóa đơn điện tử gửi qua email
-- Hóa đơn VAT (theo yêu cầu, cung cấp thông tin công ty)
-- Xuất hóa đơn trong vòng 7 ngày kể từ ngày mua
+### Invoicing
+- E-invoice sent via email
+- VAT invoice (upon request, provide company details)
+- Issued within 7 days of purchase
 
-## Chương Trình Khách Hàng Thân Thiết
+## Loyalty Program
 
-### Tích Điểm
-- Tích **1 điểm** cho mỗi **10,000 VNĐ** chi tiêu
-- 100 điểm = 10,000 VNĐ voucher
-- Điểm tích lũy có hạn 12 tháng
+### Point Accumulation
+- Earn **1 point** for every **10,000 VNĐ** spent
+- 100 points = 10,000 VNĐ voucher
+- Points valid for 12 months
 
-### Hạng Thành Viên
-**Bạc** (0-500 điểm):
-- Giảm 5% sinh nhật
-- Ưu tiên hỗ trợ
+### Membership Tiers
+**Silver** (0-500 points):
+- 5% Birthday discount
+- Priority support
 
-**Vàng** (501-1500 điểm):
-- Giảm 10% sinh nhật
-- Miễn phí ship mọi đơn
-- Quà tặng sinh nhật
+**Gold** (501-1500 points):
+- 10% Birthday discount
+- Free shipping on all orders
+- Birthday gift
 
-**Kim Cương** (>1500 điểm):
-- Giảm 15% sinh nhật
-- Miễn phí ship + đóng gói cao cấp
-- Ưu tiên mua sản phẩm mới
-- Tư vấn cá nhân hóa
+**Diamond** (>1500 points):
+- 15% Birthday discount
+- Free shipping + Premium gift wrapping
+- Priority access to new releases
+- Personalized consultation
 
 </data>
 
 <rules type="contact_and_support">
 
-## Chính Sách Bảo Mật
+## Privacy Policy
 
-### Thông Tin Cá Nhân
-- Không chia sẻ cho bên thứ 3 (trừ đối tác vận chuyển)
-- Mã hóa dữ liệu khách hàng
-- Khách hàng có quyền yêu cầu xóa dữ liệu
+### Personal Information
+- Never shared with 3rd parties (except logistics partners)
+- Encrypted customer data
+- Right to request data deletion
 
-### Sử Dụng Thông Tin
-- Gửi thông báo đơn hàng
-- Email marketing (có thể hủy đăng ký)
-- Cải thiện dịch vụ
+### Data Usage
+- Order status notifications
+- Email marketing (opt-out available)
+- Service improvement
 
-## Liên Hệ và Hỗ Trợ
+## Contact and Support
 
-### Thông Tin Liên Hệ
-- **Hotline:** 1900-xxxx (8:00 - 22:00 hàng ngày)
+### Contact Information
+- **Hotline:** 1900-xxxx (8:00 AM - 10:00 PM daily)
 - **Email:** support@perfumeshop.vn
-- **Live Chat:** Trên website
-- **Zalo OA:** @perfumeshop
+- **Live Chat:** Available on website
+- **Social Media:** @perfumeshop
 
-### Thời Gian Phản Hồi
-- Hotline: Ngay lập tức
-- Email: Trong 24 giờ
-- Live Chat: Trong 5 phút (giờ hành chính)
-- Social Media: Trong 2 giờ
+### Response Times
+- Hotline: Immediate
+- Email: Within 24 hours
+- Live Chat: Within 5 minutes (business hours)
+- Social Media: Within 2 hours
 
-### Giải Quyết Khiếu Nại
-1. Tiếp nhận khiếu nại trong 24 giờ
-2. Xác minh thông tin trong 1-2 ngày
-3. Đưa ra phương án giải quyết
-4. Thực hiện và theo dõi
-5. Lấy phản hồi từ khách hàng
+### Complaint Resolution
+1. Receipt of complaint within 24 hours
+2. Verification within 1-2 days
+3. Proposed resolution
+4. Execution and follow-up
+5. Customer feedback collection
 
 </rules>

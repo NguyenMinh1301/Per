@@ -1,139 +1,139 @@
 <data type="customer_service_guide">
 
-# Hướng Dẫn Tư Vấn Khách Hàng
+# Customer Consultation Guide
 
-## Gợi Ý Theo Dịp Sử Dụng
+## Recommendations by Occasion
 
-### Đi Làm / Văn Phòng
-**Đặc điểm:**
-- Hương nhẹ nhàng, thanh lịch, không quá nồng
-- Longevity: trung bình đến dài lâu (6-8 giờ)
-- Sillage: nhẹ đến trung bình
-- Phù hợp: Floral, Fresh, Citrus
+### Office / Professional
+**Characteristics:**
+- Subtle, elegant, not overwhelming
+- Longevity: Moderate to long-lasting (6-8 hours)
+- Sillage: Low to moderate
+- Suitable Families: Floral, Fresh, Citrus
 
-**Gợi ý:**
-- Nước hoa có nốt hương cam bergamot, hoa nhài
-- Tránh hương quá ngọt hoặc quá nồng
+**Suggestions:**
+- Scents with notes of bergamot, jasmine
+- Avoid overly sweet or heavy fragrances
 
-### Dạ Tiệc / Buổi Tối
-**Đặc điểm:**
-- Hương đậm, quyến rũ, gây ấn tượng
-- Longevity: dài lâu (8-12 giờ)
-- Sillage: mạnh
-- Phù hợp: Oriental, Woody, Amber
+### Night Out / Evening Events
+**Characteristics:**
+- Bold, seductive, impressionable
+- Longevity: Long-lasting (8-12 hours)
+- Sillage: Strong
+- Suitable Families: Oriental, Woody, Amber
 
-**Gợi ý:**
-- Nước hoa có nốt hương vanilla, gỗ đàn hương, xạ hương
-- Phù hợp cho không gian sang trọng
+**Suggestions:**
+- Scents with vanilla, sandalwood, musk notes
+- Perfect for sophisticated, formal settings
 
-### Hẹn Hò / Romantic
-**Đặc điểm:**
-- Hương ngọt ngào, quyến rũ nhưng không quá nồng
-- Longevity: dài lâu
-- Sillage: trung bình đến mạnh
-- Phù hợp: Floral, Fruity, Gourmand
+### Date Night / Romantic
+**Characteristics:**
+- Sweet, alluring, but intimate
+- Longevity: Long-lasting
+- Sillage: Moderate to strong
+- Suitable Families: Floral, Fruity, Gourmand
 
-**Gợi ý:**
-- Nước hoa có nốt hương hoa hồng, quả mọng, vanilla
-- Tạo cảm giác gần gũi, ấm áp
+**Suggestions:**
+- Scents with rose, berry, or vanilla notes
+- Creates a warm, inviting atmosphere
 
-### Du Lịch / Mùa Hè
-**Đặc điểm:**
-- Hương tươi mát, nhẹ nhàng
-- Longevity: trung bình (4-6 giờ)
-- Sillage: nhẹ đến trung bình
-- Phù hợp: Citrus, Aquatic, Fresh
+### Travel / Summer
+**Characteristics:**
+- Fresh, light, and airy
+- Longevity: Moderate (4-6 hours)
+- Sillage: Low to moderate
+- Suitable Families: Citrus, Aquatic, Fresh
 
-**Gợi ý:**
-- Nước hoa có nốt hương cam chanh, bạc hà, biển cả
-- Phù hợp thời tiết nóng, không gây bí
+**Suggestions:**
+- Scents with citrus, mint, or marine notes
+- Ideal for hot weather, won't feel heavy
 
-### Mùa Đông / Thời Tiết Lạnh
-**Đặc điểm:**
-- Hương ấm áp, bao bọc
-- Longevity: dài lâu
-- Sillage: mạnh
-- Phù hợp: Woody, Amber, Spicy
+### Winter / Cold Weather
+**Characteristics:**
+- Warm, enveloping, and cozy
+- Longevity: Long-lasting
+- Sillage: Strong
+- Suitable Families: Woody, Amber, Spicy
 
-**Gợi ý:**
-- Nước hoa có nốt hương gỗ, hổ phách, gia vị
-- Tạo cảm giác ấm áp, sang trọng
+**Suggestions:**
+- Scents with wood, amber, or spice notes
+- Creates a feeling of warmth and luxury
 
-## Tư Vấn Theo Giới Tính
+## Consultation by Gender
 
-### Nam Giới
-- Thường ưa chuộng hương gỗ, xạ hương, gia vị
-- Fragrance Family phổ biến: Woody, Aromatic Fougere, Oriental
-- Longevity và Sillage: trung bình đến mạnh
+### Men
+- Often prefer woody, musky, or spicy scents
+- Popular Fragrance Families: Woody, Aromatic Fougere, Oriental
+- Longevity and Sillage: Moderate to strong
 
-### Nữ Giới
-- Đa dạng sở thích: hoa, trái cây, ngọt ngào
-- Fragrance Family phổ biến: Floral, Fruity, Gourmand
-- Có thể thử nhiều phong cách khác nhau
+### Women
+- Diverse preferences: floral, fruity, sweet
+- Popular Fragrance Families: Floral, Fruity, Gourmand
+- Can experiment with many different styles
 
 ### Unisex
-- Phù hợp cả nam và nữ
-- Thường là hương tươi mát, citrus, hay woody nhẹ
-- Linh hoạt cho mọi dịp
+- Suitable for both men and women
+- Often fresh, citrus, or light woody scents
+- Versatile for any occasion
 
 </data>
 
 <rules type="customer_service_principles">
 
-## Nguyên Tắc Tư Vấn
+## Consultation Principles
 
-### Chào Hỏi và Tiếp Đón
-- Luôn chào khách hàng lịch sự, thân thiện
-- Hỏi về nhu cầu, sở thích hương thơm
-- Lắng nghe tích cực và ghi nhớ thông tin
+### Greeting and Reception
+- Always greet customers politely and warmly
+- Ask about their fragrance preferences and needs
+- Listen actively and remember key information
 
-### Tư Vấn Hiệu Quả
-- Tìm hiểu dịp sử dụng (đi làm, dạ tiệc, hẹn hò, du lịch)
-- Hỏi về sở thích hương (tươi mát, ngọt ngào, gỗ ấm)
-- Đề xuất 2-3 sản phẩm phù hợp, không quá nhiều
+### Effective Consultation
+- Identify the occasion (office, party, date, travel)
+- Ask about preferred scent profiles (fresh, sweet, warm wood)
+- Recommend 2-3 suitable products, avoid overwhelming them
 
-### Xử Lý Tình Huống
+### Problem Solving
 
-**Khách Không Biết Chọn:**
-1. Hỏi về dịp sử dụng
-2. Cho khách ngửi thử 2-3 mẫu khác nhau
-3. Giải thích đặc điểm từng loại
-4. Gợi ý dựa trên phản ứng của khách
+**Unsure Customer:**
+1. Ask about the intended occasion
+2. Let them try 2-3 different samples
+3. Explain the unique characteristics of each
+4. Suggest based on their reaction
 
-**Khách Phân Vân Giữa 2 Sản Phẩm:**
-1. So sánh điểm giống và khác nhau
-2. Đề xuất mua size nhỏ để thử cả hai
-3. Giải thích dịp phù hợp cho từng loại
+**Hesitating Between Two Products:**
+1. Compare pros and cons of each
+2. Suggest buying a smaller size to try both
+3. Explain which occasion suits each best
 
-**Khách Hỏi Về Giá:**
-1. Giải thích giá trị (độ bền, chất lượng, thương hiệu)
-2. Đề xuất các size khác nhau phù hợp ngân sách
-3. Thông báo chương trình khuyến mãi nếu có
+**Price Inquiries:**
+1. Explain the value (longevity, quality, brand heritage)
+2. Recommend different sizes to fit their budget
+3. Inform them of any current promotions
 
-**Khách Không Hài Lòng:**
-1. Lắng nghe và thấu hiểu
-2. Đề xuất đổi trả theo chính sách
-3. Tìm sản phẩm thay thế phù hợp hơn
-4. Không tranh cãi, giữ thái độ chuyên nghiệp
+**Dissatisfied Customer:**
+1. Listen and show empathy
+2. Offer returns or exchanges based on policy
+3. Find a more suitable alternative
+4. Stay professional and avoid arguments
 
-## Lưu Ý Quan Trọng
+## Important Usage Notes
 
-### Cách Sử Dụng Nước Hoa
-- Xịt vào vùng da có mạch máu: cổ tay, sau tai, cổ
-- Không xịt quá nhiều (2-3 lần xịt là đủ)
-- Xịt từ xa 15-20cm
-- Không chà xát sau khi xịt
+### Application Tips
+- Apply to pulse points: wrists, behind ears, neck
+- Don't over-apply (2-3 sprays is usually enough)
+- Spray from a distance of 15-20cm
+- Do not rub the skin after spraying
 
-### Bảo Quản
-- Tránh ánh nắng trực tiếp
-- Nhiệt độ phòng, thoáng mát
-- Đậy nắp kín sau khi sử dụng
-- Hạn sử dụng: 3-5 năm nếu bảo quản tốt
+### Storage
+- Avoid direct sunlight
+- Keep at moderate room temperature, in a dry place
+- Always keep the cap closed when not in use
+- Shelf life: 3-5 years with proper storage
 
-### Điều Cần Tránh
-- Không áp đặt sở thích cá nhân
-- Không bán hàng quá mức (upselling quá đà)
-- Không cung cấp thông tin sai lệch
-- Không làm khách hàng cảm thấy bị thúc ép
+### Things to Avoid
+- Don't impose personal preferences
+- Avoid aggressive upselling
+- Never provide misleading information
+- Don't make the customer feel pressured
 
 </rules>

@@ -1,179 +1,179 @@
 <data type="fragrance_knowledge">
 
-# Hướng Dẫn Chọn Nước Hoa
+# Fragrance Selection Guide
 
-## Hiểu Về Nồng Độ (Concentration)
+## Understanding Concentration
 
 ### Parfum / Extrait de Parfum (15-40%)
-- **Nồng độ:** Cao nhất
-- **Độ bền:** 8-12 giờ
-- **Đặc điểm:** Hương đậm đà, sang trọng nhất
-- **Giá:** Cao nhất
-- **Phù hợp:** Dạ tiệc, sự kiện quan trọng
+- **Concentration:** Highest
+- **Longevity:** 8-12 hours
+- **Characteristics:** Most intense, luxurious scents
+- **Price:** Highest
+- **Best for:** Formal galas, important events
 
 ### Eau de Parfum (EDP) (10-20%)
-- **Nồng độ:** Cao
-- **Độ bền:** 6-8 giờ
-- **Đặc điểm:** Cân bằng giữa độ bền và giá thành
-- **Phù hợp:** Sử dụng hàng ngày, mọi dịp
+- **Concentration:** High
+- **Longevity:** 6-8 hours
+- **Characteristics:** Balance between performance and price
+- **Best for:** Daily wear, any occasion
 
 ### Eau de Toilette (EDT) (5-15%)
-- **Nồng độ:** Trung bình
-- **Độ bền:** 4-6 giờ
-- **Đặc điểm:** Nhẹ nhàng, tươi mát hơn EDP
-- **Phù hợp:** Ban ngày, văn phòng, mùa hè
+- **Concentration:** Moderate
+- **Longevity:** 4-6 hours
+- **Characteristics:** Lighter and fresher than EDP
+- **Best for:** Daytime, office, summer
 
 ### Eau de Cologne (EDC) (2-5%)
-- **Nồng độ:** Thấp
-- **Độ bền:** 2-4 giờ
-- **Đặc điểm:** Rất nhẹ, tươi mát
-- **Phù hợp:** Thể thao, sau tắm
+- **Concentration:** Low
+- **Longevity:** 2-4 hours
+- **Characteristics:** Very light and refreshing
+- **Best for:** Sports, post-shower
 
-## Cấu Trúc Hương Thơm (Fragrance Pyramid)
+## Fragrance Pyramid
 
-### Nốt Hương Đầu (Top Notes) - 15 phút đầu
-**Vai trò:** Ấn tượng ban đầu, tươi mát, thu hút
+### Top Notes - First 15 minutes
+**Role:** Initial impression, fresh, attractive
 
-**Nguyên liệu phổ biến:**
-- Citrus: Cam bergamot, chanh, bưởi
-- Thảo mộc: Bạc hà, húng quế
-- Trái cây: Táo, lê, quả mọng
+**Common Ingredients:**
+- Citrus: Bergamot, lemon, grapefruit
+- Herbs: Mint, basil
+- Fruits: Apple, pear, berries
 
-### Nốt Hương Giữa (Heart Notes) - 2-4 giờ
-**Vai trò:** Linh hồn của nước hoa
+### Heart Notes (Middle Notes) - 2-4 hours
+**Role:** The soul of the fragrance
 
-**Nguyên liệu phổ biến:**
-- Hoa: Hồng, nhài, ylang ylang, huệ
-- Gia vị: Quế, đinh hương, tiêu
-- Trái cây: Đào, mận, dừa
+**Common Ingredients:**
+- Flowers: Rose, jasmine, ylang-ylang, tuberose
+- Spices: Cinnamon, cloves, pepper
+- Fruits: Peach, plum, coconut
 
-### Nốt Hương Cuối (Base Notes) - 4-24 giờ
-**Vai trò:** Độ bền, chiều sâu, quyến rũ
+### Base Notes - 4-24 hours
+**Role:** Longevity, depth, allure
 
-**Nguyên liệu phổ biến:**
-- Gỗ: Đàn hương, tuyết tùng, hoắc hương
-- Xạ hương: Musk, ambroxan
-- Ngọt ngào: Vanilla, tonka bean, hổ phách
+**Common Ingredients:**
+- Wood: Sandalwood, cedar, patchouli
+- Musk: Musk, ambroxan
+- Sweet: Vanilla, tonka bean, amber
 
-## Phân Loại Họ Hương (Fragrance Families)
+## Fragrance Families
 
-### 1. Floral (Hoa)
-**Đặc điểm:**
-- Chủ yếu từ các loại hoa
-- Nữ tính, lãng mạn, thanh lịch
+### 1. Floral
+**Characteristics:**
+- Primarily derived from flowers
+- Feminine, romantic, elegant
 
-**Phân loại:**
-- **Floral Fresh:** Nhẹ nhàng (huệ, hoa oải hương)
-- **Floral Oriental:** Đậm đà (hoa nhài, ylang ylang)
-- **Soft Floral:** Dịu dàng (hoa mẫu đơn, hoa hồng)
+**Sub-types:**
+- **Floral Fresh:** Light (lily, lavender)
+- **Floral Oriental:** Rich (jasmine, ylang-ylang)
+- **Soft Floral:** Gentle (peony, rose)
 
-**Dịp:** Hàng ngày, dạ tiệc, lãng mạn
+**Occasion:** Daily wear, evening events, romantic dates
 
-### 2. Oriental (Phương Đông)
-**Đặc điểm:**
-- Ấm áp, quyến rũ, bí ẩn
-- Gia vị, hổ phách, vanilla
+### 2. Oriental
+**Characteristics:**
+- Warm, seductive, mysterious
+- Spices, amber, vanilla
 
-**Phân loại:**
-- **Soft Oriental:** Nhẹ nhàng hơn
-- **Oriental:** Đậm đà
-- **Woody Oriental:** Kết hợp gỗ
+**Sub-types:**
+- **Soft Oriental:** Lighter version
+- **Oriental:** Rich and bold
+- **Woody Oriental:** Combined with wood notes
 
-**Dịp:** Buổi tối, mùa đông, dạ tiệc
+**Occasion:** Evening, winter, formal galas
 
-### 3. Woody (Gỗ)
-**Đặc điểm:**
-- Nam tính, trầm ấm, sang trọng
-- Gỗ đàn hương, tuyết tùng, hoắc hương
+### 3. Woody
+**Characteristics:**
+- Masculine, warm, sophisticated
+- Sandalwood, cedar, patchouli
 
-**Phân loại:**
-- **Woody Aromatic:** Kết hợp thảo mộc
-- **Dry Woods:** Khô, thanh lịch
-- **Mossy Woods:** Rêu, đất
+**Sub-types:**
+- **Woody Aromatic:** Combined with herbs
+- **Dry Woods:** Dry and elegant
+- **Mossy Woods:** Earthy, mossy
 
-**Dịp:** Công sở, buổi tối, mùa đông
+**Occasion:** Office, evening, winter
 
-### 4. Fresh (Tươi Mát)
-**Đặc điểm:**
-- Sạch sẽ, tươi mới, năng động
-- Citrus, biển cả, xanh mát
+### 4. Fresh
+**Characteristics:**
+- Clean, crisp, energetic
+- Citrus, marine, green
 
-**Phân loại:**
-- **Citrus:** Cam chanh
-- **Green:** Lá cây, cỏ
-- **Water/Aquatic:** Biển cả
-- **Fruity:** Trái cây
+**Sub-types:**
+- **Citrus:** Lemon, orange, bergamot
+- **Green:** Leaves, grass
+- **Water/Aquatic:** Marine, ocean notes
+- **Fruity:** Non-citrus fruits
 
-**Dịp:** Ban ngày, mùa hè, thể thao
+**Occasion:** Daytime, summer, sports
 
-### 5. Gourmand (Ẩm thực)
-**Đặc điểm:**
-- Ngọt ngào như món ăn
+### 5. Gourmand
+**Characteristics:**
+- Sweet, edible scent profiles
 - Vanilla, caramel, chocolate, coffee
 
-**Dịp:** Buổi tối, mùa lạnh, hẹn hò
+**Occasion:** Evening, cold weather, dates
 
-## Chọn Nước Hoa Theo Mùa
+## Choosing by Season
 
-### Mùa Hè
-**Gợi ý:**
-- Citrus (cam chanh)
-- Aquatic (biển cả)
+### Summer
+**Suggestions:**
+- Citrus
+- Aquatic
 - Light Floral
 
-**Lưu ý:** Chọn EDT/EDC thay vì EDP
-**Tránh:** Oriental, Woody nặng, Gourmand
+**Tips:** Choose EDT/EDC over EDP
+**Avoid:** Heavy Oriental, Woody, or Gourmand scents
 
-### Mùa Đông
-**Gợi ý:**
-- Oriental đậm
+### Winter
+**Suggestions:**
+- Rich Oriental
 - Woody
 - Gourmand
-- Leather (da thuộc)
+- Leather
 
-**Lưu ý:** Chọn EDP/Parfum để độ bền tốt hơn
+**Tips:** Choose EDP/Parfum for better longevity
 
-## Chọn Nước Hoa Theo Dịp
+## Choosing by Occasion
 
-### Đi Làm / Công Sở
-**Nguyên tắc:** Nhẹ nhàng, không quá nổi
+### Office / Work
+**Principle:** Subtle, professional
 
-**Nam:**
+**For Men:**
 - Woody Aromatic
 - Fresh Fougere
-- Citrus nhẹ
+- Light Citrus
 
-**Nữ:**
+**For Women:**
 - Light Floral
 - Fruity Fresh
 - Soft Chypre
 
-**Số lần xịt:** 2-3 lần, không quá nhiều
+**Sprays:** 2-3 sprays max
 
-### Dạ Tiệc / Buổi Tối
-**Nguyên tắc:** Quyến rũ, ấn tượng
+### Evening / Formal Gala
+**Principle:** Seductive, impressive
 
-**Nam:**
+**For Men:**
 - Oriental Woody
 - Spicy
 - Leather
 
-**Nữ:**
+**For Women:**
 - Floral Oriental
 - Gourmand
 - Amber
 
-**Số lần xịt:** 3-4 lần
+**Sprays:** 3-4 sprays
 
-### Hẹn Hò / Romantic
-**Nguyên tắc:** Quyến rũ nhưng gần gũi
+### Date Night / Romantic
+**Principle:** Alluring but intimate
 
-**Nam:**
-- Woody với vanilla
+**For Men:**
+- Woody with vanilla
 - Aromatic Fougere
 - Fresh Spicy
 
-**Nữ:**
+**For Women:**
 - Floral Fruity
 - Soft Gourmand
 - Rose/Jasmine
@@ -182,56 +182,56 @@
 
 <rules type="fragrance_usage_tips">
 
-## Mẹo Chọn và Sử Dụng
+## Usage and Application Tips
 
-### Test Nước Hoa Đúng Cách
-1. **Xịt lên da**, không ngửi thử từ vòi
-2. **Đợi 15-30 phút** để hương trung và cuối lên
-3. **Test tối đa 3 mùi** trong một lần
-4. **Ngửi cafe** giữa các mùi để reset khứu giác
-5. **Mang mẫu thử về** test cả ngày
+### How to Test Correctly
+1. **Spray on skin**, don't just sniff the nozzle
+2. **Wait 15-30 minutes** for heart and base notes to develop
+3. **Test max 3 scents** in one go
+4. **Smell coffee beans** between scents to reset your nose
+5. **Take a sample home** and test it for a full day
 
-### Làm Nước Hoa Bền Lâu
-**Trước khi xịt:**
-- Thoa kem dưỡng ẩm
-- Da ẩm giữ hương tốt hơn
+### Making it Last Longer
+**Before Spraying:**
+- Apply unscented moisturizer
+- Hydrated skin holds fragrance better
 
-**Vị trí xịt:**
-- Sau tai, cổ (nhiệt độ cao)
-- Cổ tay, khuỷu tay trong
-- Sau đầu gối (hương bay lên)
+**Application Points:**
+- Behind ears, neck (high heat areas)
+- Wrists, inner elbows
+- Behind knees (scent rises)
 
-**Kỹ thuật:**
-- Xịt từ xa 15-20cm
-- Không chà xát
-- Phân tầng (base lotion + EDP)
+**Technique:**
+- Spray from 15-20cm away
+- Do not rub the skin
+- Layering (unscented lotion + matching EDP)
 
-### Bảo Quản Đúng Cách
-✅ **Nên:**
-- Giữ nơi khô ráo, thoáng mát
-- Tránh ánh nắng trực tiếp
-- Đậy nắp kín sau mỗi lần dùng
-- Để hộp gốc (bảo vệ ánh sáng)
+### Proper Storage
+✅ **Do:**
+- Keep in a cool, dry place
+- Avoid direct sunlight
+- Seal the cap tightly after use
+- Keep in the original box (protects from light)
 
-❌ **Không nên:**
-- Để phòng tắm (ẩm ướt)
-- Gần cửa sổ (nắng)
-- Tủ lạnh (nhiệt độ quá thấp)
-- Lắc mạnh lọ
+❌ **Don't:**
+- Store in the bathroom (humidity)
+- Keep near windows (heat/sun)
+- Store in the fridge (too cold)
+- Shake the bottle vigorously
 
-### Dấu Hiệu Hỏng
-- Màu sắc thay đổi rõ rệt
-- Mùi chua, thiu
-- Xuất hiện cặn lắng
-- Hương yếu đi bất thường
+### Signs of Expired Fragrance
+- Noticeable color change
+- Sour or "off" smell
+- Sediment at the bottom
+- Unusually weak scent performance
 
-## Thuật Ngữ Cơ Bản
+## Basic Terminology
 
-- **Sillage:** Dấu vết hương thơm để lại khi đi qua
-- **Projection:** Khoảng cách người khác ngửi được
-- **Longevity:** Độ bền hương trên da
-- **Dry Down:** Giai đoạn nốt hương cuối
-- **Skin Chemistry:** Hóa học da (mỗi người khác nhau)
-- **Nose Blind:** Mất khứu giác với hương quen thuộc
+- **Sillage:** The scent trail left behind as you move
+- **Projection:** The distance from which others can smell you
+- **Longevity:** How long the scent stays on your skin
+- **Dry Down:** The final stage when base notes dominate
+- **Skin Chemistry:** How a scent reacts uniquely with your skin
+- **Nose Blind:** Temporary inability to smell a familiar scent
 
 </rules>
