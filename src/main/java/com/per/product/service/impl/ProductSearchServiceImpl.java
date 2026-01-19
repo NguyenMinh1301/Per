@@ -8,6 +8,7 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.per.common.response.PageResponse;
@@ -72,6 +73,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void reindexAll() {
         log.info("Starting full product reindex");
 

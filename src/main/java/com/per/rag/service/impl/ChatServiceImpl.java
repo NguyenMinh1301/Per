@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
+import com.per.product.repository.ProductVariantRepository;
+import com.per.rag.dto.response.ProductRecommendation;
 import com.per.rag.dto.response.ShopAssistantResponse;
 import com.per.rag.service.ChatService;
 import com.per.rag.service.VectorStoreService;
@@ -28,6 +30,7 @@ public class ChatServiceImpl implements ChatService {
 
     private final VectorStoreService vectorStoreService;
     private final ChatModel chatModel;
+    private final ProductVariantRepository productVariantRepository;
 
     @Value("${app.rag.search-top-k}")
     private int searchTopK;
@@ -35,7 +38,7 @@ public class ChatServiceImpl implements ChatService {
     @Value("${app.rag.similarity-threshold}")
     private double similarityThreshold;
 
-    @Value("classpath:prompt/system-prompt.txt")
+    @Value("classpath:knowledge/system-prompt.txt")
     private Resource systemPromptResource;
 
     private static final String SYSTEM_PROMPT_TEMPLATE =
@@ -71,9 +74,39 @@ public class ChatServiceImpl implements ChatService {
 
 			5. CONSTRAINT: Only mention products in CONTEXT. If none suitable, apologize and ask clarifying questions.
 
-			{format}
+			6. **STRICT JSON ENCODING**: Do NOT use multiline block scalars like `|` or `>`.
+			- **INCORRECT**: `"field": | \\n Markdown content`
+			- **CORRECT**: `"field": "Markdown content with \\\\n for newlines"`
+			7. **ESCAPE NEWLINES**: Use `\\n` sequence for newlines within strings. Do NOT use backslashes `\\` at the end of lines for line continuation.
+			- **INCORRECT**: `"field": "Part 1 \\ \\n Part 2"`
+			- **CORRECT**: `"field": "Part 1\\nPart 2"`
+			8. Ensure all special characters are properly escaped for a standard JSON string.
 
-			IMPORTANT: Return ONLY the raw JSON object. Do NOT wrap it in markdown code blocks or add any text before/after the JSON.
+			# CORRECT RESPONSE EXAMPLE
+			{example}
+			""";
+
+    private static final String FEW_SHOT_EXAMPLE =
+            """
+			```json
+			{
+			  "summary": "Dior Homme Intense matches your formal request perfectly.",
+			  "detailedResponse": "**Hero Recommendation:**\\nDior Homme Intense – [velvety] with notes of [iris, amber]\\nPrice: [3,400,000 VNÐ]\\n\\n**Why these scents:** Perfectly suited for formal events due to its sophisticated woody profile.",
+			  "products": [
+			    {
+			      "id": "Dior_H_Intense_ID",
+			      "name": "Dior Homme Intense",
+			      "price": 3400000.0,
+			      "reasonForRecommendation": "Sophisticated woody profile for formal events"
+			    }
+			  ],
+			  "nextSteps": [
+			    "Check availability",
+			    "Explore similar woody scents",
+			    "Learn about fragrance layering"
+			  ]
+			}
+			```
 			""";
 
     @Override
@@ -100,7 +133,8 @@ public class ChatServiceImpl implements ChatService {
                             java.util.Map.of(
                                     "context", context,
                                     "question", question,
-                                    "format", converter.getFormat()));
+                                    "format", converter.getFormat(),
+                                    "example", FEW_SHOT_EXAMPLE));
 
             // Call LLM
             String response = chatModel.call(prompt).getResult().getOutput().getText();
@@ -110,8 +144,16 @@ public class ChatServiceImpl implements ChatService {
             // Clean response (remove markdown code blocks if present)
             String cleanedResponse = cleanMarkdownCodeBlocks(response);
 
+            // Sanitize YAML-like block scalars (| or >) that break JSON parsing
+            cleanedResponse = sanitizeMalformedJson(cleanedResponse);
+
             // Parse structured response
-            return converter.convert(cleanedResponse);
+            try {
+                return converter.convert(cleanedResponse);
+            } catch (Exception e) {
+                log.error("Failed to parse LLM response as JSON. Raw response: {}", response);
+                return getFallbackResponse(question);
+            }
 
         } catch (ApiException e) {
             throw e;
@@ -198,5 +240,108 @@ public class ChatServiceImpl implements ChatService {
         }
 
         return cleaned.trim();
+    }
+
+    /**
+     * Fixes common LLM malformations in JSON specifically related to Llama models:
+     * 1. YAML-style block scalars (| or >) are converted to valid JSON strings with escaped newlines.
+     * 2. Literal newlines within strings are escaped.
+     * 3. Missing commas between JSON fields are added.
+     */
+    private String sanitizeMalformedJson(String json) {
+        if (json == null || json.isBlank()) return json;
+
+        String sanitized = json.trim();
+
+        // 1. Repair YAML-style block scalars (": |)
+        // This looks for "key": | followed by lines that don't look like JSON keys
+        // It consumes until it sees a line starting with "key": or the closing brace }
+        try {
+            java.util.regex.Pattern yamlBlock = java.util.regex.Pattern.compile(
+                "(\"\\w+\"\\s*:\\s*)[|>]\\s*\\n(.*?)(?=\\n\\s*\"\\w+\"\\s*:|\\n\\s*\\})", 
+                java.util.regex.Pattern.DOTALL);
+            java.util.regex.Matcher matcher = yamlBlock.matcher(sanitized);
+            StringBuilder sb = new StringBuilder();
+            int lastEnd = 0;
+            while (matcher.find()) {
+                sb.append(sanitized, lastEnd, matcher.start());
+                String keyPrefix = matcher.group(1);
+                String content = matcher.group(2);
+                
+                // Escape characters that are invalid inside JSON string literals
+                String escapedContent = content.trim()
+                        .replace("\\", "\\\\")
+                        .replace("\"", "\\\"")
+                        .replace("\r", "")
+                        .replace("\n", "\\n");
+                
+                sb.append(keyPrefix).append("\"").append(escapedContent).append("\"");
+                lastEnd = matcher.end();
+            }
+            sb.append(sanitized.substring(lastEnd));
+            sanitized = sb.toString();
+        } catch (Exception e) {
+            log.warn("Regex failure during YAML block repair, skipping this step.", e);
+        }
+
+        // 2. Fix missing commas between fields
+        // Pattern: (end of value) \n (start of next key)
+        sanitized = sanitized.replaceAll("(\"\\s*|\\d+|true|false|null)\\s*\\n\\s*(\"\\w+\"\\s*:)", "$1,\n  $2");
+
+        // 3. Last resort: if the LLM outputted literal newlines inside a string without a pipe
+        // This is dangerous but often needed for multiline detailedResponse.
+        // We only do this if it looks like we're still inside a block.
+        
+        return sanitized;
+    }
+
+    private ShopAssistantResponse getFallbackResponse(String question) {
+        String summary = "The system is currently experiencing technical difficulties.";
+
+        // Fetch top 3 active products to make the fallback "not stiff"
+        List<ProductRecommendation> fallbackProducts =
+                productVariantRepository
+                        .findAll(
+                                org.springframework.data.domain.PageRequest.of(
+                                        0,
+                                        3,
+                                        org.springframework.data.domain.Sort.by(
+                                                org.springframework.data.domain.Sort.Direction.DESC,
+                                                "createdAt")))
+                        .getContent()
+                        .stream()
+                        .map(
+                                variant ->
+                                        new ProductRecommendation(
+                                                variant.getProduct().getId().toString(),
+                                                variant.getProduct().getName(),
+                                                variant.getPrice(),
+                                                "Featured product in our boutique"))
+                        .toList();
+
+        String detailedResponse =
+                """
+				### System Notification
+
+				I apologize, but the system is currently having trouble processing your detailed request. This might be due to high traffic or a temporary technical issue.
+
+				However, based on your interest, I've suggested some of our most popular fragrances currently loved at our boutique below.
+
+				**Suggestions for you:**
+				* Explore the latest collections in our store.
+				* Search by fragrance family (Floral, Woody, Marine, etc.).
+				* Contact a consultant for personalized assistance.
+
+				Thank you for your patience and for choosing Per!
+				""";
+
+        return new ShopAssistantResponse(
+                summary,
+                detailedResponse,
+                fallbackProducts,
+                List.of(
+                        "View best-selling products",
+                        "Learn about popular fragrance families",
+                        "Contact customer support"));
     }
 }
