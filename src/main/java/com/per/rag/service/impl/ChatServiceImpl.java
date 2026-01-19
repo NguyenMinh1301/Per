@@ -74,6 +74,8 @@ public class ChatServiceImpl implements ChatService {
 			{format}
 
 			IMPORTANT: Return ONLY the raw JSON object. Do NOT wrap it in markdown code blocks or add any text before/after the JSON.
+			
+			**STRICT JSON ENCODING**: Do NOT use multiline block scalars like `|` or `>`. Use standard double-quoted strings with `\n` for newlines.
 			""";
 
     @Override
@@ -111,7 +113,12 @@ public class ChatServiceImpl implements ChatService {
             String cleanedResponse = cleanMarkdownCodeBlocks(response);
 
             // Parse structured response
-            return converter.convert(cleanedResponse);
+            try {
+                return converter.convert(cleanedResponse);
+            } catch (Exception e) {
+                log.error("Failed to parse LLM response as JSON. Raw response: {}", response);
+                return getFallbackResponse(question);
+            }
 
         } catch (ApiException e) {
             throw e;
@@ -198,5 +205,32 @@ public class ChatServiceImpl implements ChatService {
         }
 
         return cleaned.trim();
+    }
+    private ShopAssistantResponse getFallbackResponse(String question) {
+        String summary = "Hệ thống đang quá tải hoặc gặp sự cố kỹ thuật.";
+        String detailedResponse =
+                """
+                ### Thông báo hệ thống
+                
+                Tôi rất tiếc, hiện tại hệ thống đang gặp khó khăn trong việc xử lý yêu cầu chi tiết của bạn. Đây có thể là do lưu lượng truy cập cao hoặc một sự cố kỹ thuật tạm thời.
+                
+                Tuy nhiên, bạn có thể tham khảo một số dòng nước hoa tiêu biểu của chúng tôi dưới đây để có thêm cảm hứng. Đừng ngần ngại đặt câu hỏi khác nếu bạn cần thêm thông tin!
+                
+                **Gợi ý cho bạn:**
+                * Khám phá các bộ sưu tập mới nhất tại cửa hàng.
+                * Tìm kiếm theo tông hương (Hương hoa, Hương gỗ, Hương biển, v.v.).
+                * Liên hệ nhân viên tư vấn để được hỗ trợ trực tiếp.
+                
+                Cảm ơn bạn đã kiên nhẫn!
+                """;
+
+        return new ShopAssistantResponse(
+                summary,
+                detailedResponse,
+                List.of(), // Giữ danh sách sản phẩm trống để an toàn
+                List.of(
+                        "Xem các sản phẩm bán chạy nhất",
+                        "Tìm hiểu về các tông hương phổ biến",
+                        "Liên hệ bộ phận hỗ trợ khách hàng"));
     }
 }

@@ -98,3 +98,5 @@ Ask clarifying questions in detailedResponse and suggest categories in nextSteps
 3. If unsure → don't recommend (empty products list)
 4. Maximum 3 products in "products" array
 5. Keep detailedResponse under 300 words
+6. **STRICT JSON ENCODING**: Do NOT use multiline block scalars like `|` or `>`. Use standard double-quoted strings with `\n` for newlines.
+7. Ensure all special characters are properly escaped within JSON strings.
