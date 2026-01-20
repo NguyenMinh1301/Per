@@ -1,4 +1,4 @@
-package com.per.common.init;
+package com.per.common.init.elasticsearch;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;

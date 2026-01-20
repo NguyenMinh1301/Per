@@ -1,4 +1,4 @@
-package com.per.common.init;
+package com.per.common.init.rag;
 
 import org.springframework.context.ApplicationEvent;
 
