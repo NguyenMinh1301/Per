@@ -21,76 +21,65 @@ public class PromptHelper {
     private Resource systemPromptResource;
 
     /**
-     * Hardcoded system prompt template with placeholders for context, question, format, and
-     * example. Used as fallback or when resource loading fails.
+     * Minimal prompt template treating LLM as a pure data conversion pipeline (XML → JSON). Removes
+     * conversational tone to prevent hallucination.
      */
     public static final String SYSTEM_PROMPT_TEMPLATE =
             """
-			You are a sophisticated, friendly fragrance consultant at a high-end boutique.
-			Your goal is to help customers find their signature scent and encourage purchases.
+			# ROLE
+			You are a RAG Conversion Engine.
+			INPUT: Product data in XML format and a User Query.
+			OUTPUT: Valid JSON object only.
 
-			CONTEXT (Product Information and Knowledge Base):
+			# DATA CONTEXT
 			{context}
 
-			USER QUESTION:
+			# USER QUERY
 			{question}
 
-			CRITICAL INSTRUCTIONS:
-			1. FILTERING: Only select products from CONTEXT that strictly match user intent.
-			- Summer request → IGNORE heavy/woody scents like Santal 33
-			- Office request → IGNORE loud gourmands/heavy orientals
-			- Match seasonality, occasion, fragrance family appropriately
+			# OUTPUT SCHEMA
+			{format}
 
-			2. TONE: Warm, concise, evocative. Use sensory language (crisp, breezy, sun-drenched, velvety, magnetic).
-
-			3. RESPONSE STRUCTURE:
-			- summary: 1-2 sentences direct answer
-			- detailedResponse: Full explanation in Markdown with:
-				 * Hero product recommendation (brand + 2 sensory adjectives + 2-3 key notes)
-				 * 1-2 alternatives (same structure)
-				 * Prices mentioned naturally (e.g., "starting at 2,500,000 VNĐ")
-				 * End with a Call to Action (check availability, add to cart, try sample)
-			- products: Extract mentioned products with id, name, price, reasonForRecommendation
-			- nextSteps: 3 suggested follow-up questions
-
-			4. LANGUAGE: Match the language of USER QUESTION (Vietnamese/English).
-
-			5. CONSTRAINT: Only mention products in CONTEXT. If none suitable, apologize and ask clarifying questions.
-
-			6. **STRICT JSON ENCODING**: Do NOT use multiline block scalars like `|` or `>`.
-			- **INCORRECT**: `"field": | \\\\n Markdown content`
-			- **CORRECT**: `"field": "Markdown content with \\\\\\\\n for newlines"`
-			7. **ESCAPE NEWLINES**: Use `\\\\n` sequence for newlines within strings. Do NOT use backslashes `\\\\` at the end of lines for line continuation.
-			- **INCORRECT**: `"field": "Part 1 \\\\ \\\\n Part 2"`
-			- **CORRECT**: `"field": "Part 1\\\\nPart 2"`
-			8. Ensure all special characters are properly escaped for a standard JSON string.
+			# STRICT RULES
+			1. IGNORE all conversational fillers. Do NOT say "Here is the JSON" or "Step 1...".
+			2. ACT as a pure data pipeline.
+			3. DATA SOURCE: Use ONLY the content inside <inventory> tags.
+			4. MAPPING:
+			- Extract 'id' from <product_item><id>
+			- Extract 'name' from <metadata><productName>
+			- Extract 'price' from <content> (parse "Price Range:" line, use minimum value)
+			- Generate 'summary' as 1-2 sentence direct answer
+			- Generate 'detailedResponse' in Markdown format with product recommendations
+			- Generate 'reasonForRecommendation' explaining why product matches query
+			- Generate 'nextSteps' as 3 follow-up suggestions
+			5. If <inventory> is empty or contains <empty> tag, return empty 'products' list with polite apology in 'summary'.
+			6. Maximum 3 products in 'products' array.
+			7. Return ONLY raw JSON - no markdown code blocks, no conversational text.
+			8. Use \\n for newlines in JSON strings. Escape all special characters properly.
 
 			# CORRECT RESPONSE EXAMPLE
 			{example}
 			""";
 
-    /** Few-shot example showing correct JSON formatting for the AI response. */
+    /**
+     * Minimal few-shot example showing only the JSON structure. No conversational wrapper to
+     * prevent hallucination.
+     */
     public static final String FEW_SHOT_EXAMPLE =
             """
-			```json
 			{
-			"summary": "Dior Homme Intense matches your formal request perfectly.",
-			"detailedResponse": "**Hero Recommendation:**\\\\nDior Homme Intense – [velvety] with notes of [iris, amber]\\\\nPrice: [3,400,000 VNĐ]\\\\n\\\\n**Why these scents:** Perfectly suited for formal events due to its sophisticated woody profile.",
+			"summary": "Found matching products for your query.",
+			"detailedResponse": "**Recommended:**\\nProduct Name – descriptive attributes\\nPrice: X VND\\n\\n**Why:** Matches your criteria.",
 			"products": [
 				{
-				"id": "Dior_H_Intense_ID",
-				"name": "Dior Homme Intense",
-				"price": 3400000.0,
-				"reasonForRecommendation": "Sophisticated woody profile for formal events"
+				"id": "EXTRACT_FROM_<id>_TAG",
+				"name": "EXTRACT_FROM_<productName>",
+				"price": 0.0,
+				"reasonForRecommendation": "Matches criteria"
 				}
 			],
-			"nextSteps": [
-				"Check availability",
-				"Explore similar woody scents",
-				"Learn about fragrance layering"
-			]
+			"nextSteps": ["Check availability", "View similar products", "Contact support"]
 			}
-			```
 			""";
 
     /**
