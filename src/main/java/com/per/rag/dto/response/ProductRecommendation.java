@@ -2,5 +2,18 @@ package com.per.rag.dto.response;
 
 import java.math.BigDecimal;
 
-public record ProductRecommendation(
-        String id, String name, BigDecimal price, String reasonForRecommendation) {}
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ProductRecommendation {
+    private String id;
+    private String name;
+    private BigDecimal price;
+    private String reasonForRecommendation;
+}
