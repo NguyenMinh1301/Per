@@ -18,10 +18,11 @@ import lombok.extern.slf4j.Slf4j;
  * manual intervention.
  *
  * <p>Execution flow:
+ *
  * <ol>
- *   <li>On application startup, performs a lightweight check of vector store document count</li>
- *   <li>If vector store is empty, automatically triggers product and knowledge base indexing</li>
- *   <li>Runs asynchronously to avoid blocking application startup</li>
+ *   <li>On application startup, performs a lightweight check of vector store document count
+ *   <li>If vector store is empty, automatically triggers product and knowledge base indexing
+ *   <li>Runs asynchronously to avoid blocking application startup
  * </ol>
  */
 @Component
