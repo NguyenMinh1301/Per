@@ -3,11 +3,12 @@
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create vector_store table for RAG document embeddings
+-- Using 1536 dimensions for OpenAI text-embedding-3-small
 CREATE TABLE IF NOT EXISTS vector_store (
     id VARCHAR(255) PRIMARY KEY,
     content TEXT NOT NULL,
     metadata JSON,
-    embedding vector(768) NOT NULL
+    embedding vector(1536) NOT NULL
 );
 
 -- Create HNSW index for fast similarity search using cosine distance
@@ -21,4 +22,4 @@ USING hnsw (embedding vector_cosine_ops);
 -- - id UUID PRIMARY KEY
 -- - content TEXT
 -- - metadata JSONB
--- - embedding VECTOR(768)
+-- - embedding VECTOR(1536)

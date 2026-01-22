@@ -66,10 +66,10 @@ services:
       - ELASTICSEARCH_URI=http://elasticsearch:9200
       - APP_ELASTICSEARCH_AUTO_REINDEX=${APP_ELASTICSEARCH_AUTO_REINDEX}
 
-      # --- Ollama (RAG) ---
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - OLLAMA_CHAT_MODEL=${OLLAMA_CHAT_MODEL:-llama3.2}
-      - OLLAMA_EMBEDDING_MODEL=${OLLAMA_EMBEDDING_MODEL:-nomic-embed-text}
+      # --- OpenAI (RAG) ---
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_CHAT_MODEL=${OPENAI_CHAT_MODEL:-gpt-3.5-turbo}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
 
       # --- Admin Account ---
       - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
@@ -95,24 +95,6 @@ services:
     networks:
       - per-network
     volumes: [ "db:/var/lib/postgresql/data" ]
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    networks:
-      - per-network
-    volumes:
-      - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_ORIGINS=*
-    healthcheck:
-      test: [ "CMD", "ollama", "list" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
   redis:
     image: redis:7-alpine
@@ -286,7 +268,6 @@ services:
 volumes:
   db:
   kafka_data:
-  ollama_data:
 
 
 networks:
