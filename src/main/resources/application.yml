@@ -24,19 +24,17 @@ spring:
   elasticsearch:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
   ai:
-    ollama:
-      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+    openai:
+      api-key: ${OPENAI_API_KEY}
       chat:
-        options:
-          model: ${OLLAMA_CHAT_MODEL:llama3.2}
+        model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
       embedding:
-        options:
-          model: ${OLLAMA_EMBEDDING_MODEL:nomic-embed-text}
+        model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
     vectorstore:
       pgvector:
         index-type: HNSW
         distance-type: COSINE_DISTANCE
-        dimensions: 768
+        dimensions: 1536
   mail:
     host: smtp.gmail.com
     port: 587

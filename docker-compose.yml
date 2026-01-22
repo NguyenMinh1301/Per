@@ -11,24 +11,6 @@ services:
       - per-network
     volumes: [ "db:/var/lib/postgresql/data" ]
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    networks:
-      - per-network
-    volumes:
-      - ollama_data:/root/.ollama
-    environment:
-      - OLLAMA_ORIGINS=*
-    healthcheck:
-      test: [ "CMD", "ollama", "list" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -201,7 +183,6 @@ services:
 volumes:
   db:
   kafka_data:
-  ollama_data:
 
 
 networks:
