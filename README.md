@@ -13,12 +13,11 @@
   &nbsp;&nbsp;
    <a href="https://prometheus.io/" target="_blank"><img src="document/img/prometheus.svg" height="140" alt="Prometheus" /></a>
   &nbsp;&nbsp;
-   <a href="https://ollama.com/" target="_blank"><img src="document/img/ollama.svg" height="65" alt="Ollama" /></a>
 </p>
 
 ## Introduction
 
-Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Elasticsearch full-text search, Redis caching with transactional consistency, event-driven processing via Kafka, and resilience patterns for external service integration.
+Per is a production-ready e-commerce backend application built with Java 21 and Spring Boot 3.5. The system follows a modular monolith architecture, providing separation of concerns while maintaining deployment simplicity. It features JWT-based authentication, Elasticsearch full-text search, Redis caching with transactional consistency, event-driven processing via Kafka, AI-powered RAG (Retrieval-Augmented Generation) shopping assistant via OpenAI, and resilience patterns for external service integration.
 
 <p align="center">
   <a href="./">
