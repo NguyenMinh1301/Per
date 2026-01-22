@@ -64,7 +64,7 @@ public enum ApiErrorCode {
     RAG_INDEXING_FAILED("RAG_INDEXING_FAILED", "Failed to index product catalog", HttpStatus.INTERNAL_SERVER_ERROR),
     RAG_SEARCH_FAILED("RAG_SEARCH_FAILED", "Assistant search failed", HttpStatus.INTERNAL_SERVER_ERROR),
     RAG_CHAT_FAILED("RAG_CHAT_FAILED", "Failed to generate assistant response", HttpStatus.INTERNAL_SERVER_ERROR),
-    RAG_OLLAMA_UNAVAILABLE("RAG_OLLAMA_UNAVAILABLE", "AI service is unavailable", HttpStatus.SERVICE_UNAVAILABLE),
+    RAG_AI_SERVICE_UNAVAILABLE("RAG_AI_SERVICE_UNAVAILABLE", "AI service is unavailable", HttpStatus.SERVICE_UNAVAILABLE),
     RAG_KNOWLEDGE_INDEX_FAILED("RAG_KNOWLEDGE_INDEX_FAILED", "Failed to index knowledge base", HttpStatus.INTERNAL_SERVER_ERROR);
 
     // spotless:on
