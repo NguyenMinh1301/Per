@@ -64,12 +64,12 @@ public class RagController extends BaseController {
     public ResponseEntity<ApiResponse<IndexStatusResponse>> reindexProducts() {
         try {
             log.info("Starting product indexing for AI assistant");
-            vectorStoreService.indexAllProducts();
+            int documentsIndexed = vectorStoreService.indexAllProducts();
 
             IndexStatusResponse response =
                     IndexStatusResponse.builder()
                             .status("Indexing completed successfully")
-                            .documentsIndexed(0)
+                            .documentsIndexed(documentsIndexed)
                             .build();
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -90,12 +90,12 @@ public class RagController extends BaseController {
     public ResponseEntity<ApiResponse<IndexStatusResponse>> indexKnowledgeBase() {
         try {
             log.info("Starting knowledge base indexing");
-            documentIndexService.indexKnowledgeBase();
+            int documentsIndexed = documentIndexService.indexKnowledgeBase();
 
             IndexStatusResponse response =
                     IndexStatusResponse.builder()
                             .status("Knowledge base indexed successfully")
-                            .documentsIndexed(0)
+                            .documentsIndexed(documentsIndexed)
                             .build();
 
             return ResponseEntity.ok(
