@@ -36,7 +36,7 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
 
     @Override
     @Transactional
-    public void indexKnowledgeBase() {
+    public int indexKnowledgeBase() {
         try {
             log.info("Starting knowledge base indexing");
             Path knowledgePath = Paths.get(KNOWLEDGE_BASE_PATH);
@@ -67,8 +67,10 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
             if (!documents.isEmpty()) {
                 vectorStore.add(documents);
                 log.info("Indexed {} knowledge base documents successfully", documents.size());
+                return documents.size();
             } else {
                 log.warn("No markdown files found in knowledge base");
+                return 0;
             }
 
         } catch (ApiException e) {

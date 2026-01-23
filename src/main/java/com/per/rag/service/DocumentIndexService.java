@@ -3,8 +3,12 @@ package com.per.rag.service;
 /** Service for indexing knowledge base documents (markdown files) into vector store */
 public interface DocumentIndexService {
 
-    /** Index all markdown files from knowledge base directory */
-    void indexKnowledgeBase();
+    /**
+     * Index all markdown files from knowledge base directory
+     *
+     * @return Number of documents indexed
+     */
+    int indexKnowledgeBase();
 
     /**
      * Index a single markdown file from knowledge base

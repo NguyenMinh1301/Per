@@ -7,8 +7,12 @@ import org.springframework.ai.document.Document;
 
 public interface VectorStoreService {
 
-    /** Index all active products into the vector store */
-    void indexAllProducts();
+    /**
+     * Index all active products into the vector store
+     *
+     * @return Number of products indexed
+     */
+    int indexAllProducts();
 
     /**
      * Index a single product by ID

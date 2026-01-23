@@ -37,7 +37,7 @@ public class VectorStoreServiceImpl implements VectorStoreService {
 
     @Override
     @Transactional
-    public void indexAllProducts() {
+    public int indexAllProducts() {
         try {
             log.info("Starting full product indexing for RAG");
             List<Product> products = productRepository.findAll();
@@ -55,8 +55,10 @@ public class VectorStoreServiceImpl implements VectorStoreService {
             if (!documents.isEmpty()) {
                 vectorStore.add(documents);
                 log.info("Indexed {} products successfully", documents.size());
+                return documents.size();
             } else {
                 log.warn("No active products found to index");
+                return 0;
             }
         } catch (Exception e) {
             log.error("Failed to index products", e);
