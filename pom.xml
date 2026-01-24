@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.per</groupId>
 	<artifactId>per</artifactId>
-	<version>1.5.2</version>
+	<version>1.6.0</version>
 	<name>per</name>
 	<description>per</description>
 	<url/>
