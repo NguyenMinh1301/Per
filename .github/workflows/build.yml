@@ -54,7 +54,6 @@ jobs:
           tags: |
             type=raw,value=latest
             type=raw,value=${{ steps.extract_version.outputs.VERSION }}
-            type=sha
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
