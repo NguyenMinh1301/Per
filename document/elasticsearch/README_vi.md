@@ -1,270 +1,143 @@
-Tìm Kiếm Sản Phẩm với Elasticsearch
-====================================
+# Kiến Trúc Công Cụ Tìm Kiếm: Triển Khai Elasticsearch
 
-Ứng dụng sử dụng Elasticsearch cho tìm kiếm sản phẩm nâng cao với full-text search, fuzzy matching, và multi-field filtering.
+## 1. Giới Thiệu
 
-Kiến Trúc
----------
+Ứng dụng tận dụng **Elasticsearch** như một kho dữ liệu thứ cấp (secondary datastore) để cung cấp khả năng tìm kiếm full-text hiệu năng cao. Việc triển khai tuân theo mẫu **Command Query Responsibility Segregation (CQRS)**, trong đó các thao tác ghi được xử lý bởi cơ sở dữ liệu quan hệ chính (PostgreSQL) và các thao tác đọc/tìm kiếm được chuyển tải sang công cụ tìm kiếm.
 
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                         Kiến Trúc Tìm Kiếm                                   │
-│                                                                             │
-│  User ──► GET /products/search ──► ProductSearchService ──► Elasticsearch   │
-│                                                                             │
-│  ProductServiceImpl ──► Kafka(product-index-topic) ──► ProductIndexConsumer │
-│       (create/update/delete)                              │                 │
-│                                                           ▼                 │
-│                                                    Elasticsearch            │
-│                                                    (đồng bộ document)       │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
+### 1.1 Khả Năng Cốt Lõi
 
-Tính Năng Chính
----------------
+*   **Chỉ Mục Đảo Ngược (Inverted Index):** Sử dụng Inverted Index của Apache Lucene cho việc truy xuất từ khóa dưới giây (sub-second retrieval).
+*   **Khớp Mờ (Fuzzy Matching):** Triển khai logic khoảng cách chỉnh sửa Levenshtein (Levenshtein edit distance) để chấp nhận lỗi chính tả.
+*   **Chấm Điểm Liên Quan (Relevance Scoring):** Sử dụng thuật toán BM25 (Best Matching 25) để xếp hạng kết quả dựa trên Tần suất Xuất hiện (TF) và Tần suất Nghịch đảo Tài liệu (IDF).
+*   **Nhất Quán Cuối Cùng (Eventual Consistency):** Đồng bộ dữ liệu thông qua các luồng sự kiện bất đồng bộ.
 
-| Tính năng | Mô tả |
-| --- | --- |
-| **Multi-field Search** | Tìm kiếm trong name, description, brand, category |
-| **Fuzzy Matching** | Tìm kết quả dù có lỗi chính tả (vd: "savge" → "Sauvage") |
-| **Relevance Scoring** | Kết quả sắp xếp theo độ liên quan với field boosting |
-| **Filters** | Brand, category, gender, fragrance family, sillage, longevity, seasonality, occasion, khoảng giá |
-| **Async Sync** | Dữ liệu đồng bộ qua Kafka cho eventual consistency |
+---
 
-Các Thành Phần Chính
---------------------
+## 2. Kiến Trúc Hệ Thống
 
-| File | Mục đích |
-| --- | --- |
-| `ProductDocument.java` | Elasticsearch document mapping |
-| `ProductSearchRepository.java` | Spring Data ES repository |
-| `ProductDocumentMapper.java` | Chuyển đổi Entity sang Document |
-| `ProductSearchService.java` | Interface service tìm kiếm |
-| `ProductSearchServiceImpl.java` | Triển khai tìm kiếm với fuzzy queries |
-| `ProductIndexEvent.java` | Kafka event cho đồng bộ index |
-| `ProductIndexConsumer.java` | Kafka consumer đồng bộ ES |
+Hệ thống phụ tìm kiếm hoạt động trên kiến trúc hai đường dẫn: đường dẫn đồng bộ hóa (Write path) và đường dẫn truy vấn (Read path).
 
-API Endpoints
--------------
+### 2.1 Luồng Dữ Liệu CQRS
 
-### Tìm Kiếm Sản Phẩm
+```mermaid
+graph TD
+    subgraph Write Path / Synchronization
+        Client[Client/API] -->|Các thao tác CUD| SQL[(PostgreSQL)]
+        SQL -.->|CDC / Event Trigger| Service[Entity Service]
+        Service -->|Publish Event| Kafka{Kafka}
+        Kafka -->|Consume| Indexer[IndexConsumer]
+        Indexer -->|Upsert Document| ES[(Elasticsearch)]
+    end
 
-```
-GET /products/search
+    subgraph Read Path / Query
+        User[End User] -->|GET /search| SearchAPI[SearchController]
+        SearchAPI -->|Build Query| SearchService[SearchService]
+        SearchService -->|Execute Query| ES
+        ES -->|Return Hits| SearchService
+        SearchService -->|DTO Projection| User
+    end
 ```
 
-**Tham số Query:**
+### 2.2 Vai Trò Thành Phần
+
+| Thành Phần | Trách Nhiệm | Pattern |
+| :--- | :--- | :--- |
+| `PostgreSQL` | Nguồn Sự Thật (Canonical Data Store) | DBMS |
+| `Kafka` | Bus Thông Điệp Đồng Bộ Hóa | Eventual Consistency |
+| `Elasticsearch` | View Tối Ưu Cho Đọc | Search Engine |
+| `IndexConsumer` | Cập Nhật Projection (Projection Updater) | Event Handler |
+
+---
+
+## 3. Chiến Lược Tìm Kiếm & Thuật Toán
+
+Hệ thống sử dụng chiến lược truy vấn hỗn hợp để cân bằng giữa độ chính xác (precision) và độ phủ (recall).
+
+### 3.1 Độ Ưu Tiên Xây Dựng Truy Vấn
+
+Khi người dùng gửi thuật ngữ truy vấn $t$, hệ thống xây dựng một truy vấn Boolean Disjunction (`OR`) với các hệ số tăng cường (boosting factors) $\beta$:
+
+$$ Score(doc) = \sum (\beta_{field} \cdot Score_{match}(t, doc.field)) $$
+
+**Logic Triển Khai:**
+
+| Loại Truy Vấn | Trường Mục Tiêu | Boosting ($\beta$) | Mục Đích |
+| :--- | :--- | :--- | :--- |
+| **Prefix Match** | `name` | `3.0` (Cao) | Hành vi Auto-complete, khớp chính xác phần đầu. |
+| **Wildcard** | `name` | `2.0` (Trung bình) | Khớp chuỗi con (substring matching). |
+| **Fuzzy Match** | `name`, `desc` | `1.0` (Cơ bản) | Chấp nhận lỗi đánh máy của người dùng. |
+
+### 3.2 Cấu Hình Fuzziness
+
+Fuzziness được thiết lập là `AUTO`, tự động điều chỉnh khoảng cách chỉnh sửa dựa trên độ dài token:
+*   Độ dài $0..2$: Phải khớp chính xác.
+*   Độ dài $3..5$: Cho phép 1 chỉnh sửa.
+*   Độ dài $>5$: Cho phép 2 chỉnh sửa.
+
+---
+
+## 4. Đặc Tả API
+
+### 4.1 Tìm Kiếm Sản Phẩm: `GET /per/products/search`
+
+Cung cấp tìm kiếm đa chiều với khả năng lọc.
+
+**Tham số:**
 
 | Tham số | Kiểu | Mô tả |
-| --- | --- | --- |
-| `query` | String | Full-text search (hỗ trợ fuzzy) |
-| `brandId` | UUID | Lọc theo thương hiệu |
-| `categoryId` | UUID | Lọc theo danh mục |
-| `gender` | Enum | MALE, FEMALE, UNISEX |
-| `fragranceFamily` | Enum | WOODY, FLORAL, ORIENTAL, v.v. |
-| `sillage` | Enum | SOFT, LIGHT, MODERATE, STRONG, HEAVY |
-| `longevity` | Enum | SHORT, MODERATE, LONG_LASTING, VERY_LONG_LASTING |
-| `seasonality` | Enum | SPRING, SUMMER, FALL, WINTER, ALL_SEASONS |
-| `occasion` | Enum | DAILY, EVENING, FORMAL, CASUAL, PARTY |
-| `minPrice` | BigDecimal | Giá tối thiểu |
-| `maxPrice` | BigDecimal | Giá tối đa |
-| `isActive` | Boolean | Trạng thái active (mặc định: true) |
-| `page` | Integer | Số trang (mặc định: 0) |
-| `size` | Integer | Kích thước trang (mặc định: 20) |
+| :--- | :--- | :--- |
+| `query` | `string` | Thuật ngữ tìm kiếm full-text. |
+| `minPrice`, `maxPrice` | `decimal` | Bộ lọc nghiêm ngặt khoảng giá. |
+| `gender` | `enum` | Bộ lọc phân loại (MALE, FEMALE, UNISEX). |
+| `sillage`, `longevity` | `enum` | Bộ lọc thuộc tính. |
 
-**Ví dụ Request:**
+**Ví Dụ Request:**
 
-```bash
-# Tìm kiếm text đơn giản
-curl "/products/search?query=dior"
-
-# Tìm kiếm fuzzy (chịu lỗi chính tả)
-curl "/products/search?query=savge"   # tìm được "Sauvage"
-
-# Tìm kiếm kết hợp filters
-curl "/products/search?query=eau&gender=MALE&minPrice=100000&maxPrice=2000000"
-
-# Chỉ filter (không có text search)
-curl "/products/search?brandId=xxx&fragranceFamily=WOODY"
+```http
+GET /per/products/search?query=sauvage&minPrice=2000000&gender=MALE
 ```
 
-**Response:**
+---
 
-```json
-{
-  "success": true,
-  "data": {
-    "content": [
-      {
-        "id": "uuid",
-        "name": "Dior Sauvage",
-        "shortDescription": "Một composition tươi mới đột phá...",
-        "brandName": "Dior",
-        "categoryName": "Eau de Parfum",
-        "gender": "MALE",
-        "minPrice": 2500000,
-        "maxPrice": 4500000,
-        "imageUrl": "https://..."
-      }
-    ],
-    "page": 0,
-    "size": 20,
-    "totalElements": 15,
-    "totalPages": 1
-  }
-}
-```
+## 5. Đồng Bộ Hóa & Nhất Quán Dữ Liệu
 
-### Reindex Tất Cả Sản Phẩm
+### 5.1 Mô Hình Nhất Quán Cuối Cùng (Eventual Consistency)
 
-```
-POST /products/reindex
-```
+Dữ liệu không khả dụng ngay lập tức trong kết quả tìm kiếm sau khi tạo. Độ trễ lan truyền được định nghĩa bởi:
+$$ T_{propagation} = T_{kafka\_latency} + T_{consumer\_processing} + T_{es\_refresh\_interval} $$
 
-Thao tác admin để xây dựng lại Elasticsearch index từ PostgreSQL.
+Thông thường $T_{propagation} < 1000ms$.
 
-```bash
-curl -X POST "/products/reindex"
-```
+### 5.2 Sự Kiện Indexing
 
-Độ Liên Quan Tìm Kiếm
----------------------
+Đồng bộ hóa được thúc đẩy bởi các sự kiện miền (domain events):
 
-Kết quả được xếp hạng theo điểm liên quan với field boosting:
+*   `PRODUCT_CREATED`: Kích hoạt tạo document.
+*   `PRODUCT_UPDATED`: Kích hoạt cập nhật toàn bộ document.
+*   `PRODUCT_DELETED`: Kích hoạt xóa document theo ID.
 
-| Field | Boost | Độ ưu tiên |
-| --- | --- | --- |
-| `name` | 3x | Cao nhất |
-| `brandName` | 2x | Cao |
-| `shortDescription` | 2x | Cao |
-| `categoryName` | 1x | Bình thường |
-| `description` | 1x | Bình thường |
+### 5.3 Xử Lý Dead Letter
 
-**Fuzzy Matching:**
+Nếu một thao tác indexing thất bại (ví dụ: Elasticsearch downtime), message sẽ retry 3 lần trước khi chuyển sang Dead Letter Topic (DLT) để ngăn chặn tắc nghẽn hàng đợi.
 
-Tìm kiếm sử dụng `fuzziness: AUTO` cho phép:
-- Từ 1-2 ký tự: phải khớp chính xác
-- Từ 3-5 ký tự: cho phép 1 lỗi
-- Từ 6+ ký tự: cho phép 2 lỗi
+---
 
-Ví dụ:
-- `dior` → "Dior", "DIOR"
-- `savge` → "Sauvage"
-- `bluu` → "Bleu"
+## 6. Quy Trình Vận Hành
 
-Đồng Bộ Dữ Liệu
----------------
+### 6.1 Re-indexing Toàn Bộ
 
-Sản phẩm được đồng bộ sang Elasticsearch qua Kafka events:
+Trong trường hợp thay đổi schema hoặc trôi dữ liệu (data drift), cần thực hiện re-index toàn bộ.
 
-### Luồng Event
+**Endpoint:** `POST /per/products/reindex`
+**Xác Thực:** Yêu cầu vai trò ADMIN.
+**Quy Trình:**
+1.  Lặp qua tất cả thực thể trong PostgreSQL (Batched/Paged).
+2.  Publish các sự kiện `INDEX` tổng hợp vào Kafka.
+3.  Consumers cập nhật Elasticsearch bất đồng bộ.
 
-```
-ProductServiceImpl ──► KafkaTemplate.send() ──► [product-index-topic]
-                                                        │
-                                                        ▼
-                                               ProductIndexConsumer
-                                                        │
-                                                        ▼
-                                               ProductSearchRepository.save()
-```
+### 6.2 Giám Sát (Monitoring)
 
-### Events
-
-| Action | Khi nào | Kết quả |
-| --- | --- | --- |
-| `INDEX` | Sản phẩm được tạo/cập nhật | Document được index |
-| `DELETE` | Sản phẩm bị xóa | Document bị xóa |
-
-### Retry & DLQ
-
-Index events sử dụng cùng pattern retry như email:
-- 3 lần retry với exponential backoff (1s, 2s, 4s)
-- Events thất bại vào `product-index-topic-dlt`
-
-Cấu Hình
---------
-
-### application.yml
-
-```yaml
-spring:
-  elasticsearch:
-    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
-```
-
-### Biến Môi Trường
-
-| Biến | Mặc định | Mô tả |
-| --- | --- | --- |
-| `ELASTICSEARCH_URI` | `http://localhost:9200` | URL Elasticsearch server |
-
-Ghi Chú Phát Triển
-------------------
-
-### Phát Triển Local
-
-Khởi động Elasticsearch qua Docker Compose:
-
-```bash
-docker compose up -d elasticsearch
-```
-
-### Initial Indexing
-
-Sau khi khởi động ứng dụng, gọi reindex để populate ES:
-
-```bash
-curl -X POST http://localhost:8080/products/reindex
-```
-
-### Monitoring
-
-Truy cập Kibana tại `http://localhost:5601` để:
-- Xem product index
-- Phân tích search queries
-- Debug relevance scoring
-
-### Testing Search
-
-```bash
-# Test fuzzy matching
-curl "/products/search?query=savge"
-
-# Test filters
-curl "/products/search?gender=MALE&fragranceFamily=WOODY"
-
-# Test combined
-curl "/products/search?query=fresh&gender=UNISEX&minPrice=500000"
-```
-
-Mở Rộng Search
---------------
-
-### Thêm Fields Có Thể Tìm Kiếm
-
-1. Thêm field vào `ProductDocument.java`:
-   ```java
-   @Field(type = FieldType.Text, analyzer = "standard")
-   private String newField;
-   ```
-
-2. Cập nhật `ProductDocumentMapper.java` để map field mới
-
-3. Thêm field vào search query trong `ProductSearchServiceImpl.java`:
-   ```java
-   .fields("name^3", "newField^2", ...)
-   ```
-
-4. Reindex tất cả sản phẩm
-
-### Thêm Filters Mới
-
-1. Thêm field vào `ProductSearchRequest.java`
-
-2. Thêm logic filter trong `ProductSearchServiceImpl.buildSearchQuery()`:
-   ```java
-   if (request.getNewFilter() != null) {
-       boolQuery.filter(f -> f.term(t -> t.field("newField").value(...)));
-   }
-   ```
+Sử dụng Kibana (`localhost:5601`) để giám sát:
+*   Sức khỏe Index (Green/Yellow/Red).
+*   Độ trễ/Thông lượng tìm kiếm.
+*   Unassigned shards.

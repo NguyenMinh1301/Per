@@ -1,73 +1,124 @@
-Tổng Quan Module Order
-======================
+# Domain Module: Quản Lý Đơn Hàng (Order)
 
-Module order snapshot mọi thứ rời khỏi cart: customer, shipping info, economic totals, và exact product/variant/quantity/price đang được mua. Payments, fulfilment, và refunds đều phụ thuộc vào data được frozen ở đây.
+## 1. Tổng Quan
 
-Trách Nhiệm
------------
+**Mô đun Đơn hàng** là trái tim giao dịch của nền tảng thương mại điện tử. Nó chụp lại (snapshot) trạng thái không ổn định của giỏ hàng thành một hợp đồng mua bán bất biến. Nó theo dõi trạng thái hoàn tất đơn hàng, đối soát thanh toán và đóng vai trò là nguồn sự thật cho doanh thu.
 
-* Persist checkout snapshots (`Order` + `OrderItem`) trước khi hit payment gateway.
-* Lưu immutable copy của price, SKU, và quantity tại checkout. Later adjustments nên tạo compensating records (credit notes) thay vì update các rows này.
-* Cung cấp hooks cho:
-  * `payment.order_id` – payments reconcile against orders.
-  * Inventory rollback – nếu payment fail, chúng ta biết exactly variants nào cần restock.
-  * Future fulfilment modules (shipping labels, invoices).
+---
 
-Schema Mapping
---------------
+## 2. Kiến Trúc
 
-* **Order (`public."order"`)**
-  * Mirror `com.per.order.entity.Order`.
-  * Fields: `order_code` (9-digit random), totals (`subtotal_amount`, `discount_amount`, `shipping_fee`, `grand_total`), receiver details, `currency_code`, và timestamps.
-  * Status đến từ `OrderStatus`:
-    * `PENDING_PAYMENT` – vừa tạo; chờ payment.
-    * `PAID` – payment thành công.
-    * `CANCELLED` – user cancelled trước khi pay (qua return URL hoặc webhook).
-    * `FAILED` – expired/không nhận được payment và scheduler đánh dấu failed.
-* **OrderItem (`public.order_item`)**
-  * Mirror `com.per.order.entity.OrderItem`.
-  * Chứa FK đến `order`, `product`, và `product_variant`.
-  * Stored columns bao gồm `product_name`, `variant_sku`, `quantity`, `unit_price`, `sub_total_amount` – tất cả immutable một khi saved.
+Đơn hàng là các snapshot bất biến. Một khi đã tạo, các mục hàng (giá, số lượng) không thay đổi ngay cả khi sản phẩm trong danh mục được cập nhật.
 
-Lifecycle
----------
+### 2.1 Sơ Đồ Quan Hệ Thực Thể (ERD)
 
-1. **Checkout** (`CheckoutServiceImpl`)
-   * Validate cart items, check stock, decrement `product_variant.stockQuantity`.
-   * Tạo `Order` với `OrderItem` records và `PENDING_PAYMENT` status.
-2. **Payment** (PayOS)
-   * `Payment` reference order qua `order_id`.
-   * Webhook/return endpoint update cả payment và order status; khi failure/cancel nó cũng gọi `OrderInventoryService.restoreStock`.
-3. **Expiration** (`ExpiredPaymentScheduler`)
-   * Chạy mỗi phút: tìm `Payment` rows với `status=PENDING` và `expired_at < now`, đánh dấu order/payment là `FAILED`, và restore stock.
-4. **Fulfilment (future)**
-   * Build additional tables keyed by `order.id` khi bạn introduce shipping, invoices, v.v.
+```mermaid
+classDiagram
+    class Order {
+        +UUID id
+        +String orderCode
+        +OrderStatus status
+        +PaymentStatus paymentStatus
+        +BigDecimal grandTotal
+        +Address shippingAddress
+    }
 
-Hướng Dẫn Maintenance
----------------------
+    class OrderItem {
+        +UUID id
+        +String sku
+        +String productName
+        +BigDecimal unitPrice
+        +Integer quantity
+    }
 
-* Không bao giờ mutate unit prices hoặc quantities trên existing `OrderItem` rows. Tạo adjustments/refunds riêng.
-* Bất kỳ columns mới nào yêu cầu:
-  1. Update entity builder defaults.
-  2. Thêm Flyway migration (không edit V8 trong production).
-  3. Populate value trong checkout logic.
-* Sử dụng `OrderInventoryService` bất cứ khi nào bạn cần restore stock; không hand-roll variant updates ngoài nó để tránh inconsistencies.
-* Khi thêm order APIs sau này, luôn filter theo authenticated user (trừ khi admin) và paginate results.
+    Order "1" *-- "1..*" OrderItem : bao_gồm
+```
 
-Testing
--------
+### 2.2 Máy Trạng Thái Vòng Đời
 
-* Unit tests có thể mock `OrderRepository` và `ProductVariantRepository` để verify totals và inventory adjustments xảy ra lần lượt.
-* Integration tests nên cover:
-  * Checkout success (order → payOS link).
-  * Webhook success (order state → `PAID`).
-  * Cancel/expiry (order state → `CANCELLED`/`FAILED` và inventory restored).
+Trạng thái đơn hàng quy định các thao tác được phép.
 
-API Surface
------------
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING_PAYMENT : Checkout
+    
+    PENDING_PAYMENT --> PAID : Thanh Toán Thành Công
+    PENDING_PAYMENT --> CANCELLED : Người Dùng Hủy
+    PENDING_PAYMENT --> FAILED : Timeout/Hết Hạn
+    
+    PAID --> SHIPPED : Tích Hợp Vận Chuyển
+    SHIPPED --> DELIVERED : Xác Nhận Giao
+```
 
-Orders hiện không expose public REST endpoints. Nếu bạn cần:
+---
 
-* Sử dụng `/api/v1/orders` (GET list, GET detail theo `orderCode`).
-* Luôn return `OrderStatus` và `PaymentStatus` để clients không cần cross-check ở nơi khác.
-* Cho admin dashboards, include filters (`status`, `date range`, `user`) và pagination.
+## 3. Logic Nghiệp Vụ & Bất Biến
+
+### 3.1 Snapshot Bất Biến
+
+Khi chuyển đổi từ Giỏ hàng sang Đơn hàng:
+1.  **Đóng Băng Giá**: `unitPrice` được sao chép theo giá trị từ biến thể. Thay đổi giá trong tương lai không ảnh hưởng đơn hàng cũ.
+2.  **Đóng Băng Sản Phẩm**: `productName` và `sku` được phi chuẩn hóa vào `OrderItem` để bảo tồn độ chính xác lịch sử ngay cả khi sản phẩm bị xóa.
+
+### 3.2 Cam Kết Tồn Kho (Inventory Commit)
+
+*   **Đặt Chỗ**: Việc tạo Đơn hàng (PENDING) sẽ trừ tồn kho nghiêm ngặt.
+*   **Rollback**: Chuyển sang `CANCELLED` hoặc `FAILED` sẽ kích hoạt giao dịch bù (`restoreStock`) để trả hàng về kho.
+
+---
+
+## 4. Đặc Tả API
+
+Tiền tố: `/api/v1/orders`
+
+### 4.1 Truy Xuất
+
+#### Đơn Hàng Của Tôi
+`GET /`
+Trả về danh sách đơn hàng phân trang cho chỉ người dùng đã xác thực.
+
+#### Chi Tiết Đơn Hàng
+`GET /{orderCode}`
+Tra cứu theo mã 9 chữ số thân thiện người dùng (ví dụ: `192837465`) thay vì UUID để tăng trải nghiệm UX.
+
+### 4.2 Quản Trị
+
+#### Admin List
+`GET /admin`
+Danh sách có lọc (Trạng thái, Khoảng ngày) cho các hoạt động back-office.
+
+---
+
+## 5. Tham Chiếu Triển Khai
+
+### 5.1 Logic Snapshot
+
+```java
+// CheckoutServiceImpl.java
+OrderItem item = new OrderItem();
+item.setProductName(variant.getProduct().getName()); // Snapshot Tên
+item.setSku(variant.getSku());                     // Snapshot SKU
+item.setUnitPrice(variant.getPrice());             // Snapshot Giá
+item.setSubTotal(variant.getPrice().multiply(qty));
+```
+
+### 5.2 Bù Trừ Tồn Kho
+
+`OrderInventoryService` xử lý logic rollback quan trọng.
+
+```java
+@Transactional
+public void restoreStock(Order order) {
+    for (OrderItem item : order.getItems()) {
+        productVariantRepository.incrementStock(item.getSku(), item.getQuantity());
+    }
+}
+```
+
+---
+
+## 6. Mở Rộng Tương Lai
+
+*   **Tích Hợp Vận Chuyển**: Thêm `shipping_tracking_code` và tích hợp với đơn vị vận chuyển (GHTK, GHN).
+*   **Hóa Đơn**: Tạo snapshot hóa đơn PDF khi trạng thái chuyển sang `PAID`.
+*   **Quản Lý Đổi Trả (RMA)**: Xử lý hoàn trả một phần và hoàn tiền.

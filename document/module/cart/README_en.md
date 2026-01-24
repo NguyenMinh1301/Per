@@ -1,132 +1,131 @@
-Cart Module Overview
-====================
+# Domain Module: Shopping Cart
 
-This module encapsulates the shopping cart domain for the storefront. It provides REST endpoints for cart retrieval and cart item mutations, persists cart state in PostgreSQL, and reuses shared response/error contracts so the API stays uniform across modules.
+## 1. Overview
 
-Responsibilities
-----------------
+The **Cart Module** manages the transient state of a user's purchase intent. It persists line items, handles quantity updates, and performs real-time price aggregation. Unlike a simple session storage, the cart is a fully persisted domain entity backed by PostgreSQL to ensure cross-device consistency.
 
-* Maintain a single active cart per authenticated user.
-* Track cart line items (variant, quantity, pricing) and keep aggregate totals in sync.
-* Enforce product/variant availability and stock constraints before accepting mutations.
-* Expose idempotent HTTP endpoints for clients to fetch, add, update, remove, or clear cart items.
+---
 
-Key Packages
-------------
+## 2. Data Model Architecture
 
-| Package | Description |
-| --- | --- |
-| `controller` | REST controllers: `CartController` (read-only) and `CartItemController` (mutations). |
-| `dto` | Request/response payloads (MapStruct-driven). |
-| `entity` | JPA entities for `Cart` and `CartItem`. |
-| `repository` | Spring Data repositories for cart aggregates and items. |
-| `service` | Service contracts plus helper utilities (user resolution, cart recalculation). |
-| `service.impl` | Concrete implementations for cart read and cart-item mutation workflows. |
-| `helper` | `CartHelper` centralises current-user lookup, cart fetch/create, and totals recalculation. |
-| `mapper` | `CartMapper` converts entities to outward-facing DTOs. |
-| `enums` | Domain enumerations (`CartStatus`). |
+The cart model is designed as an aggregate root where the `Cart` entity controls the lifecycle of its `CartItem` children.
 
-Persistence Model
------------------
+### 2.1 Entity Relationship Diagram
 
-* `Cart` (`entity/Cart.java`)  
-  - UUID primary key, one-to-many with `CartItem`.  
-  - Tracks aggregate fields (`totalItems`, `subtotalAmount`, `discountAmount`, `totalAmount`, `status`).  
-  - Cascade and orphan removal are enabled so item edits propagate automatically.
+```mermaid
+classDiagram
+    class Cart {
+        +UUID id
+        +Integer totalItems
+        +BigDecimal totalAmount
+        +CartStatus status
+        +UUID userId
+    }
 
-* `CartItem` (`entity/CartItem.java`)  
-  - UUID primary key, references `Cart`, `Product`, and `ProductVariant`.  
-  - Stores `quantity`, `price`, `subTotalAmount` snapped at the time of mutation.
+    class CartItem {
+        +UUID id
+        +Integer quantity
+        +BigDecimal price
+        +BigDecimal subTotal
+        +UUID variantId
+    }
 
-* Migration `V6__create_cart_tables.sql` creates the `cart` and `cart_item` tables, ensures a unique active cart per user, and enforces `(cart_id, variant_id)` uniqueness.
+    class ProductVariant { +UUID id, +BigDecimal price, +Integer stock }
 
-Request Flow Summary
---------------------
-
-1. **Resolve Current User**  
-   `CartHelper.requireCurrentUser()` inspects `SecurityContextHolder`, supports both `UserPrincipal` and username lookups via `UserRepository`, and throws `UNAUTHORIZED` when missing.
-
-2. **Fetch/Create Active Cart**  
-   `CartHelper.getOrCreateActiveCart(User)` loads the `ACTIVE` cart or creates one lazily when absent.
-
-3. **Mutations** (`CartItemServiceImpl`)  
-   - Validate variant existence and active status (`PRODUCT_VARIANT_NOT_FOUND`).  
-   - Ensure parent product is active (`PRODUCT_NOT_FOUND`).  
-   - Enforce stock availability via `assertStockAvailable` (`CART_ITEM_OUT_OF_STOCK`).  
-   - Update or create `CartItem`, recompute item subtotal, and call `CartHelper.recalculateCart` to refresh cart aggregates.  
-   - Persist via `CartRepository.save(cart)`; cascades handle item persistence.
-
-4. **Read** (`CartServiceImpl`)  
-   - Returns the active cart mapped to `CartResponse` through `CartMapper`.
-
-API Contracts
--------------
-
-All endpoints live under `/api/v1/cart` (see `ApiConstants.Cart`) and respond with the shared `ApiResponse` envelope.
-
-### `GET /api/v1/cart`
-* Controller: `CartController#getCart`.
-* Success code: `CART_FETCH_SUCCESS`.
-* Returns `CartResponse` with aggregated totals and an array of `CartItemResponse`.
-
-### `POST /api/v1/cart/items`
-* Controller: `CartItemController#addItem`.
-* Request body: `CartItemCreateRequest { variantId, quantity }`.
-* Validations: quantity ≥ 1, variant must exist/active, product active, requested quantity ≤ stock.
-* Success code: `CART_ITEM_ADD_SUCCESS`.
-
-### `PATCH /api/v1/cart/items/{itemId}`
-* Controller: `CartItemController#updateItem`.
-* Request body: `CartItemUpdateRequest { quantity }`.
-* Enforces same validations as add; `itemId` must belong to current user.
-* Success code: `CART_ITEM_UPDATE_SUCCESS`.
-
-### `DELETE /api/v1/cart/items/{itemId}`
-* Controller: `CartItemController#removeItem`.
-* Removes the item, recalculates totals.
-* Success code: `CART_ITEM_REMOVE_SUCCESS`.
-
-### `DELETE /api/v1/cart/items`
-* Controller: `CartItemController#clearCart`.
-* Clears all items, resets aggregates to zero.
-* Success code: `CART_CLEAR_SUCCESS`.
-
-Error Codes
------------
-
-Defined in `ApiErrorCode`:
-
-* `CART_NOT_FOUND` – reserved for future use where a cart lookup fails.
-* `CART_ITEM_NOT_FOUND` – when an item ID is invalid or belongs to another user.
-* `CART_ITEM_OUT_OF_STOCK` – quantity request exceeds variant stock.
-* `PRODUCT_NOT_FOUND`, `PRODUCT_VARIANT_NOT_FOUND` – reused from product domain for inactive/missing items.
-* Generic auth and validation errors are handled through the shared exception handler.
-
-Testing
--------
-
-Unit tests target the service layer:
-
-* `CartServiceImplTest` verifies the active-cart retrieval flow (with helper interactions mocked).
-* `CartItemServiceImplTest` covers add/update/remove/clear scenarios, stock validation, and unauthorized cases.
-
-Execute module-specific tests via:
-
-```
-mvn -Dtest="CartItemServiceImplTest,CartServiceImplTest" test
+    Cart "1" *-- "0..*" CartItem : contains >
+    CartItem --> "1" ProductVariant : references >
 ```
 
-Extending the Module
---------------------
+### 2.2 Aggregate Rules
 
-* **Coupons / discounts**: introduce new fields on `Cart` and adjust `CartHelper.recalculateCart` to incorporate discount logic. Add validation services as needed.
-* **Cart serialization for anonymous users**: extract current helper logic into an interface and provide an alternate implementation/builder for guest carts.
-* **Order integration**: once checkout is introduced, add a service method to “lock” the cart (`CartStatus.CHECKOUT_LOCKED`) and expose it via a new controller endpoint.
-* **Audit/History**: attach `@EntityListeners` or separate audit table to track cart mutations if required by the business.
+*   **Consistency**: The `Cart` entity maintains denormalized totals (`totalItems`, `totalAmount`) which are strictly recomputed upon any modification to its items.
+*   **Ownership**: A persistent cart is uniquely bound to a `User`. Anonymous carts are not currently supported in the backend (handled client-side or via future guest extensions).
 
-Development Notes
------------------
+---
 
-* Run `mvn spotless:apply` before committing to satisfy formatting checks.
-* All new schema changes must be delivered through incremental Flyway migrations.
-* Reuse `CartHelper` for any future services (e.g., order checkout) that need consistent cart resolution logic.
+## 3. Business Logic & Invariants
+
+### 3.1 Inventory Validation
+
+Every mutation (Add, Update Quantity) triggers a strict inventory check against the stock service.
+
+1.  **Availability**: The requested Variant must be `ACTIVE`.
+2.  **Stock Check**: `Requested Quantity <= Available Stock`.
+    *   Violation raises `CART_ITEM_OUT_OF_STOCK`.
+
+### 3.2 Price Synchronization
+
+Prices are snapshotted at the time of addition but should ideally be re-validated during checkout. The current implementation uses the price at the moment of the cart operation.
+
+### 3.3 Lifecycle
+
+*   **ACTIVE**: The cart is reliable for mutation.
+*   **COMPLETED**: When an order is successfully placed, the cart is effectively cleared or archived (logically). Currently, checkout flows often clear the cart items to reset state.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/cart`
+
+### 4.1 Cart Management
+
+#### Get Current Cart
+`GET /`
+Retrieves the active cart for the authenticated user. Creates one if none exists.
+
+#### Clear Cart
+`DELETE /items`
+Removes all items efficiently.
+
+### 4.2 Item Mutation
+
+#### Add Item
+`POST /items`
+**Body**: `CartItemCreateRequest { variantId, quantity }`
+Adds a new item or increments the quantity if the variant already exists (merging).
+
+#### Update Quantity
+`PATCH /items/{itemId}`
+**Body**: `CartItemUpdateRequest { quantity }`
+Sets the absolute quantity.
+
+#### Remove Item
+`DELETE /items/{itemId}`
+Removes a specific line item.
+
+---
+
+## 5. Implementation Reference
+
+### 5.1 Helper Utilities
+
+`CartHelper` encapsulates the logic for retrieving the cart and recalculating totals, ensuring DRY principles across controllers.
+
+```java
+public void recalculateCart(Cart cart) {
+    int totalItems = 0;
+    BigDecimal totalAmount = BigDecimal.ZERO;
+
+    for (CartItem item : cart.getItems()) {
+        totalItems += item.getQuantity();
+        totalAmount = totalAmount.add(item.getSubTotal());
+    }
+
+    cart.setTotalItems(totalItems);
+    cart.setTotalAmount(totalAmount);
+    cartRepository.save(cart);
+}
+```
+
+### 5.2 Error Handling
+
+*   `CART_ITEM_NOT_FOUND`: Manipulation of an ID that doesn't exist in the current user's cart.
+*   `CART_ITEM_OUT_OF_STOCK`: Request exceeds inventory.
+
+---
+
+## 6. Future Extensions
+
+*   **Guest Cart**: Implementing a token-based guest cart that merges into the user cart upon login.
+*   **Price Refresh**: A mechanism to warn users if prices have changed since the item was added.

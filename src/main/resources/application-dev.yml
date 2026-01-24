@@ -26,6 +26,11 @@ app:
     auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:true}
   mail:
     from: ${MAIL_FROM}
+  rag:
+    auto-index: ${APP_RAG_AUTO_INDEX:true}
+    chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
+    search-top-k: ${RAG_SEARCH_TOP_K:3}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}

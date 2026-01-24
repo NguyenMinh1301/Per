@@ -69,6 +69,12 @@ public enum ApiSuccessCode {
     PAYMENT_WEBHOOK_SUCCESS("PAYMENT_WEBHOOK_SUCCESS", "Payment webhook processed successfully"),
     PAYMENT_RETURN_SUCCESS("PAYMENT_RETURN_SUCCESS", "Payment status retrieved successfully"),
 
+    // AI Assistant
+    RAG_CHAT_SUCCESS("RAG_CHAT_SUCCESS", "Assistant response generated successfully"),
+    RAG_INDEX_SUCCESS("RAG_INDEX_SUCCESS", "Product catalog indexed successfully"),
+    RAG_KNOWLEDGE_INDEX_SUCCESS("RAG_KNOWLEDGE_INDEX_SUCCESS", "Knowledge base indexed successfully"),
+    RAG_KNOWLEDGE_DELETE_SUCCESS("RAG_KNOWLEDGE_DELETE_SUCCESS", "Knowledge base cleared successfully"),
+
     // Media
     MEDIA_UPLOAD_SUCCESS("MEDIA_UPLOAD_SUCCESS", "Media uploaded successfully"),
     MEDIA_UPLOAD_BATCH_SUCCESS("MEDIA_UPLOAD_BATCH_SUCCESS", "Media files uploaded successfully");

@@ -1,136 +1,154 @@
-Tổng Quan Module Payment
-========================
+# Domain Module: Xử Lý Thanh Toán (Payment)
 
-Module này orchestrate checkout, tích hợp với PayOS, và track payment attempts, transactions, và gateway callbacks. Nó build trên cart và order modules: cart items được convert thành orders, PayOS payment link được generate, và webhooks update cả payment và order state.
+## 1. Tổng Quan
 
-Các Thành Phần Chính
---------------------
+**Mô đun Thanh Toán** điều phối vòng đời giao dịch tài chính. Nó hoạt động như một adapter giữa Hệ thống Quản lý Đơn hàng (OMS) nội bộ và các Cổng thanh toán bên ngoài (cụ thể là **PayOS**). Nó xử lý việc khởi tạo checkout, xử lý webhook bất đồng bộ và đối soát trạng thái thanh toán.
 
-| Package | Mô tả |
-| --- | --- |
-| `com.per.payment.controller` | REST endpoints cho checkout, PayOS webhook, và return URL. |
-| `com.per.payment.dto` | Request/response contracts (checkout request, checkout response, PayOS return response). |
-| `com.per.payment.entity` | `Payment` và `PaymentTransaction` mapped đến Flyway V9 tables. |
-| `com.per.payment.service` | `CheckoutService` (order creation + PayOS link) và `PayOsWebhookService`. |
-| `com.per.payment.configuration` | `PayOsProperties` cho credentials/paths và `PayOsConfig` wiring official SDK. |
-| `com.per.order` | Referenced bởi payment module để snapshot orders/line items. |
+---
 
-Workflow
---------
+## 2. Kiến Trúc
 
-1. **Checkout (`POST /api/v1/payments/checkout`)**
-   * Client gửi `CheckoutRequest` := optional `cartItemIds`, receiver name/phone/address, note.
-   * `CheckoutServiceImpl` resolve authenticated user's cart qua `CartHelper`.
-   * Selected cart items được validate (ownership và quantity) và corresponding product variants được fetch.
-   * Stock được check và decrement; nếu bất kỳ variant nào thiếu inventory, call fail với `CART_ITEM_OUT_OF_STOCK`.
-   * `Order` + `OrderItem` snapshot được persist sử dụng `OrderRepository` và `OrderCodeGenerator`.
-   * Selected cart items được remove để giữ remainder intact.
-   * `Payment` row được insert (status `PENDING`).
-   * PayOS `PaymentData` được build (line items included) và `PayOS#createPaymentLink` được call.
-   * Returned link metadata (payment link ID, checkout URL, expiration) được store trên `Payment`.
-   * Response payload:
-     ```json
-     {
-       "orderId": "... UUID ...",
-       "orderCode": 123456789,
-       "orderStatus": "PENDING_PAYMENT",
-       "paymentId": "... UUID ...",
-       "paymentStatus": "PENDING",
-       "paymentLinkId": "payos-link-id",
-       "checkoutUrl": "https://pay.payos.vn/...",
-       "amount": 123000.00
-     }
-     ```
+Mô đun triển khai mẫu tích hợp trực tiếp, trong đó frontend điều hướng người dùng đến trang thanh toán (hosted checkout) của Cổng thanh toán.
 
-2. **PayOS Return (`GET /payments/payos/return`)**
-   * PayOS redirect shopper đến đây dù họ đã pay hay cancelled.
-   * Query params chứa `orderCode`, `code`, `cancel`.
-   * Controller return latest `orderStatus`/`paymentStatus` cho UI **và**:
-     - Nếu `cancel=true` hoặc `code != "00"`, đánh dấu payment/order `CANCELLED` và restock qua `OrderInventoryService`.
-     - Nếu `code="00"`, statuses vẫn untouched (webhook sẽ set chúng thành `PAID`).
+### 2.1 Sơ Đồ Tuần Tự Luồng Thanh Toán
 
-3. **PayOS Webhook (`POST /api/v1/payments/payos/webhook`)**
-   * Nhận PayOS webhook JSON; SDK verify signature.
-   * `Payment` tương ứng được locate qua `orderCode`. Dựa vào `code` (PayOS success code `"00"`), payment status trở thành `PAID` hoặc `FAILED`.
-   * Linked `Order.status` được update (`PAID`, `CANCELLED`, hoặc `FAILED`). Khi non-success, inventory được restore.
-   * `PaymentTransaction` record được insert cho webhook (idempotent by reference).
-   * PayOS đôi khi gửi "test pings" với dummy order codes; ta ignore chúng thay vì throw exceptions.
+```mermaid
+sequenceDiagram
+    participant Client
+    participant CheckoutService
+    participant PayOS
+    participant WebhookHandler
+    participant OrderService
 
-4. **Expiration Scheduler**
-   * Chạy mỗi phút (`payment.expiration-check-interval`).
-   * Tìm pending payments với `expired_at < now`, đánh dấu chúng `FAILED`, set order `FAILED`, và restore stock.
-
-5. **Maintenance**
-   * `PaymentStatus` enum bao gồm `PENDING`, `PAID`, `FAILED`, `CANCELLED`, `EXPIRED`.
-   * `PaymentTransactionStatus` track `SUCCEEDED`, `FAILED`, `PENDING`.
-   * Khi thêm PayOS fields mới, update cả entity và `V9__create_payment_tables.sql` với Flyway migration mới.
-   * Cho additional gateways hoặc flows, wrap mỗi gateway call trong service class riêng để `CheckoutServiceImpl` vẫn thin.
-
-Configuration
--------------
-
-`PayOsProperties` (loaded từ `application.yml` / `.env`):
-
-| Property | Env Key | Mô tả |
-| --- | --- | --- |
-| `payos.client-id` | `PAY_OS_CLIENT_ID` | PayOS client ID |
-| `payos.api-key` | `PAY_OS_API_KEY` | API key |
-| `payos.checksum-key` | `PAY_OS_CHECKSUM_KEY` | Webhook signature secret |
-| `payos.webhook-path` | `PAY_OS_WEBHOOK_PATH` (default `/api/v1/payments/payos/webhook`) | Internal webhook URL |
-| `payos.return-path` | `PAY_OS_RETURN_PATH` (default `/payments/payos/return`) | Relative return URL |
-| `payos.cancel-path` | `PAY_OS_CANCEL_PATH` (default `/payments/payos/return`) | Relative cancel URL (same handler) |
-
-API Reference (Postman Prep)
-----------------------------
-
-### 1. Create Checkout Link
+    Client->>CheckoutService: POST /checkout (Cart Items)
+    CheckoutService->>OrderService: Tạo Order Pending (Giữ Tồn Kho)
+    CheckoutService->>PayOS: Tạo Link Thanh Toán
+    CheckoutService-->>Client: Trả về URL Checkout
+    
+    Client->>PayOS: Thực hiện thanh toán
+    PayOS-->>Client: Redirect về Return URL
+    
+    PayOS->>WebhookHandler: POST /webhook (Thanh toán thành công)
+    WebhookHandler->>WebhookHandler: Xác thực Chữ ký
+    WebhookHandler->>OrderService: Cập nhật Trạng thái Order (PAID)
+    OrderService->>Client: Thông báo (Socket/Email)
 ```
-POST /api/v1/payments/checkout
-Authorization: Bearer <access_token>
-Content-Type: application/json
 
+### 2.2 Máy Trạng Thái Thực Thể
+
+Lớp persistence theo dõi vòng đời thanh toán thông qua thực thể `Payment`.
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> PAID : Webhook (Code 00)
+    PENDING --> FAILED : Webhook (Lỗi) / Hết hạn
+    PENDING --> CANCELLED : Người dùng Hủy
+    
+    PAID --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]
+```
+
+---
+
+## 3. Logic Nghiệp Vụ & Tích Hợp
+
+### 3.1 Điều Phối Checkout
+
+`CheckoutService` thực hiện một thao tác nguyên tử (atomic):
+1.  **Validate**: Xác minh Cart, Địa chỉ và Tồn kho.
+2.  **Đặt Chỗ (Reservation)**: Tạo một `Order` ở trạng thái `PENDING_PAYMENT` và trừ tồn kho.
+3.  **Đăng Ký Gateway**: Đăng ký giao dịch với PayOS để lấy `paymentLinkId` và `checkoutUrl`.
+4.  **Lưu Trữ**: Lưu bản ghi `Payment` liên kết Order ID nội bộ với Transaction ID bên ngoài.
+
+### 3.2 Xử Lý Webhook (Tính Idempotency)
+
+Webhooks rất quan trọng để đảm bảo tính nhất quán cuối cùng nhưng có thể được gửi nhiều lần.
+*   **Xác Thực Chữ Ký**: Xác thực payload sử dụng `PAY_OS_CHECKSUM_KEY`.
+*   **Tính Idempotency**: Triển khai bằng cách theo dõi các giao dịch đã xử lý hoặc ép buộc chuyển đổi trạng thái nghiêm ngặt (ví dụ: không thể chuyển từ PAID sang PENDING).
+*   **Rollback Tồn Kho**: Nếu thanh toán thất bại hoặc bị hủy, tồn kho đã giữ sẽ tự động được giải phóng.
+
+### 3.3 Đối Soát (Scheduler)
+
+Một tác vụ định kỳ chạy mỗi phút để phát hiện các giao dịch bị bỏ rơi (các khoản thanh toán `PENDING` quá thời gian TTL). Chúng được đánh dấu là `EXPIRED`, và tồn kho được hoàn trả.
+
+---
+
+## 4. Đặc Tả API
+
+Tiền tố: `/api/v1/payments`
+
+### 4.1 Khởi Tạo Giao Dịch
+
+#### Checkout
+`POST /checkout`
+Khởi tạo luồng thanh toán.
+**Body**:
+```json
 {
-  "cartItemIds": ["f65af584-...","b5cc..."],   // optional; omit để checkout entire cart
+  "cartItemIds": ["..."],
   "receiverName": "Nguyen Van A",
-  "receiverPhone": "0988000222",
-  "shippingAddress": "123 Nguyen Trai, Ha Noi",
-  "note": "Giao giờ hành chính"
+  "shippingAddress": "123 Đường B",
+  "paymentMethod": "PAYOS"
 }
 ```
-Response `data` là `CheckoutResponse` được mô tả trên (chứa `checkoutUrl` để redirect user).
-
-### 2. PayOS Webhook (từ PayOS, test qua Postman nếu cần)
+**Response**:
+```json
+{
+  "checkoutUrl": "https://pay.payos.vn/web/...",
+  "paymentLinkId": "..."
+}
 ```
-POST /api/v1/payments/payos/webhook
-Content-Type: application/json
-<Webhook payload từ PayOS sandbox>
+
+### 4.2 Gateway Callbacks
+
+#### Webhook
+`POST /payos/webhook`
+Nhận thông báo server-to-server. Truy cập công khai nhưng được bảo vệ bởi xác thực chữ ký.
+
+#### Return Handler
+`GET /payos/return`
+Xử lý việc điều hướng người dùng từ gateway về. Cập nhật giao diện người dùng nhưng dựa vào Webhook để cập nhật trạng thái chính thức.
+
+---
+
+## 5. Cấu Hình
+
+Thông tin xác thực được lấy từ biến môi trường.
+
+| Biến | Mô Tả |
+| :--- | :--- |
+| `PAY_OS_CLIENT_ID` | Định danh Merchant |
+| `PAY_OS_API_KEY` | Secret Truy cập |
+| `PAY_OS_CHECKSUM_KEY` | Khóa ký Webhook |
+
+---
+
+## 6. Tham Chiếu Triển Khai
+
+### 6.1 Mô Hình Giao Dịch
+
+Thực thể `Payment` đóng vai trò là nhật ký kiểm toán.
+
+```java
+@Entity
+public class Payment {
+    @Id
+    private UUID id;
+    
+    @Column(nullable = false)
+    private BigDecimal amount;
+    
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; // PENDING, PAID, FAILED
+    
+    @OneToOne
+    private Order order;
+}
 ```
-Không có auth được add mặc định; nếu expose publicly, secure endpoint này (IP whitelist hoặc signature verification đã done bởi SDK).
 
-### 3. PayOS Return
-```
-GET /payments/payos/return?orderCode=123456789&cancel=true
-```
-Response body chứa latest `orderStatus`/`paymentStatus`. Khi cancel/failure endpoint này cũng persist state và restock inventory.
+### 6.2 Điểm Mở Rộng
 
-Ghi Chú Vận Hành
-----------------
-
-* Luôn chạy Flyway migrations V8 (order tables) trước V9 (payment tables). Cho new environments chạy:
-  ```
-  ./mvnw flyway:migrate
-  ```
-* Nếu migrations bị thay đổi sau khi applied, sử dụng `flyway repair` một lần để realign checksums.
-* Cho sandbox tests, cấu hình PayOS return/cancel URLs để point đến local tunnel (ngrok) hoặc staging host để webhook/return flow có thể validated end-to-end.
-* Khi debug payment issues:
-  1. Check `payment` table cho `status` và `checkout_url`.
-  2. Inspect `payment_transaction` cho webhook idempotency.
-  3. Verify `order` status mirror payment status; return/webhook/scheduler tất cả update cả hai sides.
-
-Mở Rộng Module
---------------
-
-* **Partial capture/refund**: thêm endpoints + service methods mới gọi PayOS APIs (`cancelPaymentLink`, v.v.) và update payment/order status accordingly.
-* **Retry logic**: wrap PayOS SDK calls trong retryable service với exponential backoff (Spring Retry) để handle transient errors.
-* **Admin dashboards**: thêm `/api/v1/payments` hoặc `/api/v1/orders` read endpoints để filter theo status/date.
-* **Multi-gateway**: introduce strategy layer để different providers implement common interface; `CheckoutServiceImpl` sẽ delegate based on gateway selection.
+*   **Hoàn Tiền (Refunds)**: Triển khai `POST /refunds` gọi API hoàn tiền của gateway.
+*   **Đa Gateway**: Refactor `CheckoutService` để sử dụng Mẫu Strategy (`PaymentStrategy`) nhằm hỗ trợ các nhà cung cấp khác như VNPay hoặc Stripe.

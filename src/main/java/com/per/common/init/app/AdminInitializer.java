@@ -1,4 +1,4 @@
-package com.per.common.init;
+package com.per.common.init.app;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.env.Environment;

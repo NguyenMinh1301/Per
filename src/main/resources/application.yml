@@ -23,6 +23,18 @@ spring:
       password: ${REDIS_PASSWORD}
   elasticsearch:
     uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+  ai:
+    openai:
+      api-key: ${OPENAI_API_KEY}
+      chat:
+        model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
+      embedding:
+        model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1536
   mail:
     host: smtp.gmail.com
     port: 587

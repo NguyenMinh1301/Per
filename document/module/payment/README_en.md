@@ -1,136 +1,154 @@
-Payment Module Overview
-=======================
+# Domain Module: Payment Processing
 
-This module orchestrates checkout, integrates with PayOS, and keeps track of payment attempts, transactions, and gateway callbacks. It builds on the cart and order modules: cart items are converted into orders, a PayOS payment link is generated, and webhooks update both payment and order state.
+## 1. Overview
 
-Key Components
---------------
+The **Payment Module** orchestrates the financial transaction lifecycle. It acts as an adapter between the internal Order Management System and external Payment Gateways (specifically **PayOS**). It handles checkout initiation, asynchronous webhook processing, and reconciliation of payment states.
 
-| Package | Description |
-| --- | --- |
-| `com.per.payment.controller` | REST endpoints for checkout, PayOS webhook, and return URL. |
-| `com.per.payment.dto` | Request/response contracts (checkout request, checkout response, PayOS return response). |
-| `com.per.payment.entity` | `Payment` and `PaymentTransaction` mapped to Flyway V9 tables. |
-| `com.per.payment.service` | `CheckoutService` (order creation + PayOS link) and `PayOsWebhookService`. |
-| `com.per.payment.configuration` | `PayOsProperties` for credentials/paths and `PayOsConfig` wiring the official SDK. |
-| `com.per.order` | Referenced by the payment module to snapshot orders/line items. |
+---
 
-Workflow
---------
+## 2. Architecture
 
-1. **Checkout (`POST /api/v1/payments/checkout`)**
-   * Client sends `CheckoutRequest` := optional `cartItemIds`, receiver name/phone/address, note.
-   * `CheckoutServiceImpl` resolves the authenticated user’s cart via `CartHelper`.
-   * Selected cart items are validated (ownership and quantity) and corresponding product variants are fetched.
-   * Stock is checked and decremented; if any variant lacks inventory, the call fails with `CART_ITEM_OUT_OF_STOCK`.
-   * An `Order` + `OrderItem` snapshot is persisted using `OrderRepository` and `OrderCodeGenerator`.
-   * Selected cart items are removed to keep the remainder intact.
-   * A `Payment` row is inserted (status `PENDING`).
-   * PayOS `PaymentData` is built (line items included) and `PayOS#createPaymentLink` is called.
-   * Returned link metadata (payment link ID, checkout URL, expiration) is stored on the `Payment`.
-   * Response payload:
-     ```json
-     {
-       "orderId": "... UUID ...",
-       "orderCode": 123456789,
-       "orderStatus": "PENDING_PAYMENT",
-       "paymentId": "... UUID ...",
-       "paymentStatus": "PENDING",
-       "paymentLinkId": "payos-link-id",
-       "checkoutUrl": "https://pay.payos.vn/...",
-       "amount": 123000.00
-     }
-     ```
+The module implements a direct integration pattern where the frontend redirects the user to the Payment Gateway's hosted checkout page.
 
-2. **PayOS Return (`GET /payments/payos/return`)**
-   * PayOS redirects the shopper here whether they paid or cancelled.
-   * Query params contain `orderCode`, `code`, `cancel`.
-   * Controller returns the latest `orderStatus`/`paymentStatus` to the UI **and**:
-     - If `cancel=true` or `code != "00"`, mark payment/order `CANCELLED` and restock via `OrderInventoryService`.
-     - If `code="00"`, statuses remain untouched (webhook will set them to `PAID`).
+### 2.1 Payment Flow Sequence
 
-3. **PayOS Webhook (`POST /api/v1/payments/payos/webhook`)**
-   * Receives PayOS webhook JSON; the SDK verifies the signature.
-   * The corresponding `Payment` is located via `orderCode`. Depending on `code` (PayOS success code `"00"`), the payment status becomes `PAID` or `FAILED`.
-   * The linked `Order.status` is updated (`PAID`, `CANCELLED`, or `FAILED`). On non-success, inventory is restored.
-   * A `PaymentTransaction` record is inserted for the webhook (idempotent by reference).
-   * PayOS sometimes sends “test pings” with dummy order codes; we now ignore those instead of throwing exceptions.
+```mermaid
+sequenceDiagram
+    participant Client
+    participant CheckoutService
+    participant PayOS
+    participant WebhookHandler
+    participant OrderService
 
-4. **Expiration Scheduler**
-   * Runs every minute (`payment.expiration-check-interval`).
-   * Finds pending payments with `expired_at < now`, marks them `FAILED`, sets order `FAILED`, and restores stock.
-
-5. **Maintenance**
-   * `PaymentStatus` enum includes `PENDING`, `PAID`, `FAILED`, `CANCELLED`, `EXPIRED`.
-   * `PaymentTransactionStatus` tracks `SUCCEEDED`, `FAILED`, `PENDING`.
-   * When adding new PayOS fields, update both the entity and `V9__create_payment_tables.sql` with a new Flyway migration.
-   * For additional gateways or flows, wrap each gateway call in its own service class so `CheckoutServiceImpl` remains thin.
-
-Configuration
--------------
-
-`PayOsProperties` (loaded from `application.yml` / `.env`):
-
-| Property | Env Key | Description |
-| --- | --- | --- |
-| `payos.client-id` | `PAY_OS_CLIENT_ID` | PayOS client ID |
-| `payos.api-key` | `PAY_OS_API_KEY` | API key |
-| `payos.checksum-key` | `PAY_OS_CHECKSUM_KEY` | Webhook signature secret |
-| `payos.webhook-path` | `PAY_OS_WEBHOOK_PATH` (default `/api/v1/payments/payos/webhook`) | Internal webhook URL |
-| `payos.return-path` | `PAY_OS_RETURN_PATH` (default `/payments/payos/return`) | Relative return URL |
-| `payos.cancel-path` | `PAY_OS_CANCEL_PATH` (default `/payments/payos/return`) | Relative cancel URL (same handler) |
-
-API Reference (Postman Prep)
-----------------------------
-
-### 1. Create Checkout Link
+    Client->>CheckoutService: POST /checkout (Cart Items)
+    CheckoutService->>OrderService: Create Pending Order (Reserve Stock)
+    CheckoutService->>PayOS: Create Payment Link
+    CheckoutService-->>Client: Return Checkout URL
+    
+    Client->>PayOS: Perform Payment
+    PayOS-->>Client: Redirect to Return URL
+    
+    PayOS->>WebhookHandler: POST /webhook (Payment Success)
+    WebhookHandler->>WebhookHandler: Verify Signature
+    WebhookHandler->>OrderService: Update Order Status (PAID)
+    OrderService->>Client: (Socket/Email) Confirmation
 ```
-POST /api/v1/payments/checkout
-Authorization: Bearer <access_token>
-Content-Type: application/json
 
+### 2.2 Entity State Machine
+
+The persistence layer tracks the payment lifecycle via the `Payment` entity.
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> PAID : Webhook (Code 00)
+    PENDING --> FAILED : Webhook (Error) / Expired
+    PENDING --> CANCELLED : User Cancelled
+    
+    PAID --> [*]
+    FAILED --> [*]
+    CANCELLED --> [*]
+```
+
+---
+
+## 3. Business Logic & Integrations
+
+### 3.1 Checkout Orchestration
+
+The `CheckoutService` performs an atomic operation:
+1.  **Validation**: Verifies Cart, Address, and Inventory.
+2.  **Reservation**: Creates an `Order` in `PENDING_PAYMENT` state and decrements stock.
+3.  **Gateway Registration**: Registers the transaction with PayOS to obtain a `paymentLinkId` and `checkoutUrl`.
+4.  **Persistence**: Saves a `Payment` record linking the internal Order ID to the external Transaction ID.
+
+### 3.2 Webhook Handling (Idempotency)
+
+Webhooks are critical for final consistency but can be delivered multiple times.
+*   **Signature Verification**: Authenticates the payload using `PAY_OS_CHECKSUM_KEY`.
+*   **Idempotency**: Implemented by tracking processed transactions or strictly forcing state transitions (e.g., cannot go from PAID to PENDING).
+*   **Stock Rollback**: If a payment fails or is cancelled, the reserved inventory is automatically released.
+
+### 3.3 Reconciliation (Scheduler)
+
+A scheduled job runs every minute to detect abandoned transactions (`PENDING` payments that have exceeded the TTL). These are marked as `EXPIRED`, and their inventory is released.
+
+---
+
+## 4. API Specification
+
+Prefix: `/api/v1/payments`
+
+### 4.1 Transaction Initiation
+
+#### Checkout
+`POST /checkout`
+Initiates the flow.
+**Body**:
+```json
 {
-  "cartItemIds": ["f65af584-...","b5cc..."],   // optional; omit to checkout entire cart
-  "receiverName": "Nguyen Van A",
-  "receiverPhone": "0988000222",
-  "shippingAddress": "123 Nguyen Trai, Ha Noi",
-  "note": "Giao giờ hành chính"
+  "cartItemIds": ["..."],
+  "receiverName": "John Doe",
+  "shippingAddress": "123 Street",
+  "paymentMethod": "PAYOS"
 }
 ```
-Response `data` is the `CheckoutResponse` described above (contains `checkoutUrl` to redirect the user).
-
-### 2. PayOS Webhook (from PayOS, test via Postman if needed)
+**Response**:
+```json
+{
+  "checkoutUrl": "https://pay.payos.vn/web/...",
+  "paymentLinkId": "..."
+}
 ```
-POST /api/v1/payments/payos/webhook
-Content-Type: application/json
-<Webhook payload from PayOS sandbox>
+
+### 4.2 Gateway Callbacks
+
+#### Webhook
+`POST /payos/webhook`
+Receives server-to-server notifications. Publicly accessible but protected by signature verification.
+
+#### Return Handler
+`GET /payos/return`
+Handles the user redirection from the gateway. Updates the UI state but relies on the Webhook for the authoritative status update.
+
+---
+
+## 5. Configuration
+
+Credentials are sourced from environment variables.
+
+| Variable | Description |
+| :--- | :--- |
+| `PAY_OS_CLIENT_ID` | Merchant Identity |
+| `PAY_OS_API_KEY` | Access Secret |
+| `PAY_OS_CHECKSUM_KEY` | Webhook Signing Key |
+
+---
+
+## 6. Implementation Reference
+
+### 6.1 Transaction Model
+
+The `Payment` entity serves as the audit log.
+
+```java
+@Entity
+public class Payment {
+    @Id
+    private UUID id;
+    
+    @Column(nullable = false)
+    private BigDecimal amount;
+    
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus status; // PENDING, PAID, FAILED
+    
+    @OneToOne
+    private Order order;
+}
 ```
-No auth is added by default; if exposing publicly, secure this endpoint (IP whitelist or signature verification already done by SDK).
 
-### 3. PayOS Return
-```
-GET /payments/payos/return?orderCode=123456789&cancel=true
-```
-Response body contains the latest `orderStatus`/`paymentStatus`. On cancel/failure this endpoint also persists the state and restocks inventory.
+### 6.2 Extension Points
 
-Operational Notes
------------------
-
-* Always run Flyway migrations V8 (order tables) before V9 (payment tables). For new environments run:
-  ```
-  ./mvnw flyway:migrate
-  ```
-* If migrations were changed after being applied, use `flyway repair` once to realign checksums.
-* For sandbox tests, configure PayOS return/cancel URLs to point to your local tunnel (ngrok) or staging host so the webhook/return flow can be validated end-to-end.
-* When debugging payment issues:
-  1. Check `payment` table for `status` and `checkout_url`.
-  2. Inspect `payment_transaction` for webhook idempotency.
-  3. Verify `order` status mirrors payment status; return/webhook/scheduler all update both sides.
-
-Extending the Module
---------------------
-
-* **Partial capture/refund**: add new endpoints + service methods that call PayOS APIs (`cancelPaymentLink`, etc.) and update payment/order status accordingly.
-* **Retry logic**: wrap PayOS SDK calls in a retryable service with exponential backoff (Spring Retry) to handle transient errors.
-* **Admin dashboards**: add `/api/v1/payments` or `/api/v1/orders` read endpoints to filter by status/date.
-* **Multi-gateway**: introduce a strategy layer so different providers implement a common interface; `CheckoutServiceImpl` would delegate based on gateway selection.
+*   **Refunds**: Implement `POST /refunds` calling the gateway's refund API.
+*   **Multi-Gateway**: Refactor `CheckoutService` to use the Strategy Pattern (`PaymentStrategy`) to support other providers like VNPay or Stripe.

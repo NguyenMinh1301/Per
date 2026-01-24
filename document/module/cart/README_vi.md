@@ -1,132 +1,131 @@
-Tổng Quan Module Cart
-=====================
+# Domain Module: Giỏ Hàng (Shopping Cart)
 
-Module này đóng gói domain giỏ hàng cho storefront. Nó cung cấp REST endpoints cho cart retrieval và cart item mutations, persist cart state trong PostgreSQL, và tái sử dụng các response/error contracts dùng chung để API nhất quán across modules.
+## 1. Tổng Quan
 
-Trách Nhiệm
------------
+**Mô đun Giỏ Hàng** quản lý trạng thái nhất thời (transient state) của ý định mua hàng từ người dùng. Nó lưu trữ các mục hàng (line items), xử lý cập nhật số lượng và thực hiện tính toán tổng hợp giá theo thời gian thực. Khác với lưu trữ session đơn giản, giỏ hàng là một thực thể miền bền vững được hỗ trợ bởi PostgreSQL để đảm bảo tính nhất quán trên nhiều thiết bị.
 
-* Duy trì một active cart duy nhất cho mỗi authenticated user.
-* Track cart line items (variant, quantity, pricing) và giữ aggregate totals đồng bộ.
-* Enforce product/variant availability và stock constraints trước khi chấp nhận mutations.
-* Expose idempotent HTTP endpoints cho clients để fetch, add, update, remove, hoặc clear cart items.
+---
 
-Các Packages Chính
-------------------
+## 2. Kiến Trúc Mô Hình Dữ Liệu
 
-| Package | Mô tả |
-| --- | --- |
-| `controller` | REST controllers: `CartController` (read-only) và `CartItemController` (mutations). |
-| `dto` | Request/response payloads (MapStruct-driven). |
-| `entity` | JPA entities cho `Cart` và `CartItem`. |
-| `repository` | Spring Data repositories cho cart aggregates và items. |
-| `service` | Service contracts cộng với helper utilities (user resolution, cart recalculation). |
-| `service.impl` | Concrete implementations cho cart read và cart-item mutation workflows. |
-| `helper` | `CartHelper` tập trung current-user lookup, cart fetch/create, và totals recalculation. |
-| `mapper` | `CartMapper` chuyển đổi entities thành outward-facing DTOs. |
-| `enums` | Domain enumerations (`CartStatus`). |
+Mô hình giỏ hàng được thiết kế như một Aggregate Root, trong đó thực thể `Cart` kiểm soát vòng đời của các `CartItem` con.
 
-Persistence Model
------------------
+### 2.1 Sơ Đồ Quan Hệ Thực Thể (ERD)
 
-* `Cart` (`entity/Cart.java`)
-  - UUID primary key, one-to-many với `CartItem`.
-  - Track các aggregate fields (`totalItems`, `subtotalAmount`, `discountAmount`, `totalAmount`, `status`).
-  - Cascade và orphan removal được enable nên item edits propagate tự động.
+```mermaid
+classDiagram
+    class Cart {
+        +UUID id
+        +Integer totalItems
+        +BigDecimal totalAmount
+        +CartStatus status
+        +UUID userId
+    }
 
-* `CartItem` (`entity/CartItem.java`)
-  - UUID primary key, references `Cart`, `Product`, và `ProductVariant`.
-  - Lưu `quantity`, `price`, `subTotalAmount` snapped tại thời điểm mutation.
+    class CartItem {
+        +UUID id
+        +Integer quantity
+        +BigDecimal price
+        +BigDecimal subTotal
+        +UUID variantId
+    }
 
-* Migration `V6__create_cart_tables.sql` tạo các tables `cart` và `cart_item`, đảm bảo unique active cart cho mỗi user, và enforce `(cart_id, variant_id)` uniqueness.
+    class ProductVariant { +UUID id, +BigDecimal price, +Integer stock }
 
-Tóm Tắt Request Flow
---------------------
-
-1. **Resolve Current User**
-   `CartHelper.requireCurrentUser()` inspect `SecurityContextHolder`, hỗ trợ cả `UserPrincipal` và username lookups qua `UserRepository`, và throw `UNAUTHORIZED` khi missing.
-
-2. **Fetch/Create Active Cart**
-   `CartHelper.getOrCreateActiveCart(User)` load `ACTIVE` cart hoặc tạo mới lazily khi không có.
-
-3. **Mutations** (`CartItemServiceImpl`)
-   - Validate variant existence và active status (`PRODUCT_VARIANT_NOT_FOUND`).
-   - Đảm bảo parent product active (`PRODUCT_NOT_FOUND`).
-   - Enforce stock availability qua `assertStockAvailable` (`CART_ITEM_OUT_OF_STOCK`).
-   - Update hoặc create `CartItem`, recompute item subtotal, và gọi `CartHelper.recalculateCart` để refresh cart aggregates.
-   - Persist qua `CartRepository.save(cart)`; cascades xử lý item persistence.
-
-4. **Read** (`CartServiceImpl`)
-   - Trả về active cart được map thành `CartResponse` qua `CartMapper`.
-
-API Contracts
--------------
-
-Tất cả endpoints nằm dưới `/api/v1/cart` (xem `ApiConstants.Cart`) và respond với `ApiResponse` envelope dùng chung.
-
-### `GET /api/v1/cart`
-* Controller: `CartController#getCart`.
-* Success code: `CART_FETCH_SUCCESS`.
-* Trả về `CartResponse` với aggregated totals và array of `CartItemResponse`.
-
-### `POST /api/v1/cart/items`
-* Controller: `CartItemController#addItem`.
-* Request body: `CartItemCreateRequest { variantId, quantity }`.
-* Validations: quantity >= 1, variant phải exist/active, product active, requested quantity <= stock.
-* Success code: `CART_ITEM_ADD_SUCCESS`.
-
-### `PATCH /api/v1/cart/items/{itemId}`
-* Controller: `CartItemController#updateItem`.
-* Request body: `CartItemUpdateRequest { quantity }`.
-* Enforce same validations như add; `itemId` phải thuộc về current user.
-* Success code: `CART_ITEM_UPDATE_SUCCESS`.
-
-### `DELETE /api/v1/cart/items/{itemId}`
-* Controller: `CartItemController#removeItem`.
-* Remove item, recalculate totals.
-* Success code: `CART_ITEM_REMOVE_SUCCESS`.
-
-### `DELETE /api/v1/cart/items`
-* Controller: `CartItemController#clearCart`.
-* Clear tất cả items, reset aggregates về zero.
-* Success code: `CART_CLEAR_SUCCESS`.
-
-Error Codes
------------
-
-Được định nghĩa trong `ApiErrorCode`:
-
-* `CART_NOT_FOUND` – reserved cho future use khi cart lookup fail.
-* `CART_ITEM_NOT_FOUND` – khi item ID invalid hoặc thuộc về user khác.
-* `CART_ITEM_OUT_OF_STOCK` – quantity request vượt quá variant stock.
-* `PRODUCT_NOT_FOUND`, `PRODUCT_VARIANT_NOT_FOUND` – reused từ product domain cho inactive/missing items.
-* Generic auth và validation errors được xử lý qua shared exception handler.
-
-Testing
--------
-
-Unit tests target service layer:
-
-* `CartServiceImplTest` verify active-cart retrieval flow (với helper interactions mocked).
-* `CartItemServiceImplTest` cover add/update/remove/clear scenarios, stock validation, và unauthorized cases.
-
-Chạy module-specific tests qua:
-
-```
-mvn -Dtest="CartItemServiceImplTest,CartServiceImplTest" test
+    Cart "1" *-- "0..*" CartItem : chứa >
+    CartItem --> "1" ProductVariant : tham_chiếu >
 ```
 
-Mở Rộng Module
---------------
+### 2.2 Quy Tắc Tổng Hợp (Aggregate Rules)
 
-* **Coupons / discounts**: giới thiệu các fields mới trên `Cart` và adjust `CartHelper.recalculateCart` để incorporate discount logic. Thêm validation services khi cần.
-* **Cart serialization cho anonymous users**: extract current helper logic thành interface và cung cấp alternate implementation/builder cho guest carts.
-* **Order integration**: khi checkout được giới thiệu, thêm service method để "lock" cart (`CartStatus.CHECKOUT_LOCKED`) và expose qua controller endpoint mới.
-* **Audit/History**: attach `@EntityListeners` hoặc separate audit table để track cart mutations nếu business yêu cầu.
+*   **Tính Nhất Quán**: Thực thể `Cart` duy trì các tổng số được phi chuẩn hóa (`totalItems`, `totalAmount`), các giá trị này được tính toán lại nghiêm ngặt sau bất kỳ sửa đổi nào đối với các item con.
+*   **Quyền Sở Hữu**: Một giỏ hàng bền vững được liên kết duy nhất với một `User`. Giỏ hàng vô danh (Anonymous carts) hiện chưa được hỗ trợ ở backend (xử lý phía client hoặc qua mở rộng guest trong tương lai).
 
-Ghi Chú Phát Triển
-------------------
+---
 
-* Chạy `mvn spotless:apply` trước khi commit để satisfy formatting checks.
-* Tất cả schema changes mới phải được deliver qua incremental Flyway migrations.
-* Tái sử dụng `CartHelper` cho bất kỳ future services nào (ví dụ: order checkout) cần cart resolution logic nhất quán.
+## 3. Logic Nghiệp Vụ & Bất Biến
+
+### 3.1 Validate Tồn Kho
+
+Mọi thay đổi (Thêm, Cập nhật số lượng) đều kích hoạt kiểm tra tồn kho nghiêm ngặt.
+
+1.  **Tính Khả Dụng**: Variant được yêu cầu phải ở trạng thái `ACTIVE`.
+2.  **Kiểm Tra Kho**: `Số Lượng Yêu Cầu <= Tồn Kho Khả Dụng`.
+    *   Vi phạm sẽ gây ra lỗi `CART_ITEM_OUT_OF_STOCK`.
+
+### 3.2 Đồng Bộ Giá
+
+Giá được snapshot tại thời điểm thêm vào giỏ nhưng lý tưởng nhất nên được validate lại trong quá trình checkout. Triển khai hiện tại sử dụng giá tại thời điểm thao tác giỏ hàng.
+
+### 3.3 Vòng Đời
+
+*   **ACTIVE**: Giỏ hàng đáng tin cậy để thay đổi.
+*   **COMPLETED**: Khi đơn hàng được đặt thành công, giỏ hàng được coi là đã hoàn tất hoặc xóa sạch (về mặt logic). Hiện tại, luồng checkout thường xóa các item trong giỏ để reset trạng thái.
+
+---
+
+## 4. Đặc Tả API
+
+Tiền tố: `/api/v1/cart`
+
+### 4.1 Quản Lý Giỏ Hàng
+
+#### Lấy Giỏ Hàng Hiện Tại
+`GET /`
+Truy xuất giỏ hàng hoạt động cho người dùng đã xác thực. Tạo mới nếu chưa tồn tại.
+
+#### Xóa Sạch Giỏ Hàng
+`DELETE /items`
+Xóa tất cả các item một cách hiệu quả.
+
+### 4.2 Thao Tác Item
+
+#### Thêm Item
+`POST /items`
+**Body**: `CartItemCreateRequest { variantId, quantity }`
+Thêm item mới hoặc tăng số lượng nếu variant đã tồn tại (gộp dòng).
+
+#### Cập Nhật Số Lượng
+`PATCH /items/{itemId}`
+**Body**: `CartItemUpdateRequest { quantity }`
+Thiết lập số lượng tuyệt đối.
+
+#### Xóa Item
+`DELETE /items/{itemId}`
+Xóa một dòng item cụ thể.
+
+---
+
+## 5. Tham Chiếu Triển Khai
+
+### 5.1 Các Tiện Ích Helper
+
+`CartHelper` đóng gói logic truy xuất giỏ hàng và tính toán lại tổng số, đảm bảo nguyên tắc DRY (Don't Repeat Yourself) trên các controller.
+
+```java
+public void recalculateCart(Cart cart) {
+    int totalItems = 0;
+    BigDecimal totalAmount = BigDecimal.ZERO;
+
+    for (CartItem item : cart.getItems()) {
+        totalItems += item.getQuantity();
+        totalAmount = totalAmount.add(item.getSubTotal());
+    }
+
+    cart.setTotalItems(totalItems);
+    cart.setTotalAmount(totalAmount);
+    cartRepository.save(cart);
+}
+```
+
+### 5.2 Xử Lý Lỗi
+
+*   `CART_ITEM_NOT_FOUND`: Thao tác trên ID không tồn tại trong giỏ của user hiện tại.
+*   `CART_ITEM_OUT_OF_STOCK`: Yêu cầu vượt quá tồn kho.
+
+---
+
+## 6. Mở Rộng Tương Lai
+
+*   **Giỏ Hàng Khách (Guest)**: Triển khai giỏ hàng dựa trên token cho khách, sau đó gộp vào giỏ hàng user khi đăng nhập.
+*   **Làm Mới Giá**: Cơ chế cảnh báo người dùng nếu giá thay đổi so với thời điểm thêm vào giỏ.

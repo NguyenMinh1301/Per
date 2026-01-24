@@ -1,295 +1,170 @@
-Kafka Messaging Overview
-========================
+# Event-Driven Architecture: Kafka Messaging System
 
-The application uses Apache Kafka for asynchronous event-driven communication. Currently, Kafka handles email delivery, decoupling the authentication flow from SMTP latency.
+## 1. Introduction
 
-Architecture
-------------
+The application utilizes Apache Kafka as a distributed streaming platform to implement an Event-Driven Architecture (EDA). This decouples high-latency I/O operations (such as SMTP email delivery) from the primary synchronous HTTP request-response cycle, enhancing system responsiveness/throughput and ensuring fault tolerance.
 
+### 1.1 Architectural Pattern
+
+The system adopts a **Fire-and-Forget** pattern for event publishing, combined with **At-Least-Once** delivery semantics for consumption. This ensures data durability while accepting the possibility of duplicate processing, which is handled via idempotent consumers where necessary.
+
+---
+
+## 2. System Architecture
+
+### 2.1 Event Flow Topology
+
+The following diagram illustrates the topological flow of an event from generation to valid consumption or deadlock handling.
+
+```mermaid
+graph LR
+    subgraph Publisher Domain
+        Client[Auth Service]
+        Template[KafkaTemplate]
+    end
+
+    subgraph Kafka Cluster
+        Topic[("Topic: email-topic")]
+        DLT[("DLT: email-topic-dlt")]
+    end
+
+    subgraph Consumer Domain
+        Listener[EmailConsumer]
+        Mailing[MailService]
+    end
+
+    Client -->|1. Publish Event| Template
+    Template -->|2. Ingest| Topic
+    Topic -->|3. Pull| Listener
+    Listener -->|4. Execute| Mailing
+    
+    Listener -.->|5. Retry Loop| Topic
+    Listener -.->|6. Max Retries Exceeded| DLT
 ```
-┌──────────────────────────────────────────────────────────────────────┐
-│                     Email Sending Flow                               │
-│                                                                      │
-│  AuthService ──► KafkaTemplate.send() ──► [email-topic] ──►          │
-│                                            EmailConsumer ──►         │
-│                                            MailService ──► SMTP      │
-└──────────────────────────────────────────────────────────────────────┘
+
+### 2.2 Component Specifications
+
+| Component | Role | Responsibility |
+| :--- | :--- | :--- |
+| `AuthServiceImpl` | Producer | Constructs domain events (`EmailEvent`) and publishes to specific topics. |
+| `KafkaTemplate` | Transport | Spring abstraction handling serialization and broker communication. |
+| `EmailConsumer` | Consumer | Subscribes to topics, deserializes payloads, and triggers business logic. |
+| `Dead Letter Queue` | Fault Tolerance | Persists messages that fail processing after exhaustive retries for manual intervention. |
+
+---
+
+## 3. Data Specification
+
+### 3.1 Event Schema: `EmailEvent`
+
+Events are serialized using standard JSON formatting to ensure interoperability.
+
+```json
+{
+  "to": "user@example.com",
+  "subject": "Account Verification",
+  "content": "<html>...</html>"
+}
 ```
 
-Benefits of async email:
-* User registration/password reset returns immediately
-* SMTP failures do not block API responses
-* Retries can be handled by Kafka consumer
+**Schema Definition:**
 
-Key Components
---------------
+| Field | Type | Constraint | Description |
+| :--- | :--- | :--- | :--- |
+| `to` | `String` | Non-Null, Email | Recipient address. |
+| `subject` | `String` | Non-Null | Email subject line. |
+| `content` | `String` | Non-Null, HTML | Rendered HTML payload. |
 
-| File | Purpose |
-| --- | --- |
-| `KafkaConfig.java` | Producer and consumer factory configuration |
-| `KafkaTopicNames.java` | Centralized topic name constants |
-| `EmailEvent.java` | Event payload for email messages |
-| `EmailConsumer.java` | Kafka listener with retry and DLQ support |
-| `AuthServiceImpl.java` | Producer that publishes email events |
+---
 
-Topics and Consumer Groups
---------------------------
+## 4. Operational Semantics
 
-| Topic | Consumer Group | Purpose |
-| --- | --- | --- |
-| `email-topic` | `email-group` | Email delivery queue |
-| `email-topic-dlt` | `email-group` | Dead Letter Topic for failed emails |
+### 4.1 Reliability & Fault Tolerance
 
-Configuration
--------------
+The system implements a robust retry strategy with exponential backoff to handle transient failures (e.g., SMTP timeout).
 
-Kafka connection is configured via Spring Boot properties:
+*   **Initial Attempt:** Immediate execution upon consumption.
+*   **Retry Policy:** Exponential Backoff `(delay * multiplier)`.
+    *   *Delay:* 1000ms
+    *   *Multiplier:* 2.0
+    *   *Max Delay:* 4000ms
+    *   *Max Attempts:* 4
+*   **Failure Handling:** Upon exhausting retries, the message is routed to the DLT (`email-topic-dlt`).
+
+### 4.2 Configuration
+
+Configuration is managed via `application.yml` and injected into `KafkaConfig`.
 
 ```yaml
 spring:
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: email-group
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 ```
 
-### Producer Configuration
+---
+
+## 5. Implementation Reference
+
+### 5.1 Producer Implementation
 
 ```java
-@Bean
-public ProducerFactory<String, Object> producerFactory() {
-    Map<String, Object> configProps = new HashMap<>();
-    configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-    configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
-    return new DefaultKafkaProducerFactory<>(configProps);
-}
-```
-
-### Consumer Configuration
-
-```java
-@Bean
-public ConsumerFactory<String, Object> consumerFactory() {
-    Map<String, Object> configProps = new HashMap<>();
-    configProps.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-    configProps.put(ConsumerConfig.GROUP_ID_CONFIG, "email-group");
-    configProps.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-    configProps.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
-    configProps.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
-    return new DefaultKafkaConsumerFactory<>(configProps);
-}
-```
-
-Event Format
-------------
-
-### EmailEvent
-
-```java
-public class EmailEvent {
-    private String to;      // Recipient email address
-    private String subject; // Email subject line
-    private String content; // HTML email body
-}
-```
-
-Serialized as JSON when sent to Kafka.
-
-Publishing Events
------------------
-
-Events are published using `KafkaTemplate`:
-
-```java
+@Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     
     private final KafkaTemplate<String, Object> kafkaTemplate;
     
-    private void sendVerificationEmail(User user, String token) {
-        String subject = "Verify your email";
-        String content = buildVerificationEmailContent(token);
-        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
-    }
-    
-    private void sendPasswordResetEmail(User user, String token) {
-        String subject = "Reset your password";
-        String content = buildPasswordResetEmailContent(token);
-        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
+    private void dispatchEvent(User user, String type) {
+        EmailEvent event = buildEvent(user, type);
+        // Asynchronous publish
+        kafkaTemplate.send(KafkaTopicNames.EMAIL_TOPIC, event)
+            .whenComplete((result, ex) -> {
+                if (ex != null) log.error("Publish failed", ex);
+                else log.debug("Offset: {}", result.getRecordMetadata().offset());
+            });
     }
 }
 ```
 
-Consuming Events
-----------------
-
-The `EmailConsumer` listens to the topic and delegates to `MailService`:
+### 5.2 Consumer Implementation
 
 ```java
 @Component
-@RequiredArgsConstructor
-@Slf4j
+@KafkaListener(topics = "email-topic", groupId = "email-group")
 public class EmailConsumer {
 
-    private final MailService mailService;
-
-    @KafkaListener(topics = "email-topic", groupId = "email-group")
+    @RetryableTopic(
+        backoff = @Backoff(delay = 1000, multiplier = 2.0),
+        dltTopicSuffix = "-dlt"
+    )
     public void consume(EmailEvent event) {
-        log.info("Received email event: {}", event);
-        mailService.sendEmail(event.getTo(), event.getSubject(), event.getContent());
+        // Business logic execution
+        mailService.send(event);
+    }
+    
+    @DltHandler
+    public void processFailure(EmailEvent event) {
+        // Alerting logic for permanent failures
+        monitor.alert("Email delivery failed for " + event.getTo());
     }
 }
 ```
 
-Current Use Cases
------------------
+---
 
-| Flow | Event Published | Trigger |
-| --- | --- | --- |
-| User Registration | Email verification | After user creation |
-| Forgot Password | Password reset link | On forgot password request |
+## 6. Extension Guidelines
 
-Error Handling and Dead Letter Queue (DLQ)
--------------------------------------------
+To introduce new asynchronous workflows:
 
-The application implements retry with exponential backoff and Dead Letter Queue:
-
-### Retry Mechanism
-
-```java
-@RetryableTopic(
-    attempts = "4",  // 1 initial + 3 retries
-    backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 4000),
-    dltTopicSuffix = "-dlt"
-)
-@KafkaListener(topics = "email-topic", groupId = "email-group")
-public void consume(EmailEvent event) {
-    mailService.sendEmail(event.getTo(), event.getSubject(), event.getContent());
-}
-```
-
-| Attempt | Delay |
-| --- | --- |
-| 1 (initial) | 0s |
-| 2 (retry 1) | 1s |
-| 3 (retry 2) | 2s |
-| 4 (retry 3) | 4s |
-| DLT | after 4th failure |
-
-### Dead Letter Queue
-
-Messages failing after all retries are sent to `email-topic-dlt`:
-
-```java
-@DltHandler
-public void handleDlt(EmailEvent event, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
-    log.error("Email failed permanently: {}, Topic: {}", event.getTo(), topic);
-}
-```
-
-### Monitoring DLQ via Kafka UI
-
-1. Access Kafka UI at `http://localhost:8090`
-2. Navigate to Topics → `email-topic-dlt`
-3. Review failed messages for manual processing
-
-Development Notes
------------------
-
-### Local Development
-
-Ensure Kafka is running locally or via Docker (KRaft mode, no Zookeeper required):
-
-```bash
-# Using Docker Compose
-docker compose up -d kafka
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-| --- | --- | --- |
-| `KAFKA_BOOTSTRAP_SERVERS` | `localhost:9092` | Kafka broker addresses |
-
-### Testing
-
-For unit tests, mock `KafkaTemplate` to verify events are published:
-
-```java
-@Mock
-private KafkaTemplate<String, Object> kafkaTemplate;
-
-@Test
-void shouldPublishEmailEventOnRegistration() {
-    authService.register(request);
-    
-    verify(kafkaTemplate).send(eq("email-topic"), any(EmailEvent.class));
-}
-```
-
-For integration tests, use embedded Kafka or Testcontainers.
-
-Extending Kafka Usage
----------------------
-
-### Adding a New Event Type
-
-1. Create event class in `com.per.common.event`:
-   ```java
-   @Data
-   @Builder
-   @NoArgsConstructor
-   @AllArgsConstructor
-   public class OrderCreatedEvent {
-       private UUID orderId;
-       private UUID userId;
-       private BigDecimal amount;
-   }
-   ```
-
-2. Create consumer in relevant module:
-   ```java
-   @Component
-   @RequiredArgsConstructor
-   public class OrderEventConsumer {
-       
-       @KafkaListener(topics = "order-topic", groupId = "order-group")
-       public void consume(OrderCreatedEvent event) {
-           // Handle event
-       }
-   }
-   ```
-
-3. Publish from service:
-   ```java
-   kafkaTemplate.send("order-topic", orderCreatedEvent);
-   ```
-
-### Adding New Consumer Group
-
-Update `KafkaConfig.consumerFactory()` or create separate factory for different group configurations.
-
-### Topic Management
-
-For production, create topics explicitly with proper partitioning:
-
-```bash
-kafka-topics.sh --create --topic email-topic \
-  --bootstrap-server localhost:9092 \
-  --partitions 3 \
-  --replication-factor 1
-```
-
-Monitoring
-----------
-
-Kafka metrics can be exposed via Spring Actuator:
-
-```yaml
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,kafka
-```
-
-Monitor consumer lag to ensure messages are processed timely.
+1.  **Define Event:** Create a POJO in `com.per.common.event` (Immutable, Serializable).
+2.  **Provision Topic:** Add constant to `KafkaTopicNames` and create topic in broker.
+3.  **Implement Producer:** Inject `KafkaTemplate` and publish event.
+4.  **Implement Consumer:** Annotate method with `@KafkaListener` and define retry policy.

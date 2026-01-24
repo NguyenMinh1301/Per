@@ -58,7 +58,14 @@ public enum ApiErrorCode {
     ORDER_NOT_FOUND("ORDER_NOT_FOUND", "The requested order could not be found", HttpStatus.NOT_FOUND),
     PAYMENT_NOT_FOUND("PAYMENT_NOT_FOUND", "Payment information could not be found", HttpStatus.NOT_FOUND),
     PAYMENT_GATEWAY_ERROR("PAYMENT_GATEWAY_ERROR", "Unable to create payment link at this time", HttpStatus.BAD_GATEWAY),
-    PAYMENT_WEBHOOK_INVALID("PAYMENT_WEBHOOK_INVALID", "Invalid payment webhook payload", HttpStatus.BAD_REQUEST);
+    PAYMENT_WEBHOOK_INVALID("PAYMENT_WEBHOOK_INVALID", "Invalid payment webhook payload", HttpStatus.BAD_REQUEST),
+
+    // AI Assistant
+    RAG_INDEXING_FAILED("RAG_INDEXING_FAILED", "Failed to index product catalog", HttpStatus.INTERNAL_SERVER_ERROR),
+    RAG_SEARCH_FAILED("RAG_SEARCH_FAILED", "Assistant search failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    RAG_CHAT_FAILED("RAG_CHAT_FAILED", "Failed to generate assistant response", HttpStatus.INTERNAL_SERVER_ERROR),
+    RAG_AI_SERVICE_UNAVAILABLE("RAG_AI_SERVICE_UNAVAILABLE", "AI service is unavailable", HttpStatus.SERVICE_UNAVAILABLE),
+    RAG_KNOWLEDGE_INDEX_FAILED("RAG_KNOWLEDGE_INDEX_FAILED", "Failed to index knowledge base", HttpStatus.INTERNAL_SERVER_ERROR);
 
     // spotless:on
     private final String code;
