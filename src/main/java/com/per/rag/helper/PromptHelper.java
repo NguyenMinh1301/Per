@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class PromptHelper {
 
-    @Value("classpath:knowledge/system-prompt.txt")
+    @Value("file:${user.dir}/knowledge/system-prompt.txt")
     private Resource systemPromptResource;
 
     /**
