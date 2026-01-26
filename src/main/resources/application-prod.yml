@@ -21,9 +21,14 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS}
   elasticsearch:
-    auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:false}
+    auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:true}
   mail:
     from: ${MAIL_FROM}
+  rag:
+    auto-index: ${APP_RAG_AUTO_INDEX:true}
+    chat-model: ${OPENAI_CHAT_MODEL}
+    search-top-k: ${RAG_SEARCH_TOP_K}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
