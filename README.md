@@ -1,5 +1,5 @@
 <p align="center">
-   <a href="https://spring.io/" target="_blank"><img src="document/img/springio.svg" height="140" alt="Spring Boot" /></a>
+   <a href="https://spring.io/" target="_blank"><img src="assets/img/springio.svg" height="140" alt="Spring Boot" /></a>
   &nbsp;&nbsp;
    <a href="https://www.postgresql.org/" target="_blank"><img src="document/img/postgresql.svg" height="140" alt="PostgreSQL" /></a>
   &nbsp;&nbsp;
