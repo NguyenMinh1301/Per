@@ -57,7 +57,8 @@ import com.per.auth.security.jwt.JwtTokenType;
 import com.per.auth.security.principal.UserPrincipal;
 import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
-import com.per.common.event.EmailEvent;
+import com.per.common.config.kafka.KafkaTopicNames;
+import com.per.mail.dto.SendEmailEvent;
 import com.per.user.entity.User;
 
 @ExtendWith(MockitoExtension.class)
@@ -179,7 +180,8 @@ class AuthServiceImplTest {
             verify(roleRepository).findByName(RoleType.USER);
             verify(passwordEncoder).encode(PASSWORD);
             verify(userRepository).save(any(User.class));
-            verify(kafkaTemplate).send(eq("email-topic"), any(EmailEvent.class));
+            verify(kafkaTemplate)
+                    .send(eq(KafkaTopicNames.EMAIL_SEND_TOPIC), any(SendEmailEvent.class));
             verify(jwtService, never()).generateAccessToken(any(User.class));
             verify(jwtService, never()).generateRefreshToken(any(User.class));
             verify(refreshTokenService, never()).store(anyString(), anyString());
@@ -557,7 +559,8 @@ class AuthServiceImplTest {
             verify(userRepository).findByEmail(EMAIL);
             verify(userTokenService)
                     .create(any(User.class), eq(TokenType.PASSWORD_RESET), any(Duration.class));
-            verify(kafkaTemplate).send(eq("email-topic"), any(EmailEvent.class));
+            verify(kafkaTemplate)
+                    .send(eq(KafkaTopicNames.EMAIL_SEND_TOPIC), any(SendEmailEvent.class));
         }
 
         @Test
@@ -574,7 +577,7 @@ class AuthServiceImplTest {
             // Then
             verify(userRepository).findByEmail(EMAIL);
             verify(userTokenService, never()).create(any(), any(), any());
-            verify(kafkaTemplate, never()).send(anyString(), any(EmailEvent.class));
+            verify(kafkaTemplate, never()).send(anyString(), any(SendEmailEvent.class));
         }
     }
 
