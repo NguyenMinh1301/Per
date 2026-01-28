@@ -35,20 +35,13 @@ spring:
         index-type: HNSW
         distance-type: COSINE_DISTANCE
         dimensions: 1536
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
-      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:true}
-      mail.smtp.starttls.required: ${MAIL_SMTP_STARTTLS:true}
-      mail.smtp.ssl.trust: smtp.gmail.com
-      mail.smtp.connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
-      mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT:5000}
-      mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
-    default-encoding: UTF-8
+  # AWS SES Configuration
+aws:
+  ses:
+    region: ${AWS_REGION}
+    source-email: ${AWS_SES_SOURCE_EMAIL}
+    access-key: ${AWS_ACCESS_KEY_ID}
+    secret-key: ${AWS_SECRET_ACCESS_KEY}
 
 management:
   health:

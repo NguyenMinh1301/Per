@@ -7,7 +7,8 @@ package com.per.common.config.kafka;
 public final class KafkaTopicNames {
 
     // Email topics
-    public static final String EMAIL_TOPIC = "email-topic";
+    public static final String EMAIL_SEND_TOPIC = "notification.email.send";
+    public static final String EMAIL_DLQ_TOPIC = "notification.email.dlq";
     public static final String EMAIL_GROUP = "email-group";
 
     // Product index topics (Elasticsearch sync)

@@ -24,8 +24,6 @@ app:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   elasticsearch:
     auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:true}
-  mail:
-    from: ${MAIL_FROM}
   rag:
     auto-index: ${APP_RAG_AUTO_INDEX:true}
     chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}

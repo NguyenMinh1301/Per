@@ -1,0 +1,17 @@
+resilience4j:
+  retry:
+    instances:
+      emailSend:
+        maxAttempts: 3
+        waitDuration: 1s
+        exponentialBackoffMultiplier: 2
+        enableExponentialBackoff: true
+        retryExceptions:
+          - software.amazon.awssdk.core.exception.SdkClientException
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+        ignoreExceptions:
+          - software.amazon.awssdk.services.ses.model.MessageRejectedException
+          - software.amazon.awssdk.services.ses.model.MailFromDomainNotVerifiedException
+          - software.amazon.awssdk.services.ses.model.BadRequestException
+          - software.amazon.awssdk.services.ses.model.InvalidParameterValueException
