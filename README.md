@@ -48,7 +48,8 @@ graph TD
     subgraph "External Integration"
         Core -->|Upload| Cloudinary[Cloudinary]
         Core -->|Payment| PayOS[PayOS Gateway]
-        Core -->|SMTP| MailAuth[Gmail SMTP]
+        Core -->|Payment| PayOS[PayOS Gateway]
+        Core -->|Email| SES[AWS SES]
     end
 ```
 
