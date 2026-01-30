@@ -54,6 +54,10 @@ services:
       - APP_ADMIN_EMAIL=${APP_ADMIN_EMAIL}
       - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
 
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SES_SOURCE_EMAIL=${AWS_SES_SOURCE_EMAIL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - ./knowledge:/app/knowledge:ro
 

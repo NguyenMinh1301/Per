@@ -16,7 +16,7 @@ services:
       - SPRING_PROFILES_ACTIVE=prod
       - SERVER_PORT=${SERVER_PORT}
 
-      # --- PostgreSQL (app đọc từ env) ---
+      # --- PostgreSQL ---
       - POSTGRES_URL=${POSTGRES_URL}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -71,6 +71,13 @@ services:
       - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
       - APP_ADMIN_EMAIL=${APP_ADMIN_EMAIL}
       - APP_ADMIN_PASSWORD=${APP_ADMIN_PASSWORD}
+
+      # AWS
+      # SES
+      - AWS_REGION=${AWS_REGION}
+      - AWS_SES_SOURCE_EMAIL=${AWS_SES_SOURCE_EMAIL}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     ports:
       - "8080:8080"
     networks:
