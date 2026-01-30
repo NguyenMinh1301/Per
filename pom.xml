@@ -118,7 +118,6 @@
 		</dependency>
 
 		<!-- AWS SES SDK v2 -->
-		<!-- AWS SES SDK v2 -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>ses</artifactId>
@@ -287,7 +286,7 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<!--                        <exclude>com/example/dto/**</exclude>-->
+						<!--<exclude>com/example/dto/**</exclude>-->
 					</excludes>
 				</configuration>
 			</plugin>
