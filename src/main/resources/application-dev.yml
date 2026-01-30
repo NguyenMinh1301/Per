@@ -16,25 +16,25 @@ security:
     secret: ${JWT_SECRET} # base64 256-bit+
     access-ttl: ${ACCESS_TOKEN_TTL:PT15M} # 60 minutes (ISO-8601)
     refresh-ttl: ${REFRESH_TOKEN_TTL:P30D} # 30 days (ISO-8601)
-    issuer: ${JWT_ISSUER:per-auth-service}
+    issuer: ${JWT_ISSUER}
 
 app:
-  base-url: ${APP_BASE_URL:http://localhost:8080}
+  base-url: ${APP_BASE_URL}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
   elasticsearch:
     auto-reindex: ${APP_ELASTICSEARCH_AUTO_REINDEX:true}
   rag:
     auto-index: ${APP_RAG_AUTO_INDEX:true}
-    chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
-    search-top-k: ${RAG_SEARCH_TOP_K:3}
-    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+    chat-model: ${OPENAI_CHAT_MODEL}
+    search-top-k: ${RAG_SEARCH_TOP_K}
+    similarity-threshold: ${RAG_SIMILARITY_THRESHOLD}
 
 cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
-  folder: ${CLOUDINARY_FOLDER:per/uploads}
+  folder: ${CLOUDINARY_FOLDER}
 
 payos:
   client-id: ${PAY_OS_CLIENT_ID}
@@ -55,4 +55,4 @@ springdoc:
     url: /per/v3/api-docs
   api-docs:
     path: /per/v3/api-docs
-  server-url: ${APP_BASE_URL:http://localhost:8080}
+  server-url: ${APP_BASE_URL}

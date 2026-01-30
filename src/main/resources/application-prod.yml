@@ -11,10 +11,10 @@ jpa:
 
 security:
   jwt:
-    secret: ${JWT_SECRET}                   # base64 256-bit+
-    access-ttl: ${ACCESS_TOKEN_TTL:PT15M}   # 15 minutes (ISO-8601)
-    refresh-ttl: ${REFRESH_TOKEN_TTL:P30D}  # 30 days (ISO-8601)
-    issuer: ${JWT_ISSUER:per-auth-service}
+    secret: ${JWT_SECRET}
+    access-ttl: ${ACCESS_TOKEN_TTL}
+    refresh-ttl: ${REFRESH_TOKEN_TTL}
+    issuer: ${JWT_ISSUER}
 
 app:
   base-url: ${APP_BASE_URL}
@@ -34,7 +34,7 @@ cloudinary:
   cloud-name: ${CLOUDINARY_CLOUD_NAME}
   api-key: ${CLOUDINARY_API_KEY}
   api-secret: ${CLOUDINARY_API_SECRET}
-  folder: ${CLOUDINARY_FOLDER:per/uploads}
+  folder: ${CLOUDINARY_FOLDER}
 
 payos:
   client-id: ${PAY_OS_CLIENT_ID}

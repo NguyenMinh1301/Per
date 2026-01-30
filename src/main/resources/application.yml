@@ -13,7 +13,7 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
   flyway:
     enabled: true
   data:
@@ -22,14 +22,14 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
   elasticsearch:
-    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+    uris: ${ELASTICSEARCH_URI}
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
       chat:
-        model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
+        model: ${OPENAI_CHAT_MODEL}
       embedding:
-        model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+        model: ${OPENAI_EMBEDDING_MODEL}
     vectorstore:
       pgvector:
         index-type: HNSW
