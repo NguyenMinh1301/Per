@@ -15,12 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Kafka consumer for email notification events. Listens to notification.email.send topic and
- * dispatches emails via AWS SES.
+ * dispatches emails via SMTP.
  *
  * <p>Resilience:
  *
  * <ul>
- *   <li>Resilience4j @Retry for transient AWS network failures
+ *   <li>Resilience4j @Retry for transient SMTP network failures
  *   <li>Failed messages after retries are routed to notification.email.dlq
  * </ul>
  */

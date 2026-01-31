@@ -3,28 +3,23 @@ package com.per.mail.config;
 import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Configuration properties for AWS SES email service. Values are bound from aws.ses.* properties.
- * All fields are required - application will fail to start if not configured.
+ * Configuration properties for SMTP email service. Values are bound from mail.* properties. Spring
+ * Boot auto-configures JavaMailSender from spring.mail.* properties.
  */
 @Getter
 @Setter
-@ConfigurationProperties(prefix = "aws.ses")
+@Configuration
+@EnableConfigurationProperties
+@ConfigurationProperties(prefix = "mail")
 public class MailProperties {
 
-    /** AWS region for SES service (e.g., ap-southeast-1). Required. */
-    @NotBlank private String region;
-
-    /** Verified sender email address in AWS SES. Required. */
-    @NotBlank private String sourceEmail;
-
-    /** AWS Access Key ID for SES authentication. Required. */
-    @NotBlank private String accessKey;
-
-    /** AWS Secret Access Key for SES authentication. Required. */
-    @NotBlank private String secretKey;
+    /** Sender email address for the "From" header. Required. */
+    @NotBlank private String from;
 }
