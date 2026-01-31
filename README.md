@@ -48,8 +48,7 @@ graph TD
     subgraph "External Integration"
         Core -->|Upload| Cloudinary[Cloudinary]
         Core -->|Payment| PayOS[PayOS Gateway]
-        Core -->|Payment| PayOS[PayOS Gateway]
-        Core -->|Email| SES[AWS SES]
+        Core -->|Email| SMTP[Google SMTP]
     end
 ```
 
@@ -99,7 +98,30 @@ Copy the example configuration to a local environment file.
 ```bash
 cp .env.example .env
 ```
-> **Note**: Populate critical secrets (Payment Keys, Cloudinary Credentials) in `.env` before starting the application.
+> **Note**: Populate critical secrets (Payment Keys, Cloudinary Credentials, SMTP credentials) in `.env` before starting the application.
+
+### SMTP Configuration
+
+The application uses Google SMTP for sending transactional emails (welcome, password reset, etc.).
+
+#### Generate Google App Password
+
+1. Go to [Google Account Security](https://myaccount.google.com/security)
+2. Enable **2-Step Verification** if not already enabled
+3. Navigate to **App Passwords** ([direct link](https://myaccount.google.com/apppasswords))
+4. Select **Mail** and your device, then click **Generate**
+5. Copy the 16-character password
+
+#### Environment Variables
+
+```bash
+# .env
+MAIL_USERNAME=your-gmail@gmail.com
+MAIL_PASSWORD=xxxx-xxxx-xxxx-xxxx  # App Password (not your Gmail password)
+MAIL_FROM=your-gmail@gmail.com
+```
+
+> **Important**: Never use your regular Gmail password. App Passwords are required for SMTP access.
 
 ### Build & Run
 

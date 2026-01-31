@@ -2,7 +2,7 @@
 
 ## 1. Giới Thiệu
 
-**Mô đun Mail** cung cấp hạ tầng thông báo hiệu suất cao và được tách biệt (decoupled) cho nền tảng. Nó chuyển đổi cơ chế gửi tin dựa trên SMTP truyền thống sang kiến trúc hướng sự kiện (event-driven) bất đồng bộ, được vận hành bởi **AWS SES (Simple Email Service)**. Mô đun được thiết kế để đảm bảo tính tin cậy, khả năng mở rộng và sự nhất quán nghiêm ngặt về thương hiệu, sử dụng các **Thymeleaf** templates chuyên biệt cho truyền thông cao cấp.
+**Mô đun Mail** cung cấp hạ tầng thông báo hiệu suất cao và được tách biệt (decoupled) cho nền tảng. Nó sử dụng kiến trúc hướng sự kiện (event-driven) bất đồng bộ, được vận hành bởi **Spring Boot Mail (JavaMailSender)** với Google SMTP. Mô đun được thiết kế để đảm bảo tính tin cậy, khả năng mở rộng và sự nhất quán nghiêm ngặt về thương hiệu, sử dụng các **Thymeleaf** templates chuyên biệt cho truyền thông cao cấp.
 
 ---
 
@@ -18,21 +18,21 @@ sequenceDiagram
     participant Kafka as Apache Kafka
     participant Listener as EmailNotificationListener
     participant Thymeleaf as Thymeleaf Engine
-    participant AWS_SES as AWS SES SDK v2
+    participant SMTP as JavaMailSender (Google SMTP)
     
     Domain->>Kafka: Publish SendEmailEvent
     Kafka->>Listener: Consume Message
     Listener->>Thymeleaf: Xử lý Template (HTML + Variables)
     Thymeleaf-->>Listener: Nội dung HTML đã render
-    Listener->>AWS_SES: sendTemplatedEmail() (SDK v2)
-    AWS_SES-->>Client: Gửi Email
+    Listener->>SMTP: send(MimeMessage)
+    SMTP-->>Client: Gửi Email
 ```
 
 ### 2.2 Các Thành Phần Cốt Lõi
 
 *   **EmailNotificationListener**: Một Kafka consumer đăng ký nhận tin từ topic `notification.email.send`. Nó điều phối toàn bộ quá trình render và gửi tin.
-*   **AwsSesEmailService**: Thành phần triển khai chính, chịu trách nhiệm xây dựng `SendEmailRequest` bằng cách sử dụng AWS SDK for Java v2.
-*   **MailProperties**: Thành phần cấu hình fail-fast, bắt buộc phải có AWS credentials và các thiết lập vùng (region) hợp lệ ngay khi khởi động ứng dụng.
+*   **SmtpEmailService**: Thành phần triển khai chính, chịu trách nhiệm xây dựng `MimeMessage` bằng cách sử dụng Spring's `JavaMailSender` và `MimeMessageHelper`.
+*   **MailProperties**: Thành phần cấu hình định nghĩa địa chỉ email người gửi (`from`).
 
 ---
 
@@ -42,14 +42,14 @@ sequenceDiagram
 
 Để đảm bảo khả năng gửi tin trước các sự cố mạng tạm thời, mô đun triển khai cơ chế retry nâng cao:
 
-1.  **Exponential Backoff**: Các lượt thử lại được lập lịch với độ trễ tăng dần để tránh gây quá tải cho endpoint của AWS SES.
+1.  **Exponential Backoff**: Các lượt thử lại được lập lịch với độ trễ tăng dần để tránh gây quá tải cho SMTP server.
 2.  **Xử Lý Ngoại Lệ (Exception Handling) Nghiêm Ngặt**:
-    *   **Retry**: `SdkClientException`, `SocketTimeout`, `ConnectException`.
-    *   **Ignore (Fail-Fast)**: Các lỗi 4xx từ phía Client như `MessageRejected`, `MailFromDomainNotVerified`, và `BadRequestException`.
+    *   **Retry**: `MailSendException`, `SocketTimeout`, `ConnectException`, `MessagingException`.
+    *   **Ignore (Fail-Fast)**: `MailAuthenticationException` (thông tin xác thực không hợp lệ).
 
 ### 3.2 Cấu Hình Bảo Mật
 
-Mô đun triển khai mô hình **StaticCredentialsProvider**, tiêm (inject) các giá trị `access-key` và `secret-key` trực tiếp từ môi trường. Điều này đảm bảo ứng dụng không phụ thuộc vào các IAM roles mặc định, cung cấp khả năng kiểm soát chi tiết trên các môi trường triển khai khác nhau.
+Mô đun sử dụng **Google App Passwords** để xác thực SMTP. Mật khẩu Gmail thông thường không được hỗ trợ; phải tạo App Password 16 ký tự từ cài đặt Google Account.
 
 ---
 
@@ -80,28 +80,37 @@ public record SendEmailEvent(
 
 ### 5.1 Triển Khai Service
 
-`AwsSesEmailService` trừu tượng hóa sự phức tạp của AWS SDK v2, cung cấp một giao diện sạch cho các domain services.
+`SmtpEmailService` cung cấp một giao diện sạch cho các domain services sử dụng mail abstraction của Spring.
 
 ```java
 @Override
 public void sendTemplatedEmail(SendEmailEvent event) {
     Context ctx = new Context();
-    ctx.setVariables(event.variables());
-    String htmlBody = templateEngine.process("email/" + event.templateCode(), ctx);
+    ctx.setVariables(event.getVariables());
+    String htmlBody = templateEngine.process("email/" + event.getTemplateCode(), ctx);
 
-    SendEmailRequest request = SendEmailRequest.builder()
-            .source(mailProps.getSourceEmail())
-            .destination(d -> d.toAddresses(event.to()))
-            .message(m -> m.subject(s -> s.data(getSubject(event.templateCode())))
-                           .body(b -> b.html(h -> h.data(htmlBody))))
-            .build();
+    MimeMessage message = mailSender.createMimeMessage();
+    MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-    sesClient.sendEmail(request);
+    helper.setFrom(mailProps.getFrom());
+    helper.setTo(event.getTo());
+    helper.setSubject(getSubject(event.getTemplateCode()));
+    helper.setText(htmlBody, true); // true = HTML content
+
+    mailSender.send(message);
 }
 ```
 
 ### 5.2 Yêu Cầu Hạ Tầng
 
 *   **Apache Kafka**: Lưu trữ các topic `notification.email.send` và `notification.email.dlq`.
-*   **AWS SES**: Các định danh đã được xác thực (verified identities) và IAM credentials hợp lệ với quyền `ses:SendEmail`.
+*   **Google SMTP**: Tài khoản Gmail hợp lệ với App Password đã bật. Cấu hình qua `spring.mail.*` properties.
 *   **Thymeleaf**: Spring Boot starter để render HTML phía server.
+
+### 5.3 Biến Môi Trường
+
+```bash
+MAIL_USERNAME=your-gmail@gmail.com
+MAIL_PASSWORD=xxxx-xxxx-xxxx-xxxx  # Google App Password
+MAIL_FROM=your-gmail@gmail.com
+```
