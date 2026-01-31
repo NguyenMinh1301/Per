@@ -9,6 +9,21 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
         eventConsumerBufferSize: 10
         registerHealthIndicator: true
+  
+  retry:
+    instances:
+      emailSend:
+        maxAttempts: 3
+        waitDuration: 1s
+        exponentialBackoffMultiplier: 2
+        enableExponentialBackoff: true
+        retryExceptions:
+          - org.springframework.mail.MailSendException
+          - java.net.SocketTimeoutException
+          - java.net.ConnectException
+          - jakarta.mail.MessagingException
+        ignoreExceptions:
+          - org.springframework.mail.MailAuthenticationException
 
   ratelimiter:
     instances:
