@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 data
 grafana-storage
+.agent/
 
 ### STS ###
 .apt_generated

@@ -1,17 +1,17 @@
 <p align="center">
-   <a href="https://spring.io/" target="_blank"><img src="document/img/springio.svg" height="140" alt="Spring Boot" /></a>
+   <a href="https://spring.io/" target="_blank"><img src="assets/img/springio.svg" height="140" alt="Spring Boot" /></a>
   &nbsp;&nbsp;
-   <a href="https://www.postgresql.org/" target="_blank"><img src="document/img/postgresql.svg" height="140" alt="PostgreSQL" /></a>
+   <a href="https://www.postgresql.org/" target="_blank"><img src="assets/img/postgresql.svg" height="140" alt="PostgreSQL" /></a>
   &nbsp;&nbsp;
-   <a href="https://redis.io/" target="_blank"><img src="document/img/redis.svg" height="140" alt="Redis" /></a>
+   <a href="https://redis.io/" target="_blank"><img src="assets/img/redis.svg" height="140" alt="Redis" /></a>
   &nbsp;&nbsp;
-   <a href="https://kafka.apache.org/" target="_blank"><img src="document/img/kafka.svg" height="140" alt="Kafka" /></a>
+   <a href="https://kafka.apache.org/" target="_blank"><img src="assets/img/kafka.svg" height="140" alt="Kafka" /></a>
   &nbsp;&nbsp;
-   <a href="https://www.elastic.co/" target="_blank"><img src="document/img/elastic.svg" height="140" alt="Elasticsearch" /></a>
+   <a href="https://www.elastic.co/" target="_blank"><img src="assets/img/elastic.svg" height="140" alt="Elasticsearch" /></a>
   &nbsp;&nbsp;
-   <a href="https://www.docker.com/" target="_blank"><img src="document/img/docker.svg" height="140" alt="Docker" /></a>
+   <a href="https://www.docker.com/" target="_blank"><img src="assets/img/docker.svg" height="140" alt="Docker" /></a>
   &nbsp;&nbsp;
-   <a href="https://prometheus.io/" target="_blank"><img src="document/img/prometheus.svg" height="140" alt="Prometheus" /></a>
+   <a href="https://prometheus.io/" target="_blank"><img src="assets/img/prometheus.svg" height="140" alt="Prometheus" /></a>
   &nbsp;&nbsp;
 </p>
 
@@ -21,7 +21,7 @@ Per is a production-ready e-commerce backend application built with Java 21 and 
 
 <p align="center">
   <a href="./">
-    <img src="/document/img/Per.svg" alt="Per" width="160">
+    <img src="/assets/img/Per.svg" alt="Per" width="160">
   </a>
 </p>
 
@@ -48,7 +48,7 @@ graph TD
     subgraph "External Integration"
         Core -->|Upload| Cloudinary[Cloudinary]
         Core -->|Payment| PayOS[PayOS Gateway]
-        Core -->|SMTP| MailAuth[Gmail SMTP]
+        Core -->|Email| SMTP[Google SMTP]
     end
 ```
 
@@ -98,7 +98,30 @@ Copy the example configuration to a local environment file.
 ```bash
 cp .env.example .env
 ```
-> **Note**: Populate critical secrets (Payment Keys, Cloudinary Credentials) in `.env` before starting the application.
+> **Note**: Populate critical secrets (Payment Keys, Cloudinary Credentials, SMTP credentials) in `.env` before starting the application.
+
+### SMTP Configuration
+
+The application uses Google SMTP for sending transactional emails (welcome, password reset, etc.).
+
+#### Generate Google App Password
+
+1. Go to [Google Account Security](https://myaccount.google.com/security)
+2. Enable **2-Step Verification** if not already enabled
+3. Navigate to **App Passwords** ([direct link](https://myaccount.google.com/apppasswords))
+4. Select **Mail** and your device, then click **Generate**
+5. Copy the 16-character password
+
+#### Environment Variables
+
+```bash
+# .env
+MAIL_USERNAME=your-gmail@gmail.com
+MAIL_PASSWORD=xxxx-xxxx-xxxx-xxxx  # App Password (not your Gmail password)
+MAIL_FROM=your-gmail@gmail.com
+```
+
+> **Important**: Never use your regular Gmail password. App Passwords are required for SMTP access.
 
 ### Build & Run
 

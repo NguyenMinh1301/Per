@@ -61,6 +61,8 @@ public class SecurityConfig {
         "/per/made-in/search",
     };
 
+    private static final String[] publicRAGEndpoints = {"/per/rag/chat"};
+
     private static final String[] publicOtherEndpoints = {
         "/per/v3/api-docs/**",
         "/per/swagger-ui.html",
@@ -82,6 +84,8 @@ public class SecurityConfig {
                                 auth.requestMatchers(publicAuthEndpoints)
                                         .permitAll()
                                         .requestMatchers(HttpMethod.GET, publicGetEndpoints)
+                                        .permitAll()
+                                        .requestMatchers(publicRAGEndpoints)
                                         .permitAll()
                                         .requestMatchers(publicOtherEndpoints)
                                         .permitAll()

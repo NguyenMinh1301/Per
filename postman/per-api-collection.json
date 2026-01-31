@@ -1302,7 +1302,8 @@
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "products"
+                                "products",
+                                "list"
                             ],
                             "query": [
                                 {
@@ -1336,6 +1337,7 @@
                             ],
                             "path": [
                                 "products",
+                                "detail",
                                 ":id"
                             ],
                             "variable": [
@@ -1375,7 +1377,8 @@
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "products"
+                                "products",
+                                "create"
                             ]
                         },
                         "body": {
@@ -1417,6 +1420,7 @@
                             ],
                             "path": [
                                 "products",
+                                "update",
                                 ":id"
                             ],
                             "variable": [
@@ -1460,6 +1464,7 @@
                             ],
                             "path": [
                                 "products",
+                                "delete",
                                 ":id"
                             ],
                             "variable": [
@@ -1498,14 +1503,15 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/products/:productId/variants",
+                                    "raw": "{{baseUrl}}/products/:productId/variants/create",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
                                     "path": [
                                         "products",
                                         ":productId",
-                                        "variants"
+                                        "variants",
+                                        "create"
                                     ],
                                     "variable": [
                                         {
@@ -1548,7 +1554,7 @@
                                     }
                                 ],
                                 "url": {
-                                    "raw": "{{baseUrl}}/products/:productId/variants/:variantId",
+                                    "raw": "{{baseUrl}}/products/:productId/variants/update/:variantId",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
@@ -1556,6 +1562,7 @@
                                         "products",
                                         ":productId",
                                         "variants",
+                                        "update",
                                         ":variantId"
                                     ],
                                     "variable": [
@@ -1598,7 +1605,7 @@
                                 },
                                 "method": "DELETE",
                                 "url": {
-                                    "raw": "{{baseUrl}}/products/:productId/variants/:variantId",
+                                    "raw": "{{baseUrl}}/products/:productId/variants/delete/:variantId",
                                     "host": [
                                         "{{baseUrl}}"
                                     ],
@@ -1606,6 +1613,7 @@
                                         "products",
                                         ":productId",
                                         "variants",
+                                        "delete",
                                         ":variantId"
                                     ],
                                     "variable": [

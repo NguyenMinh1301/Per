@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to PER - The Essence of Elegance</title>
+    <!-- Google Fonts for Playfair Display -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Reset and Body */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #E0E0E0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Container */
+        .wrapper {
+            width: 100%;
+            table-layout: fixed;
+            background-color: #121212;
+            padding-bottom: 40px;
+        }
+
+        .main-container {
+            background-color: #1E1E1E;
+            margin: 0 auto;
+            max-width: 600px;
+            border: 1px solid #333333;
+            border-top: 3px solid #D4AF37;
+            /* Gold Accent */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Typography */
+        h1,
+        h2,
+        h3 {
+            font-family: 'Playfair Display', 'Times New Roman', serif;
+            color: #D4AF37;
+            /* Gold */
+            font-weight: 400;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #C0C0C0;
+            margin-bottom: 24px;
+        }
+
+        /* Header */
+        .header {
+            padding: 50px 0 30px 0;
+            text-align: center;
+            border-bottom: 1px solid #333333;
+        }
+
+        .brand-name {
+            font-size: 36px;
+            letter-spacing: 6px;
+            color: #E0E0E0;
+            text-transform: uppercase;
+        }
+
+        .tagline {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #888888;
+            margin-top: 8px;
+        }
+
+        /* Content */
+        .content {
+            padding: 40px;
+        }
+
+        .greeting {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: #FFFFFF;
+            margin-bottom: 30px;
+        }
+
+        /* Button */
+        .btn-container {
+            text-align: center;
+            margin: 40px 0;
+        }
+
+        .btn {
+            display: inline-block;
+            background-color: transparent;
+            color: #D4AF37;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+            padding: 16px 36px;
+            border: 1px solid #D4AF37;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #D4AF37;
+            color: #121212;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #333333, transparent);
+            margin: 40px 0;
+        }
+
+        /* Link Fallback */
+        .link-fallback {
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .link-text {
+            color: #888888;
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #121212;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            font-size: 11px;
+            color: #555555;
+            margin: 5px 0;
+            letter-spacing: 0.5px;
+        }
+
+        .copyright {
+            margin-top: 20px;
+            font-family: 'Playfair Display', serif;
+            color: #444444;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="main-container">
+            <!-- Header -->
+            <div class="header">
+                <h1 class="brand-name">PER</h1>
+                <div class="tagline">The Essence of Elegance</div>
+            </div>
+
+            <!-- Content -->
+            <div class="content">
+                <div class="greeting">Dear <span th:text="${name}">Valued Member</span>,</div>
+
+                <p>Welcome to the exclusive world of PER. It is our distinct privilege to count you among our most
+                    discerning connoisseurs.</p>
+
+                <p>Your registration marks the beginning of a sensory journey into the highest echelons of olfactory
+                    artistry. To finalize your access to our private collection, we kindly request that you confirm your
+                    credentials.</p>
+
+                <div class="btn-container">
+                    <a th:href="${verificationLink}" class="btn">Confirm Email</a>
+                </div>
+
+                <p>We await your presence with great anticipation.</p>
+
+                <p style="margin-top: 40px; font-style: italic; color: #888888;">Cordially,<br>The PER Maison</p>
+
+                <div class="divider"></div>
+
+                <div class="link-fallback">
+                    If the button above does not function, please use the following secure link:<br>
+                    <a th:href="${verificationLink}" th:text="${verificationLink}"
+                        class="link-text">https://per.io.vn/verify</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This automated message was sent from our secure servers.</p>
+            <p class="copyright">&copy; 2026 PER. All Rights Reserved.</p>
+        </div>
+    </div>
+</body>
+
+</html>
