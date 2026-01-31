@@ -61,9 +61,7 @@ public class SecurityConfig {
         "/per/made-in/search",
     };
 
-    private static final String[] publicRAGEndpoints = {
-        "/per/rag/chat"
-    };
+    private static final String[] publicRAGEndpoints = {"/per/rag/chat"};
 
     private static final String[] publicOtherEndpoints = {
         "/per/v3/api-docs/**",

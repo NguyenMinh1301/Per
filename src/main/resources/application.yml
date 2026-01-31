@@ -13,7 +13,7 @@ spring:
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
   flyway:
     enabled: true
   data:
@@ -22,33 +22,37 @@ spring:
       port: ${REDIS_PORT}
       password: ${REDIS_PASSWORD}
   elasticsearch:
-    uris: ${ELASTICSEARCH_URI:http://localhost:9200}
+    uris: ${ELASTICSEARCH_URI}
   ai:
     openai:
       api-key: ${OPENAI_API_KEY}
       chat:
-        model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
+        model: ${OPENAI_CHAT_MODEL}
       embedding:
-        model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
+        model: ${OPENAI_EMBEDDING_MODEL}
     vectorstore:
       pgvector:
         index-type: HNSW
         distance-type: COSINE_DISTANCE
         dimensions: 1536
+  # Spring Mail (Google SMTP)
   mail:
     host: smtp.gmail.com
     port: 587
     username: ${MAIL_USERNAME}
     password: ${MAIL_PASSWORD}
     properties:
-      mail.smtp.auth: ${MAIL_SMTP_AUTH:true}
-      mail.smtp.starttls.enable: ${MAIL_SMTP_STARTTLS:true}
-      mail.smtp.starttls.required: ${MAIL_SMTP_STARTTLS:true}
-      mail.smtp.ssl.trust: smtp.gmail.com
-      mail.smtp.connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
-      mail.smtp.timeout: ${MAIL_SMTP_TIMEOUT:5000}
-      mail.smtp.writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
-    default-encoding: UTF-8
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS:true}
+          connectiontimeout: ${MAIL_SMTP_CONNECTION_TIMEOUT:5000}
+          timeout: ${MAIL_SMTP_TIMEOUT:5000}
+          writetimeout: ${MAIL_SMTP_WRITETIMEOUT:5000}
+
+mail:
+  from: ${MAIL_FROM}
 
 management:
   health:

@@ -117,10 +117,16 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
-		<!-- Mail -->
+		<!-- Spring Mail -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- Thymeleaf (for email templates) -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
 
 		<!-- JWT -->
@@ -210,6 +216,8 @@
 
 	</dependencies>
 
+
+
 	<build>
 		<plugins>
 			<plugin>
@@ -264,7 +272,7 @@
 				</executions>
 				<configuration>
 					<excludes>
-						<!--                        <exclude>com/example/dto/**</exclude>-->
+						<!--<exclude>com/example/dto/**</exclude>-->
 					</excludes>
 				</configuration>
 			</plugin>

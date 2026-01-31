@@ -42,7 +42,8 @@ import com.per.auth.service.AuthService;
 import com.per.auth.service.token.RefreshTokenService;
 import com.per.auth.service.token.db.UserTokenService;
 import com.per.common.ApiConstants;
-import com.per.common.event.EmailEvent;
+import com.per.common.config.kafka.KafkaTopicNames;
+import com.per.mail.dto.SendEmailEvent;
 import com.per.user.entity.User;
 
 import io.jsonwebtoken.Claims;
@@ -261,46 +262,42 @@ public class AuthServiceImpl implements AuthService {
 
     private void sendVerificationEmail(User user, String token) {
         String displayName = resolveDisplayName(user);
-        String subject = "Verify your email address";
-        String content =
-                "Hello "
-                        + displayName
-                        + ",\n\n"
-                        + "Please verify your email address by visiting the following link within 24 hours:\n"
-                        + buildVerificationLink(token)
-                        + "\n\n"
-                        + "Thank you.";
+        String verificationLink = buildVerificationLink(token);
 
-        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
+        SendEmailEvent event =
+                SendEmailEvent.builder()
+                        .to(user.getEmail())
+                        .templateCode("welcome")
+                        .variables(
+                                java.util.Map.of(
+                                        "name", displayName,
+                                        "verificationLink", verificationLink))
+                        .build();
+
+        kafkaTemplate.send(KafkaTopicNames.EMAIL_SEND_TOPIC, event);
     }
 
     private void sendPasswordResetEmail(User user, String token) {
         String displayName = resolveDisplayName(user);
-        String subject = "Password reset request";
-        String content =
-                "Hello "
-                        + displayName
-                        + ",\n\n"
-                        + "A password reset was requested for your account. Please use the link below within 15 minutes:\n"
-                        + buildResetLink(token)
-                        + "\n\n"
-                        + "If you did not initiate this request, you can safely ignore this email.";
 
-        kafkaTemplate.send("email-topic", new EmailEvent(user.getEmail(), subject, content));
+        SendEmailEvent event =
+                SendEmailEvent.builder()
+                        .to(user.getEmail())
+                        .templateCode("reset-password")
+                        .variables(
+                                java.util.Map.of(
+                                        "name", displayName,
+                                        "resetCode", token,
+                                        "expiryMinutes", 15))
+                        .build();
+
+        kafkaTemplate.send(KafkaTopicNames.EMAIL_SEND_TOPIC, event);
     }
 
     private String buildVerificationLink(String token) {
         return applicationProperties.getBaseUrl()
                 + ApiConstants.Auth.ROOT
                 + ApiConstants.Auth.VERIFY_EMAIL
-                + "?token="
-                + token;
-    }
-
-    private String buildResetLink(String token) {
-        return applicationProperties.getBaseUrl()
-                + ApiConstants.Auth.ROOT
-                + ApiConstants.Auth.RESET_PASSWORD
                 + "?token="
                 + token;
     }
