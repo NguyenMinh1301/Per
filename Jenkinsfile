@@ -8,7 +8,6 @@ pipeline {
     environment {
         DOCKER_REPO = "nguyenminh1301/per"
         DEPLOY_DIR = "home/per"
-        DOTENV = credentials('per-dotenv')
     }
 
     stages {
@@ -52,8 +51,6 @@ pipeline {
             steps {
                 dir("${env.DEPLOY_DIR}") {
                     echo "Deploying at ${env.DEPLOY_DIR}..."
-
-                    sh "cp ${DOTENV} .env"
 
                     sh "docker compose down -v"
 
