@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         DOCKER_REPO = "nguyenminh1301/per"
-        DEPLOY_DIR = "/home/per"
+        DEPLOY_DIR = "home/per"
         DOTENV = credentials('per-dotenv')
     }
 
