@@ -31,9 +31,20 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-                echo "Pushing images to Docker Hub..."
-                sh "docker push ${DOCKER_REPO}:${env.APP_VERSION}"
-                sh "docker push ${DOCKER_REPO}:latest"
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-hub-creds',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS')]) {
+
+                        sh "echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin"
+
+                        echo "Pushing images to Docker Hub..."
+                        sh "docker push ${DOCKER_REPO}:${env.APP_VERSION}"
+                        sh "docker push ${DOCKER_REPO}:latest"
+
+                        sh "docker logout"
+                    }
+                }
             }
         }
 
