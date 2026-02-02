@@ -52,13 +52,16 @@ pipeline {
                 script {
                     echo "Deploying at ${env.DEPLOY_DIR}..."
 
-                    sh cd /home/per
+                    sh """
+                        cd /home/per
 
-                    sh "docker compose down -v"
+                        "docker compose down -v"
 
-                    sh "docker rmi ${DOCKER_REPO}:latest || true"
+                        "docker rmi ${DOCKER_REPO}:latest || true"
 
-                    sh "docker compose up -d"
+                        "docker compose up -d"
+                    """
+
                 }
             }
         }
