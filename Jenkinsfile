@@ -5,43 +5,61 @@ pipeline {
         githubPush()
     }
 
+    environment {
+        DOCKER_REPO = "nguyenminh1301/per"
+        DEPLOY_DIR = "/home/per"
+        DOTENV = credentials('per-dotenv')
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Extract Version') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'github-ssh-key',
-                    url: 'git@github.com:NguyenMinh1301/Per.git'
+                script {
+                    def pom = readMavenPom file: 'pom.xml'
+                    env.APP_VERSION = pom.version
+                    echo "App version detection: ${env.APP_VERSION}"
+                }
             }
         }
 
-        stage('Build') {
+        stage('Docker Build & Tag') {
             steps {
-                echo 'Building application...'
-                // Wait
+                echo "Building an image with the tag: ${env.APP_VERSION} and latest..."
+                sh "docker build . -t ${DOCKER_REPO}:${env.APP_VERSION} -t ${DOCKER_REPO}:latest"
             }
         }
 
-        stage('Test') {
+        stage('Docker Push') {
             steps {
-                echo 'Testing...'
-                // Wait
+                echo "Pushing images to Docker Hub..."
+                sh "docker push ${DOCKER_REPO}:${env.APP_VERSION}"
+                sh "docker push ${DOCKER_REPO}:latest"
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to VPS') {
             steps {
-                echo 'Deploying to VPS...'
-                // Wait
+                dir("${env.DEPLOY_DIR}") {
+                    echo "Deploying at ${env.DEPLOY_DIR}..."
+
+                    sh "cp ${DOTENV} .env"
+
+                    sh "docker compose down -v"
+
+                    sh "docker rmi ${DOCKER_REPO}:latest || true"
+
+                    sh "docker compose up -d"
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'Build success!'
+            echo "Workflow success!"
         }
         failure {
-            echo 'Build fail. Check logs'
+            echo "Workflow fail. Check logs."
         }
     }
 }
