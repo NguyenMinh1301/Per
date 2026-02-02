@@ -49,8 +49,10 @@ pipeline {
 
         stage('Deploy to VPS') {
             steps {
-                dir("${env.DEPLOY_DIR}") {
+                script {
                     echo "Deploying at ${env.DEPLOY_DIR}..."
+
+                    sh cd /home/per
 
                     sh "docker compose down -v"
 
