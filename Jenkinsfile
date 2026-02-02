@@ -55,11 +55,11 @@ pipeline {
                     sh """
                         cd /home/per
 
-                        "docker compose down -v"
+                        docker compose down -v
 
-                        "docker rmi ${DOCKER_REPO}:latest || true"
+                        docker rmi ${DOCKER_REPO}:latest || true
 
-                        "docker compose up -d"
+                        docker compose up -d
                     """
 
                 }
