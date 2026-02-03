@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import com.per.rag.service.DocumentIndexService;
+import com.per.rag.service.EntityVectorService;
 import com.per.rag.service.VectorStoreService;
 
 import lombok.RequiredArgsConstructor;
@@ -14,28 +15,29 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * Automated RAG data initializer that checks vector store state on application startup and triggers
- * indexing if the store is empty. This component ensures the RAG system is ready for use without
- * manual intervention.
- *
- * <p>Execution flow:
- *
- * <ol>
- *   <li>On application startup, performs a lightweight check of vector store document count
- *   <li>If vector store is empty, automatically triggers product and knowledge base indexing
- *   <li>Runs asynchronously to avoid blocking application startup
- * </ol>
+ * indexing if empty. Indexes products, brands, categories, and knowledge base documents.
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
-@Order(3) // Run after database and other critical initializers
+@Order(3)
 public class RagDataInitializer implements CommandLineRunner {
 
     private final VectorStoreService vectorStoreService;
+    private final EntityVectorService entityVectorService;
     private final DocumentIndexService documentIndexService;
 
     @Value("${app.rag.auto-index:true}")
     private boolean autoIndex;
+
+    @Value("${app.rag.qdrant.collections.product:product_vectors}")
+    private String productCollection;
+
+    @Value("${app.rag.qdrant.collections.brand:brand_vectors}")
+    private String brandCollection;
+
+    @Value("${app.rag.qdrant.collections.category:category_vectors}")
+    private String categoryCollection;
 
     @Override
     @Async
@@ -45,48 +47,90 @@ public class RagDataInitializer implements CommandLineRunner {
             return;
         }
 
-        log.info("Verifying vector store state...");
+        log.info("Verifying vector store state for all collections...");
 
         try {
-            // Lightweight check: query document count
-            var status = vectorStoreService.getKnowledgeStatus();
-            int totalDocs = (Integer) status.getOrDefault("totalDocuments", 0);
+            // Index products if empty
+            indexProductsIfEmpty();
 
-            if (totalDocs > 0) {
-                log.info(
-                        "Vector store verification passed. Found {} documents ({} products, {} knowledge).",
-                        totalDocs,
-                        status.get("productDocuments"),
-                        status.get("knowledgeDocuments"));
-                return;
-            }
+            // Index brands if empty
+            indexBrandsIfEmpty();
 
-            // Vector store is empty - trigger automatic indexing
-            log.warn("Vector store is empty. Initiating automatic indexing...");
+            // Index categories if empty
+            indexCategoriesIfEmpty();
 
-            // Index products
-            log.info("Indexing products into vector store...");
-            vectorStoreService.indexAllProducts();
-            log.info("Product indexing completed successfully");
+            // Index knowledge base (uses product_vectors collection)
+            indexKnowledgeIfEmpty();
 
-            // Index knowledge base
-            log.info("Indexing knowledge base documents...");
-            documentIndexService.indexKnowledgeBase();
-            log.info("Knowledge base indexing completed successfully");
-
-            // Verify final state
-            var finalStatus = vectorStoreService.getKnowledgeStatus();
-            log.info(
-                    "RAG initialization completed: {} total documents indexed ({} products, {} knowledge)",
-                    finalStatus.get("totalDocuments"),
-                    finalStatus.get("productDocuments"),
-                    finalStatus.get("knowledgeDocuments"));
+            log.info("RAG initialization completed successfully");
 
         } catch (Exception e) {
             log.error(
                     "RAG automatic initialization failed: {}. Manual indexing may be required.",
                     e.getMessage(),
                     e);
+        }
+    }
+
+    private void indexProductsIfEmpty() {
+        try {
+            var status = vectorStoreService.getKnowledgeStatus();
+            int productDocs = (Integer) status.getOrDefault("productDocuments", 0);
+
+            if (productDocs == 0) {
+                log.info("Product collection is empty. Indexing products...");
+                vectorStoreService.indexAllProducts();
+                log.info("Product indexing completed");
+            } else {
+                log.debug("Product collection has {} documents", productDocs);
+            }
+        } catch (Exception e) {
+            log.error("Failed to index products: {}", e.getMessage());
+        }
+    }
+
+    private void indexBrandsIfEmpty() {
+        try {
+            if (entityVectorService.isCollectionEmpty(brandCollection)) {
+                log.info("Brand collection is empty. Indexing brands...");
+                entityVectorService.indexAllBrands();
+                log.info("Brand indexing completed");
+            } else {
+                log.debug("Brand collection already has data");
+            }
+        } catch (Exception e) {
+            log.error("Failed to index brands: {}", e.getMessage());
+        }
+    }
+
+    private void indexCategoriesIfEmpty() {
+        try {
+            if (entityVectorService.isCollectionEmpty(categoryCollection)) {
+                log.info("Category collection is empty. Indexing categories...");
+                entityVectorService.indexAllCategories();
+                log.info("Category indexing completed");
+            } else {
+                log.debug("Category collection already has data");
+            }
+        } catch (Exception e) {
+            log.error("Failed to index categories: {}", e.getMessage());
+        }
+    }
+
+    private void indexKnowledgeIfEmpty() {
+        try {
+            var status = vectorStoreService.getKnowledgeStatus();
+            int knowledgeDocs = (Integer) status.getOrDefault("knowledgeDocuments", 0);
+
+            if (knowledgeDocs == 0) {
+                log.info("Knowledge base is empty. Indexing knowledge documents...");
+                documentIndexService.indexKnowledgeBase();
+                log.info("Knowledge base indexing completed");
+            } else {
+                log.debug("Knowledge base has {} documents", knowledgeDocs);
+            }
+        } catch (Exception e) {
+            log.error("Failed to index knowledge base: {}", e.getMessage());
         }
     }
 }
