@@ -180,6 +180,18 @@ services:
     depends_on:
       - elasticsearch
 
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333" # HTTP API
+      - "6334:6334" # gRPC API (used by Spring AI)
+    volumes:
+      - ./qdrant-storage:/qdrant/storage
+    networks:
+      - per-network
+
 volumes:
   db:
   kafka_data:
