@@ -88,12 +88,19 @@ The API guarantees a structured response adhering to the following schema. This 
 
 ### 4.1 Vector Store Configuration
 
-The system utilizes Qdrant as the vector database for high-performance vector operations.
+The system utilizes Qdrant as the vector database with multiple collections for different entity types.
 
+**Collections:**
+| Collection | Entity Type | Purpose |
+| :--- | :--- | :--- |
+| `product_vectors` | Products | Product semantic search |
+| `brand_vectors` | Brands | Brand discovery |
+| `category_vectors` | Categories | Category navigation |
+
+**Configuration:**
 *   **Metric:** Cosine Similarity
 *   **Dimensions:** 1536 (aligned with OpenAI's `text-embedding-3-small` model output)
-*   **Index Type:** HNSW (Hierarchical Navigable Small World) for efficient approximate nearest neighbor search.
-*   **Collection Name:** `product_vectors`
+*   **Index Type:** HNSW (Hierarchical Navigable Small World)
 *   **API:** REST/gRPC via Spring AI Qdrant Store Starter
 
 ### 4.2 Prompt Engineering Strategy
@@ -108,9 +115,11 @@ Prompts are managed as external resources in `src/main/resources/prompt/` to all
 
 The `RagDataInitializer` component (implementing `CommandLineRunner`) automatically verifies vector store state on application startup:
 
-*   **Verification:** Performs lightweight query to check document count
-*   **Conditional Indexing:** If vector store is empty (`totalDocuments == 0`), automatically triggers:
-    *   Product catalog indexing
+*   **Verification:** Checks each collection for existing data
+*   **Conditional Indexing:** If collections are empty, automatically triggers:
+    *   Product catalog indexing → `product_vectors`
+    *   Brand indexing → `brand_vectors`
+    *   Category indexing → `category_vectors`
     *   Knowledge base document indexing
 *   **Asynchronous Execution:** Runs in background thread to avoid blocking application startup
 *   **Configuration:** Controlled via `app.rag.auto-index` property (default: `true`)
@@ -177,6 +186,11 @@ app:
     chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
     search-top-k: ${RAG_SEARCH_TOP_K:3}
     similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+    qdrant:
+      collections:
+        product: ${QDRANT_COLLECTION_PRODUCT:product_vectors}
+        brand: ${QDRANT_COLLECTION_BRAND:brand_vectors}
+        category: ${QDRANT_COLLECTION_CATEGORY:category_vectors}
 ```
 
 ---
