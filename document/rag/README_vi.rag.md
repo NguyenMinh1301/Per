@@ -39,7 +39,7 @@ graph TD
     Controller --> Service[ChatService]
     
     subgraph Data Layer
-        DB[(PostgreSQL + PgVector<br/>1536 dimensions)]
+        Qdrant[(Qdrant Vector DB<br/>1536 dimensions)]
     end
     
     subgraph Cloud AI Services
@@ -49,7 +49,7 @@ graph TD
     end
     
     Service -->|1. Store/Retrieve| VectorService[VectorStoreService]
-    VectorService -->|2. Similarity Search| DB
+    VectorService -->|2. Similarity Search| Qdrant
     Service -->|3. Generate Embeddings| EmbedAPI
     EmbedAPI -->|4. Vector Embeddings| VectorService
     Service -->|5. Generate Prompt| PromptTemplate[Prompt Template Engine]
@@ -88,12 +88,20 @@ API đảm bảo phản hồi có cấu trúc tuân thủ schema sau. Việc đ�
 
 ### 4.1 Cấu Hình Vector Store
 
-Hệ thống sử dụng extension `pgvector` cho các hoạt động vector hiệu năng cao trong PostgreSQL.
+Hệ thống sử dụng Qdrant làm cơ sở dữ liệu vector với nhiều collections cho các loại thực thể khác nhau.
 
+**Collections:**
+| Collection | Loại Thực Thể | Mục Đích |
+| :--- | :--- | :--- |
+| `product_vectors` | Sản phẩm | Tìm kiếm ngữ nghĩa sản phẩm |
+| `brand_vectors` | Thương hiệu | Khám phá thương hiệu |
+| `category_vectors` | Danh mục | Điều hướng danh mục |
+
+**Cấu hình:**
 *   **Metric:** Cosine Similarity
 *   **Dimensions:** 1536 (phù hợp với đầu ra của mô hình `text-embedding-3-small` của OpenAI)
-*   **Index Type:** HNSW (Hierarchical Navigable Small World) cho tìm kiếm láng giềng gần nhất xấp xỉ hiệu quả.
-*   **Schema Bảng:** `vector_store` với các cột: `id`, `content`, `metadata` (JSONB), `embedding` (vector(1536))
+*   **Index Type:** HNSW (Hierarchical Navigable Small World)
+*   **API:** REST/gRPC qua Spring AI Qdrant Store Starter
 
 ### 4.2 Chiến Lược Kỹ Thuật Prompt (Prompt Engineering Strategy)
 
@@ -144,11 +152,11 @@ Việc điều phối được định nghĩa qua `docker-compose.yml`. Không c
 1. API key OpenAI hợp lệ với quyền truy cập:
    * Mô hình chat (ví dụ: `gpt-3.5-turbo`, `gpt-4-turbo`)
    * Mô hình embedding (`text-embedding-3-small`)
-2. PostgreSQL 16+ với extension `pgvector` được bật
+2. Qdrant instance (self-hosted qua Docker hoặc cloud)
 3. Kết nối mạng tới `api.openai.com`
 
-**Database Migration:**
-Bảng vector store được tạo tự động qua Flyway migration `V18__Enable_pgvector_extension.sql` với hỗ trợ vector 1536 chiều.
+**Hạ Tầng:**
+Qdrant được triển khai qua `docker-compose.yml` với lưu trữ bền vững trong `./qdrant_storage`.
 
 ### 5.3 Cấu Hình Ứng Dụng
 
@@ -164,10 +172,11 @@ spring:
       embedding:
         model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
     vectorstore:
-      pgvector:
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
-        dimensions: 1536
+      qdrant:
+        host: ${QDRANT_HOST:qdrant}
+        port: ${QDRANT_PORT:6334}
+        collection-name: ${QDRANT_COLLECTION:product_vectors}
+        use-tls: false
 
 app:
   rag:
@@ -175,6 +184,11 @@ app:
     chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
     search-top-k: ${RAG_SEARCH_TOP_K:3}
     similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+    qdrant:
+      collections:
+        product: ${QDRANT_COLLECTION_PRODUCT:product_vectors}
+        brand: ${QDRANT_COLLECTION_BRAND:brand_vectors}
+        category: ${QDRANT_COLLECTION_CATEGORY:category_vectors}
 ```
 
 ---

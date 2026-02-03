@@ -18,7 +18,7 @@ This document serves as the authoritative technical reference for the architectu
 
 ## 2. System Architecture
 
-The system follows a cloud-native architecture pattern, orchestrating interactions between the application layer, vector database (PostgreSQL with pgvector), and OpenAI's inference platform.
+The system follows a cloud-native architecture pattern, orchestrating interactions between the application layer, vector database (Qdrant), and OpenAI's inference platform.
 
 ### 2.1 Information Flow Pipeline
 
@@ -39,7 +39,7 @@ graph TD
     Controller --> Service[ChatService]
     
     subgraph Data Layer
-        DB[(PostgreSQL + PgVector<br/>1536 dimensions)]
+        Qdrant[(Qdrant Vector DB<br/>1536 dimensions)]
     end
     
     subgraph Cloud AI Services
@@ -49,7 +49,7 @@ graph TD
     end
     
     Service -->|1. Store/Retrieve| VectorService[VectorStoreService]
-    VectorService -->|2. Similarity Search| DB
+    VectorService -->|2. Similarity Search| Qdrant
     Service -->|3. Generate Embeddings| EmbedAPI
     EmbedAPI -->|4. Vector Embeddings| VectorService
     Service -->|5. Generate Prompt| PromptTemplate[Prompt Template Engine]
@@ -88,12 +88,20 @@ The API guarantees a structured response adhering to the following schema. This 
 
 ### 4.1 Vector Store Configuration
 
-The system utilizes `pgvector` extension for high-performance vector operations within PostgreSQL.
+The system utilizes Qdrant as the vector database with multiple collections for different entity types.
 
+**Collections:**
+| Collection | Entity Type | Purpose |
+| :--- | :--- | :--- |
+| `product_vectors` | Products | Product semantic search |
+| `brand_vectors` | Brands | Brand discovery |
+| `category_vectors` | Categories | Category navigation |
+
+**Configuration:**
 *   **Metric:** Cosine Similarity
 *   **Dimensions:** 1536 (aligned with OpenAI's `text-embedding-3-small` model output)
-*   **Index Type:** HNSW (Hierarchical Navigable Small World) for efficient approximate nearest neighbor search.
-*   **Table Schema:** `vector_store` with columns: `id`, `content`, `metadata` (JSONB), `embedding` (vector(1536))
+*   **Index Type:** HNSW (Hierarchical Navigable Small World)
+*   **API:** REST/gRPC via Spring AI Qdrant Store Starter
 
 ### 4.2 Prompt Engineering Strategy
 
@@ -107,9 +115,11 @@ Prompts are managed as external resources in `src/main/resources/prompt/` to all
 
 The `RagDataInitializer` component (implementing `CommandLineRunner`) automatically verifies vector store state on application startup:
 
-*   **Verification:** Performs lightweight query to check document count
-*   **Conditional Indexing:** If vector store is empty (`totalDocuments == 0`), automatically triggers:
-    *   Product catalog indexing
+*   **Verification:** Checks each collection for existing data
+*   **Conditional Indexing:** If collections are empty, automatically triggers:
+    *   Product catalog indexing → `product_vectors`
+    *   Brand indexing → `brand_vectors`
+    *   Category indexing → `category_vectors`
     *   Knowledge base document indexing
 *   **Asynchronous Execution:** Runs in background thread to avoid blocking application startup
 *   **Configuration:** Controlled via `app.rag.auto-index` property (default: `true`)
@@ -144,11 +154,11 @@ The orchestration is defined via `docker-compose.yml`. No local inference engine
 1. Valid OpenAI API key with access to:
    * Chat models (e.g., `gpt-3.5-turbo`, `gpt-4-turbo`)
    * Embedding models (`text-embedding-3-small`)
-2. PostgreSQL 16+ with `pgvector` extension enabled
+2. Qdrant instance (self-hosted via Docker or cloud)
 3. Network connectivity to `api.openai.com`
 
-**Database Migration:**
-The vector store table is automatically created via Flyway migration `V18__Enable_pgvector_extension.sql` with 1536-dimensional vector support.
+**Infrastructure:**
+Qdrant is deployed via `docker-compose.yml` with persistent storage in `./qdrant_storage`.
 
 ### 5.3 Application Configuration
 
@@ -164,10 +174,11 @@ spring:
       embedding:
         model: ${OPENAI_EMBEDDING_MODEL:text-embedding-3-small}
     vectorstore:
-      pgvector:
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
-        dimensions: 1536
+      qdrant:
+        host: ${QDRANT_HOST:qdrant}
+        port: ${QDRANT_PORT:6334}
+        collection-name: ${QDRANT_COLLECTION:product_vectors}
+        use-tls: false
 
 app:
   rag:
@@ -175,6 +186,11 @@ app:
     chat-model: ${OPENAI_CHAT_MODEL:gpt-3.5-turbo}
     search-top-k: ${RAG_SEARCH_TOP_K:3}
     similarity-threshold: ${RAG_SIMILARITY_THRESHOLD:0.3}
+    qdrant:
+      collections:
+        product: ${QDRANT_COLLECTION_PRODUCT:product_vectors}
+        brand: ${QDRANT_COLLECTION_BRAND:brand_vectors}
+        category: ${QDRANT_COLLECTION_CATEGORY:category_vectors}
 ```
 
 ---

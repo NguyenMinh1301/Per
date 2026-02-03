@@ -81,8 +81,15 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-qdrant-store-spring-boot-starter</artifactId>
             <version>${spring-ai.version}</version>
+        </dependency>
+
+		<!-- Qdrant -->
+        <dependency>
+            <groupId>io.qdrant</groupId>
+            <artifactId>client</artifactId>
+            <version>1.12.0</version>
         </dependency>
 
 		<!-- JPA -->

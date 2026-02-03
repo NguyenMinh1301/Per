@@ -11,9 +11,17 @@ import java.util.stream.Collectors;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.product.entity.Product;
@@ -33,7 +41,38 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final VectorStore vectorStore;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Value("${spring.ai.vectorstore.qdrant.host:qdrant}")
+    private String qdrantHost;
+
+    @Value("${spring.ai.vectorstore.qdrant.port:6334}")
+    private int qdrantGrpcPort;
+
+    @Value("${spring.ai.vectorstore.qdrant.collection-name:product_vectors}")
+    private String collectionName;
+
+    @Value("${app.rag.qdrant.collections.product:product_vectors}")
+    private String productCollection;
+
+    @Value("${app.rag.qdrant.collections.brand:brand_vectors}")
+    private String brandCollection;
+
+    @Value("${app.rag.qdrant.collections.category:category_vectors}")
+    private String categoryCollection;
+
+    @Value("${app.rag.qdrant.collections.knowledge:knowledge_vectors}")
+    private String knowledgeCollection;
+
+    /** Qdrant HTTP API port (gRPC port - 1) */
+    private int getHttpPort() {
+        return 6333; // HTTP API is always on 6333
+    }
+
+    private String getQdrantBaseUrl() {
+        return "http://" + qdrantHost + ":" + getHttpPort();
+    }
 
     @Override
     @Transactional
@@ -199,13 +238,43 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     }
 
     @Override
-    @Transactional
     public void deleteByMetadata(String key, String value) {
         try {
             log.info("Deleting documents with metadata {}={}", key, value);
-            String sql = "DELETE FROM vector_store WHERE metadata->>? = ?";
-            int deletedCount = jdbcTemplate.update(sql, key, value);
-            log.info("Deleted {} documents with metadata {}={}", deletedCount, key, value);
+
+            // Use Qdrant's delete by filter API
+            String url = getQdrantBaseUrl() + "/collections/" + collectionName + "/points/delete";
+
+            // Build filter payload for Qdrant
+            String payload =
+                    """
+					{
+						"filter": {
+							"must": [
+								{
+									"key": "%s",
+									"match": {
+										"value": "%s"
+									}
+								}
+							]
+						}
+					}
+					"""
+                            .formatted(key, value);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> request = new HttpEntity<>(payload, headers);
+
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(url, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Successfully deleted documents with metadata {}={}", key, value);
+            } else {
+                log.warn("Qdrant delete returned non-success status: {}", response.getStatusCode());
+            }
         } catch (Exception e) {
             log.error("Failed to delete documents by metadata", e);
             throw new ApiException(
@@ -216,28 +285,29 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     @Override
     public Map<String, Object> getKnowledgeStatus() {
         try {
-            Integer totalCount =
-                    jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Integer.class);
-
-            Integer knowledgeCount =
-                    jdbcTemplate.queryForObject(
-                            "SELECT COUNT(*) FROM vector_store WHERE metadata->>'type' = 'knowledge'",
-                            Integer.class);
-
-            List<String> sources =
-                    jdbcTemplate.queryForList(
-                            "SELECT DISTINCT metadata->>'source' FROM vector_store WHERE metadata->>'type' = 'knowledge'",
-                            String.class);
-
             Map<String, Object> status = new HashMap<>();
-            status.put("totalDocuments", totalCount != null ? totalCount : 0);
-            status.put("knowledgeDocuments", knowledgeCount != null ? knowledgeCount : 0);
-            status.put(
-                    "productDocuments",
-                    (totalCount != null ? totalCount : 0)
-                            - (knowledgeCount != null ? knowledgeCount : 0));
-            status.put("knowledgeSources", sources);
-            status.put("isIndexed", knowledgeCount != null && knowledgeCount > 0);
+            Map<String, Integer> collections = new HashMap<>();
+
+            // Query all 4 collections
+            int productCount = getCollectionPointCount(productCollection);
+            int brandCount = getCollectionPointCount(brandCollection);
+            int categoryCount = getCollectionPointCount(categoryCollection);
+            int knowledgeCount = getCollectionPointCount(knowledgeCollection);
+
+            collections.put(productCollection, productCount);
+            collections.put(brandCollection, brandCount);
+            collections.put(categoryCollection, categoryCount);
+            collections.put(knowledgeCollection, knowledgeCount);
+
+            int totalCount = productCount + brandCount + categoryCount + knowledgeCount;
+
+            status.put("totalDocuments", totalCount);
+            status.put("products", productCount);
+            status.put("brands", brandCount);
+            status.put("categories", categoryCount);
+            status.put("knowledge", knowledgeCount);
+            status.put("collections", collections);
+            status.put("isIndexed", totalCount > 0);
 
             return status;
         } catch (Exception e) {
@@ -245,5 +315,24 @@ public class VectorStoreServiceImpl implements VectorStoreService {
             throw new ApiException(
                     ApiErrorCode.RAG_SEARCH_FAILED, "Failed to get knowledge status", e);
         }
+    }
+
+    private int getCollectionPointCount(String collection) {
+        try {
+            String collectionUrl = getQdrantBaseUrl() + "/collections/" + collection;
+            ResponseEntity<String> response =
+                    restTemplate.getForEntity(collectionUrl, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode result = root.path("result");
+                if (!result.isMissingNode()) {
+                    return result.path("points_count").asInt(0);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Collection {} not found or empty: {}", collection, e.getMessage());
+        }
+        return 0;
     }
 }

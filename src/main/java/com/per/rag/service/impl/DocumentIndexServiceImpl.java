@@ -10,19 +10,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.springframework.ai.document.Document;
-import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.rag.service.DocumentIndexService;
-import com.per.rag.service.VectorStoreService;
 
+import io.qdrant.client.QdrantClient;
+import io.qdrant.client.QdrantGrpcClient;
+import io.qdrant.client.grpc.Points.PointStruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service for indexing knowledge base documents into the knowledge_vectors collection. Separates
+ * knowledge documents (policies, guides) from product vectors.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,14 +41,31 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
     private static final String KNOWLEDGE_BASE_PATH = "knowledge";
     private static final String KNOWLEDGE_TYPE = "knowledge";
 
-    private final VectorStore vectorStore;
-    private final VectorStoreService vectorStoreService;
+    private final EmbeddingModel embeddingModel;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Value("${spring.ai.vectorstore.qdrant.host}")
+    private String qdrantHost;
+
+    @Value("${spring.ai.vectorstore.qdrant.port}")
+    private int qdrantGrpcPort;
+
+    @Value("${app.rag.qdrant.collections.knowledge:knowledge_vectors}")
+    private String knowledgeCollection;
+
+    private int getHttpPort() {
+        return qdrantGrpcPort - 1;
+    }
+
+    private String getQdrantBaseUrl() {
+        return "http://" + qdrantHost + ":" + getHttpPort();
+    }
 
     @Override
-    @Transactional
     public int indexKnowledgeBase() {
         try {
-            log.info("Starting knowledge base indexing");
+            log.info("Starting knowledge base indexing into collection: {}", knowledgeCollection);
             Path knowledgePath = Paths.get(KNOWLEDGE_BASE_PATH);
 
             if (!Files.exists(knowledgePath)) {
@@ -48,15 +75,16 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
                         "Knowledge base directory not found");
             }
 
-            List<Document> documents = new ArrayList<>();
+            List<KnowledgeDoc> documents = new ArrayList<>();
 
             try (Stream<Path> paths = Files.walk(knowledgePath)) {
                 paths.filter(Files::isRegularFile)
                         .filter(p -> p.toString().endsWith(".md"))
+                        .filter(p -> !p.getFileName().toString().equals("system-prompt.txt"))
                         .forEach(
                                 path -> {
                                     try {
-                                        Document doc = createDocumentFromFile(path);
+                                        KnowledgeDoc doc = createKnowledgeDoc(path);
                                         documents.add(doc);
                                     } catch (IOException e) {
                                         log.error("Failed to read file: {}", path, e);
@@ -65,8 +93,11 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
             }
 
             if (!documents.isEmpty()) {
-                vectorStore.add(documents);
-                log.info("Indexed {} knowledge base documents successfully", documents.size());
+                indexToQdrant(documents);
+                log.info(
+                        "Indexed {} knowledge documents into {} successfully",
+                        documents.size(),
+                        knowledgeCollection);
                 return documents.size();
             } else {
                 log.warn("No markdown files found in knowledge base");
@@ -83,7 +114,6 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
     }
 
     @Override
-    @Transactional
     public void indexSingleDocument(String filename) {
         try {
             Path filePath = Paths.get(KNOWLEDGE_BASE_PATH, filename);
@@ -99,10 +129,10 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
                         "Only markdown files (.md) are supported");
             }
 
-            Document document = createDocumentFromFile(filePath);
-            vectorStore.add(List.of(document));
+            KnowledgeDoc doc = createKnowledgeDoc(filePath);
+            indexToQdrant(List.of(doc));
 
-            log.info("Indexed knowledge document: {}", filename);
+            log.info("Indexed knowledge document: {} into {}", filename, knowledgeCollection);
 
         } catch (ApiException e) {
             throw e;
@@ -116,12 +146,31 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
     }
 
     @Override
-    @Transactional
     public void clearKnowledgeBase() {
         try {
-            log.info("Clearing knowledge base from vector store");
-            vectorStoreService.deleteByMetadata("type", KNOWLEDGE_TYPE);
-            log.info("Knowledge base cleared successfully");
+            log.info("Clearing knowledge base from collection: {}", knowledgeCollection);
+            String url =
+                    getQdrantBaseUrl() + "/collections/" + knowledgeCollection + "/points/delete";
+
+            Map<String, Object> filter =
+                    Map.of(
+                            "filter",
+                            Map.of(
+                                    "must",
+                                    List.of(
+                                            Map.of(
+                                                    "key",
+                                                    "type",
+                                                    "match",
+                                                    Map.of("value", KNOWLEDGE_TYPE)))));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> request =
+                    new HttpEntity<>(objectMapper.writeValueAsString(filter), headers);
+
+            restTemplate.postForEntity(url, request, String.class);
+            log.info("Knowledge base cleared successfully from {}", knowledgeCollection);
         } catch (Exception e) {
             log.error("Failed to clear knowledge base", e);
             throw new ApiException(
@@ -129,11 +178,44 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
         }
     }
 
-    private Document createDocumentFromFile(Path filePath) throws IOException {
+    private void indexToQdrant(List<KnowledgeDoc> documents) throws Exception {
+        try (QdrantClient client =
+                new QdrantClient(
+                        QdrantGrpcClient.newBuilder(qdrantHost, qdrantGrpcPort, false).build())) {
+
+            List<PointStruct> points = new ArrayList<>();
+
+            for (KnowledgeDoc doc : documents) {
+                float[] embedding = embeddingModel.embed(doc.content);
+
+                PointStruct point =
+                        PointStruct.newBuilder()
+                                .setId(
+                                        io.qdrant.client.grpc.Points.PointId.newBuilder()
+                                                .setUuid(doc.id)
+                                                .build())
+                                .setVectors(
+                                        io.qdrant.client.grpc.Points.Vectors.newBuilder()
+                                                .setVector(
+                                                        io.qdrant.client.grpc.Points.Vector
+                                                                .newBuilder()
+                                                                .addAllData(toFloatList(embedding))
+                                                                .build())
+                                                .build())
+                                .putAllPayload(toPayload(doc.metadata))
+                                .build();
+
+                points.add(point);
+            }
+
+            client.upsertAsync(knowledgeCollection, points).get();
+        }
+    }
+
+    private KnowledgeDoc createKnowledgeDoc(Path filePath) throws IOException {
         String content = Files.readString(filePath);
         String filename = filePath.getFileName().toString();
 
-        // Extract category from subdirectory if exists
         String category = "general";
         Path parent = filePath.getParent();
         if (parent != null && !parent.endsWith(KNOWLEDGE_BASE_PATH)) {
@@ -145,8 +227,8 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
         metadata.put("source", filename);
         metadata.put("category", category);
         metadata.put("documentName", filename.replace(".md", ""));
+        metadata.put("content", content);
 
-        // Generate deterministic UUID from filename for consistent re-indexing
         String documentId =
                 java.util
                         .UUID
@@ -154,6 +236,29 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
                                 filename.getBytes(java.nio.charset.StandardCharsets.UTF_8))
                         .toString();
 
-        return new Document(documentId, content, metadata);
+        return new KnowledgeDoc(documentId, content, metadata);
     }
+
+    private List<Float> toFloatList(float[] arr) {
+        List<Float> list = new ArrayList<>(arr.length);
+        for (float f : arr) {
+            list.add(f);
+        }
+        return list;
+    }
+
+    private Map<String, io.qdrant.client.grpc.JsonWithInt.Value> toPayload(
+            Map<String, Object> metadata) {
+        Map<String, io.qdrant.client.grpc.JsonWithInt.Value> payload = new HashMap<>();
+        for (Map.Entry<String, Object> entry : metadata.entrySet()) {
+            payload.put(
+                    entry.getKey(),
+                    io.qdrant.client.grpc.JsonWithInt.Value.newBuilder()
+                            .setStringValue(String.valueOf(entry.getValue()))
+                            .build());
+        }
+        return payload;
+    }
+
+    private record KnowledgeDoc(String id, String content, Map<String, Object> metadata) {}
 }
