@@ -1,13 +1,11 @@
 package com.per.rag.service.impl;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
-import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -19,22 +17,23 @@ import com.per.rag.helper.ContextBuilderHelper;
 import com.per.rag.helper.JsonSanitizerHelper;
 import com.per.rag.helper.PromptHelper;
 import com.per.rag.service.ChatService;
-import com.per.rag.service.VectorStoreService;
+import com.per.rag.service.MultiCollectionSearchService;
+import com.per.rag.service.MultiCollectionSearchService.MultiSearchResult;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 
 /**
- * Implementation of ChatService for AI-powered fragrance consultation. Orchestrates RAG (Retrieval
- * Augmented Generation) workflow by delegating to helper and handler classes.
+ * Implementation of ChatService for AI-powered fragrance consultation. Uses multi-collection
+ * retrieval across brands, categories, products, and knowledge.
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ChatServiceImpl implements ChatService {
 
-    private final VectorStoreService vectorStoreService;
+    private final MultiCollectionSearchService multiSearchService;
     private final ChatModel chatModel;
     private final PromptHelper promptHelper;
     private final JsonSanitizerHelper jsonSanitizerHelper;
@@ -50,15 +49,15 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public ShopAssistantResponse chat(String question) {
         try {
-            // Load system prompt from resource
+            // Load system prompt
             String systemPromptTemplate = promptHelper.loadSystemPrompt();
 
-            // Retrieve similar documents from vector store
-            List<Document> similarDocs =
-                    vectorStoreService.searchSimilar(question, searchTopK, similarityThreshold);
+            // Multi-source retrieval across all collections
+            MultiSearchResult searchResult =
+                    multiSearchService.searchAll(question, searchTopK, similarityThreshold);
 
-            // Build context from retrieved documents
-            String context = contextBuilderHelper.buildContext(similarDocs);
+            // Build multi-source context with labeled sections
+            String context = contextBuilderHelper.buildMultiSourceContext(searchResult);
 
             // Initialize BeanOutputConverter for structured output
             BeanOutputConverter<ShopAssistantResponse> converter =
@@ -83,10 +82,8 @@ public class ChatServiceImpl implements ChatService {
 
             log.debug("Raw LLM response: {}", response);
 
-            // Clean response (remove markdown code blocks if present)
+            // Clean response
             String cleanedResponse = jsonSanitizerHelper.cleanMarkdownCodeBlocks(response);
-
-            // Sanitize YAML-like block scalars (| or >) that break JSON parsing
             cleanedResponse = jsonSanitizerHelper.sanitizeMalformedJson(cleanedResponse);
 
             // Parse structured response
@@ -109,24 +106,23 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Flux<String> chatStream(String question) {
         try {
-            // Retrieve similar documents
-            List<Document> similarDocs =
-                    vectorStoreService.searchSimilar(question, searchTopK, similarityThreshold);
+            // Multi-source retrieval
+            MultiSearchResult searchResult =
+                    multiSearchService.searchAll(question, searchTopK, similarityThreshold);
 
-            if (similarDocs.isEmpty()) {
+            if (searchResult.products().isEmpty() && searchResult.knowledge().isEmpty()) {
                 return Flux.just(
                         "{\"summary\":\"No relevant information found\",\"detailedResponse\":\"I apologize, but I couldn't find relevant information. Please rephrase your question.\",\"products\":[],\"nextSteps\":[\"Browse our product catalog\",\"Contact customer service\",\"Ask about specific fragrance families\"]}");
             }
 
-            // Build context
-            String context = contextBuilderHelper.buildContext(similarDocs);
+            // Build multi-source context
+            String context = contextBuilderHelper.buildMultiSourceContext(searchResult);
 
-            // For streaming, we use a simpler prompt without structured output
+            // Streaming prompt
             String streamPrompt =
                     """
 					You are a fragrance consultant. Use this context to answer the question:
 
-					CONTEXT:
 					%s
 
 					QUESTION: %s
@@ -135,7 +131,6 @@ public class ChatServiceImpl implements ChatService {
 					"""
                             .formatted(context, question);
 
-            // Stream response
             return chatModel.stream(streamPrompt);
 
         } catch (ApiException e) {
