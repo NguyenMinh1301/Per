@@ -138,10 +138,10 @@ public class RagController extends BaseController {
             com.per.rag.dto.response.KnowledgeStatusResponse response =
                     com.per.rag.dto.response.KnowledgeStatusResponse.builder()
                             .totalDocuments((Integer) statusMap.get("totalDocuments"))
-                            .knowledgeDocuments((Integer) statusMap.get("knowledgeDocuments"))
-                            .productDocuments((Integer) statusMap.get("productDocuments"))
-                            .knowledgeSources(
-                                    (java.util.List<String>) statusMap.get("knowledgeSources"))
+                            .products((Integer) statusMap.get("products"))
+                            .brands((Integer) statusMap.get("brands"))
+                            .categories((Integer) statusMap.get("categories"))
+                            .knowledge((Integer) statusMap.get("knowledge"))
                             .isIndexed((Boolean) statusMap.get("isIndexed"))
                             .build();
 

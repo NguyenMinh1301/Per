@@ -53,6 +53,18 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     @Value("${spring.ai.vectorstore.qdrant.collection-name:product_vectors}")
     private String collectionName;
 
+    @Value("${app.rag.qdrant.collections.product:product_vectors}")
+    private String productCollection;
+
+    @Value("${app.rag.qdrant.collections.brand:brand_vectors}")
+    private String brandCollection;
+
+    @Value("${app.rag.qdrant.collections.category:category_vectors}")
+    private String categoryCollection;
+
+    @Value("${app.rag.qdrant.collections.knowledge:knowledge_vectors}")
+    private String knowledgeCollection;
+
     /** Qdrant HTTP API port (gRPC port - 1) */
     private int getHttpPort() {
         return 6333; // HTTP API is always on 6333
@@ -274,84 +286,28 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     public Map<String, Object> getKnowledgeStatus() {
         try {
             Map<String, Object> status = new HashMap<>();
+            Map<String, Integer> collections = new HashMap<>();
 
-            // Check if collection exists and get point count via Qdrant REST API
-            String collectionUrl = getQdrantBaseUrl() + "/collections/" + collectionName;
+            // Query all 4 collections
+            int productCount = getCollectionPointCount(productCollection);
+            int brandCount = getCollectionPointCount(brandCollection);
+            int categoryCount = getCollectionPointCount(categoryCollection);
+            int knowledgeCount = getCollectionPointCount(knowledgeCollection);
 
-            int totalCount = 0;
-            int knowledgeCount = 0;
-            List<String> sources = new ArrayList<>();
+            collections.put(productCollection, productCount);
+            collections.put(brandCollection, brandCount);
+            collections.put(categoryCollection, categoryCount);
+            collections.put(knowledgeCollection, knowledgeCount);
 
-            try {
-                ResponseEntity<String> response =
-                        restTemplate.getForEntity(collectionUrl, String.class);
-
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    JsonNode root = objectMapper.readTree(response.getBody());
-                    JsonNode result = root.path("result");
-                    if (!result.isMissingNode()) {
-                        totalCount = result.path("points_count").asInt(0);
-                    }
-                }
-            } catch (Exception e) {
-                // Collection may not exist yet, return zeros
-                log.debug("Collection {} not found or empty: {}", collectionName, e.getMessage());
-            }
-
-            // Count knowledge documents using scroll with filter
-            try {
-                String scrollUrl =
-                        getQdrantBaseUrl() + "/collections/" + collectionName + "/points/scroll";
-                String filterPayload =
-                        """
-						{
-							"filter": {
-								"must": [
-									{
-										"key": "type",
-										"match": {
-											"value": "knowledge"
-										}
-									}
-								]
-							},
-							"limit": 1000,
-							"with_payload": true
-						}
-						""";
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.APPLICATION_JSON);
-                HttpEntity<String> request = new HttpEntity<>(filterPayload, headers);
-
-                ResponseEntity<String> response =
-                        restTemplate.postForEntity(scrollUrl, request, String.class);
-
-                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                    JsonNode root = objectMapper.readTree(response.getBody());
-                    JsonNode points = root.path("result").path("points");
-                    if (points.isArray()) {
-                        knowledgeCount = points.size();
-
-                        // Extract unique sources
-                        for (JsonNode point : points) {
-                            JsonNode payload = point.path("payload");
-                            String source = payload.path("source").asText(null);
-                            if (source != null && !sources.contains(source)) {
-                                sources.add(source);
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                log.debug("Failed to count knowledge documents: {}", e.getMessage());
-            }
+            int totalCount = productCount + brandCount + categoryCount + knowledgeCount;
 
             status.put("totalDocuments", totalCount);
-            status.put("knowledgeDocuments", knowledgeCount);
-            status.put("productDocuments", totalCount - knowledgeCount);
-            status.put("knowledgeSources", sources);
-            status.put("isIndexed", knowledgeCount > 0);
+            status.put("products", productCount);
+            status.put("brands", brandCount);
+            status.put("categories", categoryCount);
+            status.put("knowledge", knowledgeCount);
+            status.put("collections", collections);
+            status.put("isIndexed", totalCount > 0);
 
             return status;
         } catch (Exception e) {
@@ -359,5 +315,24 @@ public class VectorStoreServiceImpl implements VectorStoreService {
             throw new ApiException(
                     ApiErrorCode.RAG_SEARCH_FAILED, "Failed to get knowledge status", e);
         }
+    }
+
+    private int getCollectionPointCount(String collection) {
+        try {
+            String collectionUrl = getQdrantBaseUrl() + "/collections/" + collection;
+            ResponseEntity<String> response =
+                    restTemplate.getForEntity(collectionUrl, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                JsonNode root = objectMapper.readTree(response.getBody());
+                JsonNode result = root.path("result");
+                if (!result.isMissingNode()) {
+                    return result.path("points_count").asInt(0);
+                }
+            }
+        } catch (Exception e) {
+            log.debug("Collection {} not found or empty: {}", collection, e.getMessage());
+        }
+        return 0;
     }
 }
