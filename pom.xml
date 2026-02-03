@@ -84,6 +84,8 @@
             <artifactId>spring-ai-qdrant-store-spring-boot-starter</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
+
+		<!-- Qdrant -->
         <dependency>
             <groupId>io.qdrant</groupId>
             <artifactId>client</artifactId>
