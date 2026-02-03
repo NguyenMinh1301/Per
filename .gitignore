@@ -6,6 +6,8 @@ target/
 data
 grafana-storage
 .agent/
+qdrant-storage
+qdrant_storage
 
 ### STS ###
 .apt_generated

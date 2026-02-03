@@ -31,10 +31,11 @@ spring:
       embedding:
         model: ${OPENAI_EMBEDDING_MODEL}
     vectorstore:
-      pgvector:
-        index-type: HNSW
-        distance-type: COSINE_DISTANCE
-        dimensions: 1536
+      qdrant:
+        host: ${QDRANT_HOST}
+        port: ${QDRANT_PORT}
+        collection-name: ${QDRANT_COLLECTION}
+        use-tls: false
   # Spring Mail (Google SMTP)
   mail:
     host: smtp.gmail.com

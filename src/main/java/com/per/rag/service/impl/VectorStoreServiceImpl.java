@@ -11,9 +11,17 @@ import java.util.stream.Collectors;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.product.entity.Product;
@@ -33,7 +41,26 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final VectorStore vectorStore;
-    private final org.springframework.jdbc.core.JdbcTemplate jdbcTemplate;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
+
+    @Value("${spring.ai.vectorstore.qdrant.host:qdrant}")
+    private String qdrantHost;
+
+    @Value("${spring.ai.vectorstore.qdrant.port:6334}")
+    private int qdrantGrpcPort;
+
+    @Value("${spring.ai.vectorstore.qdrant.collection-name:product_vectors}")
+    private String collectionName;
+
+    /** Qdrant HTTP API port (gRPC port - 1) */
+    private int getHttpPort() {
+        return 6333; // HTTP API is always on 6333
+    }
+
+    private String getQdrantBaseUrl() {
+        return "http://" + qdrantHost + ":" + getHttpPort();
+    }
 
     @Override
     @Transactional
@@ -199,13 +226,43 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     }
 
     @Override
-    @Transactional
     public void deleteByMetadata(String key, String value) {
         try {
             log.info("Deleting documents with metadata {}={}", key, value);
-            String sql = "DELETE FROM vector_store WHERE metadata->>? = ?";
-            int deletedCount = jdbcTemplate.update(sql, key, value);
-            log.info("Deleted {} documents with metadata {}={}", deletedCount, key, value);
+
+            // Use Qdrant's delete by filter API
+            String url = getQdrantBaseUrl() + "/collections/" + collectionName + "/points/delete";
+
+            // Build filter payload for Qdrant
+            String payload =
+                    """
+					{
+						"filter": {
+							"must": [
+								{
+									"key": "%s",
+									"match": {
+										"value": "%s"
+									}
+								}
+							]
+						}
+					}
+					"""
+                            .formatted(key, value);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<String> request = new HttpEntity<>(payload, headers);
+
+            ResponseEntity<String> response =
+                    restTemplate.postForEntity(url, request, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("Successfully deleted documents with metadata {}={}", key, value);
+            } else {
+                log.warn("Qdrant delete returned non-success status: {}", response.getStatusCode());
+            }
         } catch (Exception e) {
             log.error("Failed to delete documents by metadata", e);
             throw new ApiException(
@@ -216,28 +273,85 @@ public class VectorStoreServiceImpl implements VectorStoreService {
     @Override
     public Map<String, Object> getKnowledgeStatus() {
         try {
-            Integer totalCount =
-                    jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Integer.class);
-
-            Integer knowledgeCount =
-                    jdbcTemplate.queryForObject(
-                            "SELECT COUNT(*) FROM vector_store WHERE metadata->>'type' = 'knowledge'",
-                            Integer.class);
-
-            List<String> sources =
-                    jdbcTemplate.queryForList(
-                            "SELECT DISTINCT metadata->>'source' FROM vector_store WHERE metadata->>'type' = 'knowledge'",
-                            String.class);
-
             Map<String, Object> status = new HashMap<>();
-            status.put("totalDocuments", totalCount != null ? totalCount : 0);
-            status.put("knowledgeDocuments", knowledgeCount != null ? knowledgeCount : 0);
-            status.put(
-                    "productDocuments",
-                    (totalCount != null ? totalCount : 0)
-                            - (knowledgeCount != null ? knowledgeCount : 0));
+
+            // Check if collection exists and get point count via Qdrant REST API
+            String collectionUrl = getQdrantBaseUrl() + "/collections/" + collectionName;
+
+            int totalCount = 0;
+            int knowledgeCount = 0;
+            List<String> sources = new ArrayList<>();
+
+            try {
+                ResponseEntity<String> response =
+                        restTemplate.getForEntity(collectionUrl, String.class);
+
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    JsonNode root = objectMapper.readTree(response.getBody());
+                    JsonNode result = root.path("result");
+                    if (!result.isMissingNode()) {
+                        totalCount = result.path("points_count").asInt(0);
+                    }
+                }
+            } catch (Exception e) {
+                // Collection may not exist yet, return zeros
+                log.debug("Collection {} not found or empty: {}", collectionName, e.getMessage());
+            }
+
+            // Count knowledge documents using scroll with filter
+            try {
+                String scrollUrl =
+                        getQdrantBaseUrl() + "/collections/" + collectionName + "/points/scroll";
+                String filterPayload =
+                        """
+						{
+							"filter": {
+								"must": [
+									{
+										"key": "type",
+										"match": {
+											"value": "knowledge"
+										}
+									}
+								]
+							},
+							"limit": 1000,
+							"with_payload": true
+						}
+						""";
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.APPLICATION_JSON);
+                HttpEntity<String> request = new HttpEntity<>(filterPayload, headers);
+
+                ResponseEntity<String> response =
+                        restTemplate.postForEntity(scrollUrl, request, String.class);
+
+                if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                    JsonNode root = objectMapper.readTree(response.getBody());
+                    JsonNode points = root.path("result").path("points");
+                    if (points.isArray()) {
+                        knowledgeCount = points.size();
+
+                        // Extract unique sources
+                        for (JsonNode point : points) {
+                            JsonNode payload = point.path("payload");
+                            String source = payload.path("source").asText(null);
+                            if (source != null && !sources.contains(source)) {
+                                sources.add(source);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.debug("Failed to count knowledge documents: {}", e.getMessage());
+            }
+
+            status.put("totalDocuments", totalCount);
+            status.put("knowledgeDocuments", knowledgeCount);
+            status.put("productDocuments", totalCount - knowledgeCount);
             status.put("knowledgeSources", sources);
-            status.put("isIndexed", knowledgeCount != null && knowledgeCount > 0);
+            status.put("isIndexed", knowledgeCount > 0);
 
             return status;
         } catch (Exception e) {
