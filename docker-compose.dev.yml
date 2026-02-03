@@ -25,6 +25,14 @@ services:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
 
+      # --- Qdrant ---
+      - QDRANT_HOST=${QDRANT_HOST}
+      - QDRANT_PORT=${QDRANT_PORT}
+      - QDRANT_COLLECTION=${QDRANT_COLLECTION}
+      - QDRANT_COLLECTION_PRODUCT=${QDRANT_COLLECTION_PRODUCT}
+      - QDRANT_COLLECTION_BRAND=${QDRANT_COLLECTION_BRAND}
+      - QDRANT_COLLECTION_CATEGORY=${QDRANT_COLLECTION_CATEGORY}
+
       # --- JWT ---
       - JWT_SECRET=${JWT_SECRET}
       - ACCESS_TOKEN_TTL=${ACCESS_TOKEN_TTL}
@@ -259,6 +267,18 @@ services:
       - per-network
     depends_on:
       - elasticsearch
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - ./qdrant-storage:/qdrant/storage
+    networks:
+      - per-network
 
 volumes:
   db:
