@@ -17,23 +17,23 @@
 
 # Per - High-Performance E-Commerce Backend
 
-[![Vietnamese Version](https://img.shields.io/badge/Language-Vietnamese-red)](README.vi.md)
+[![English Version](https://img.shields.io/badge/Language-English-blue)](README.md)
 
-**Per** is a production-ready Modular Monolith e-commerce system built with Java 21, Spring Boot 3.5, and a robust Event-Driven Architecture.
+**Per** là một hệ thống thương mại điện tử Modular Monolith sẵn sàng cho production (production-ready), được xây dựng với Java 21, Spring Boot 3.5 và kiến trúc hướng sự kiện (Event-Driven Architecture) mạnh mẽ.
 
 ## 📚 Module Documentation
 
 | Module | Purpose | Tech Stack |
 | :--- | :--- | :--- |
-| **[Common](docs/modules/common/README.md)** | Shared Utilities, Global Exceptions | Spring Web, Resilience4j |
-| **[Auth](docs/modules/auth/README.md)** | Security, JWT, Role Management | Spring Security 6, JJWT |
-| **[User](docs/modules/user/README.md)** | Identity & Profile Management | JPA, PostgreSQL |
-| **[Product](docs/modules/product/README.md)** | Catalog, Elasticsearch Sync | Elastic, Kafka |
-| **[Media](docs/modules/media/README.md)** | Cloudinary Asset Management | Cloudinary SDK |
-| **[Cart](docs/modules/cart/README.md)** | Persistent Shopping Cart | JPA (Persistent) |
-| **[Order](docs/modules/order/README.md)** | Transaction Lifecycle | State Machine |
-| **[Payment](docs/modules/payment/README.md)** | Gateways & Webhooks | PayOS SDK |
-| **[RAG](docs/modules/rag/README.md)** | AI Shopping Assistant | Spring AI, Qdrant |
+| **[Common](docs/modules/common/README.vi.md)** | Shared Utilities, Global Exceptions | Spring Web, Resilience4j |
+| **[Auth](docs/modules/auth/README.vi.md)** | Security, JWT, Role Management | Spring Security 6, JJWT |
+| **[User](docs/modules/user/README.vi.md)** | Identity & Profile Management | JPA, PostgreSQL |
+| **[Product](docs/modules/product/README.vi.md)** | Catalog, Elasticsearch Sync | Elastic, Kafka |
+| **[Media](docs/modules/media/README.vi.md)** | Cloudinary Asset Management | Cloudinary SDK |
+| **[Cart](docs/modules/cart/README.vi.md)** | Persistent Shopping Cart | JPA (Persistent) |
+| **[Order](docs/modules/order/README.vi.md)** | Transaction Lifecycle | State Machine |
+| **[Payment](docs/modules/payment/README.vi.md)** | Gateways & Webhooks | PayOS SDK |
+| **[RAG](docs/modules/rag/README.vi.md)** | AI Shopping Assistant | Spring AI, Qdrant |
 
 ## 🚀 Quick Start
 
@@ -53,7 +53,7 @@ docker-compose up -d
 
 ## 🏗 System Architecture
 
-The application follows a **Modular Monolith** pattern with **Event-Driven** consistency by default.
+Ứng dụng tuân theo mô hình **Modular Monolith** với tính nhất quán **Event-Driven** theo mặc định.
 
 ```mermaid
 graph TD
