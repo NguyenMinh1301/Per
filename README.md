@@ -3,6 +3,8 @@
   &nbsp;&nbsp;
    <a href="https://www.postgresql.org/" target="_blank"><img src="assets/img/postgresql.svg" height="140" alt="PostgreSQL" /></a>
   &nbsp;&nbsp;
+   <a href="https://qdrant.tech/" target="_blank"><img src="assets/img/qdrant.svg" height="140" alt="Qdrant" /></a>
+  &nbsp;&nbsp;
    <a href="https://redis.io/" target="_blank"><img src="assets/img/redis.svg" height="140" alt="Redis" /></a>
   &nbsp;&nbsp;
    <a href="https://kafka.apache.org/" target="_blank"><img src="assets/img/kafka.svg" height="140" alt="Kafka" /></a>
@@ -11,17 +13,27 @@
   &nbsp;&nbsp;
    <a href="https://www.docker.com/" target="_blank"><img src="assets/img/docker.svg" height="140" alt="Docker" /></a>
   &nbsp;&nbsp;
+   <a href="https://jenkins.io/" target="_blank"><img src="assets/img/jenkins.svg" height="140" alt="Jenkins" /></a>
+  &nbsp;&nbsp;
    <a href="https://prometheus.io/" target="_blank"><img src="assets/img/prometheus.svg" height="140" alt="Prometheus" /></a>
+  &nbsp;&nbsp;
+   <a href="https://grafana.com/" target="_blank"><img src="assets/img/grafana.svg" height="140" alt="Grafana" /></a>
   &nbsp;&nbsp;
 </p>
 
-# Per - High-Performance E-Commerce Backend
+# Per - E-Commerce Backend
 
 [![Vietnamese Version](https://img.shields.io/badge/Language-Vietnamese-red)](README.vi.md)
 
 **Per** is a production-ready Modular Monolith e-commerce system built with Java 21, Spring Boot 3.5, and a robust Event-Driven Architecture.
 
-## 📚 Module Documentation
+<p align="center">
+  <a href="./">
+    <img src="/assets/img/Per.svg" alt="Per" width="160">
+  </a>
+</p>
+
+## Module Documentation
 
 | Module | Purpose | Tech Stack |
 | :--- | :--- | :--- |
@@ -35,7 +47,7 @@
 | **[Payment](docs/modules/payment/README.md)** | Gateways & Webhooks | PayOS SDK |
 | **[RAG](docs/modules/rag/README.md)** | AI Shopping Assistant | Spring AI, Qdrant |
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 *   Java 21
@@ -51,7 +63,7 @@ docker-compose up -d
 ./mvnw spring-boot:run
 ```
 
-## 🏗 System Architecture
+## System Architecture
 
 The application follows a **Modular Monolith** pattern with **Event-Driven** consistency by default.
 
