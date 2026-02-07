@@ -71,7 +71,7 @@ public class EntityVectorServiceImpl implements EntityVectorService {
                                     .build())) {
 
                 for (Brand brand : brands) {
-                    if (!Boolean.TRUE.equals(brand.getIsActive())) {
+                    if (!Boolean.TRUE.equals(brand.isActive())) {
                         continue;
                     }
                     indexBrandInternal(client, brand);
@@ -100,7 +100,7 @@ public class EntityVectorServiceImpl implements EntityVectorService {
                                     .build())) {
 
                 for (Category category : categories) {
-                    if (!Boolean.TRUE.equals(category.getIsActive())) {
+                    if (!Boolean.TRUE.equals(category.isActive())) {
                         continue;
                     }
                     indexCategoryInternal(client, category);

@@ -34,5 +34,5 @@ public class MadeInCreateRequest {
 
     private String imageUrl;
 
-    private Boolean isActive;
+    private Boolean active;
 }

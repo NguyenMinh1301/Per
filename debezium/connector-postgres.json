@@ -1,0 +1,31 @@
+{
+  "name": "per-postgres-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "postgres",
+    "database.password": "postgres",
+    "database.dbname": "postgres",
+    "topic.prefix": "per",
+    "table.include.list": "public.product,public.product_variant,public.brand,public.category,public.made_id",
+    "plugin.name": "pgoutput",
+    "publication.autocreate.mode": "all_tables",
+    "publication.name": "dbz_publication",
+    "slot.name": "debezium_slot",
+    "tombstones.on.delete": "true",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "time.precision.mode": "connect",
+    "decimal.handling.mode": "string",
+    "transforms": "unwrap",
+    "transforms.unwrap.type": "io.debezium.transforms.ExtractNewRecordState",
+    "transforms.unwrap.drop.tombstones": "false",
+    "transforms.unwrap.delete.handling.mode": "rewrite",
+    "transforms.unwrap.add.fields": "op,source.ts_ms,source.table",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true"
+  }
+}
