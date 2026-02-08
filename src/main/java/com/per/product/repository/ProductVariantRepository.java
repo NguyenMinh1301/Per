@@ -17,4 +17,7 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findByProductId(UUID productId);
 
     Optional<ProductVariant> findByIdAndProductId(UUID id, UUID productId);
+
+    // Bulk fetch for CDC indexing
+    List<ProductVariant> findByProductIdIn(List<UUID> productIds);
 }

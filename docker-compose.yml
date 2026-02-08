@@ -18,6 +18,12 @@ services:
     networks:
       - per-network
     volumes: [ "db:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   redis:
     image: redis:7-alpine
@@ -52,6 +58,16 @@ services:
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   kafka-ui:
     container_name: kafka-ui
@@ -92,8 +108,10 @@ services:
       KEY_CONVERTER_SCHEMAS_ENABLE: "false"
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
     depends_on:
-      - kafka
-      - db
+      kafka:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
       interval: 30s
@@ -129,7 +147,7 @@ services:
       MAX_RETRIES: 60
       RETRY_INTERVAL: 5
     command: >
-      sh -c "apk add --no-cache curl jq bash && bash /init/init-connector.sh"
+      sh -c "apk add --no-cache curl jq bash gettext && bash /init/init-connector.sh"
     depends_on:
       debezium-kafka-connect:
         condition: service_healthy
@@ -223,10 +241,20 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      - ES_JAVA_OPTS=-Xmx256m -Xms256m
+      - ES_JAVA_OPTS=-Xmx1g -Xms1g
       - discovery.type=single-node
     networks:
       - per-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   logstash:
     image: logstash:7.17.25

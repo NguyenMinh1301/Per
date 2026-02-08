@@ -17,7 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * CDC consumer for Product entity changes from Debezium. Listens to per.public.products topic and
+ * CDC consumer for Product entity changes from Debezium. Listens to
+ * per.public.products topic and
  * syncs to Elasticsearch/Qdrant.
  */
 @Component
@@ -28,17 +29,9 @@ public class ProductCdcConsumer {
     private final ProductCdcIndexService productCdcIndexService;
     private final ObjectMapper objectMapper;
 
-    @RetryableTopic(
-            attempts = "4",
-            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 4000),
-            dltTopicSuffix = "-dlt",
-            dltStrategy = DltStrategy.FAIL_ON_ERROR,
-            autoCreateTopics = "true",
-            include = {Exception.class})
-    @KafkaListener(
-            topics = KafkaTopicNames.CDC_PRODUCTS_TOPIC,
-            groupId = KafkaTopicNames.CDC_PRODUCT_GROUP,
-            containerFactory = "cdcKafkaListenerContainerFactory")
+    @RetryableTopic(attempts = "4", backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 4000), dltTopicSuffix = "-dlt", dltStrategy = DltStrategy.FAIL_ON_ERROR, autoCreateTopics = "true", include = {
+            Exception.class })
+    @KafkaListener(topics = KafkaTopicNames.CDC_PRODUCTS_TOPIC, groupId = KafkaTopicNames.CDC_PRODUCT_GROUP, containerFactory = "cdcKafkaListenerContainerFactory")
     public void consume(String message) {
         // Tombstones are filtered at container level, but double-check
         if (message == null || message.isEmpty()) {
@@ -53,8 +46,7 @@ public class ProductCdcConsumer {
                 jsonContent = objectMapper.readValue(message, String.class);
             }
 
-            ProductCdcPayload payload =
-                    objectMapper.readValue(jsonContent, ProductCdcPayload.class);
+            ProductCdcPayload payload = objectMapper.readValue(jsonContent, ProductCdcPayload.class);
             UUID productId = UUID.fromString(payload.getId());
 
             log.info(
@@ -73,5 +65,22 @@ public class ProductCdcConsumer {
             log.error("Failed to process product CDC event: {}", e.getMessage(), e);
             throw new RuntimeException("CDC processing failed", e);
         }
+    }
+
+    /**
+     * Dead Letter Topic handler. Logs messages that failed after all retries.
+     * This provides visibility into failed CDC events for monitoring and debugging.
+     */
+    @org.springframework.kafka.annotation.DltHandler
+    public void handleDlt(
+            String message,
+            @org.springframework.messaging.handler.annotation.Header(org.springframework.kafka.support.KafkaHeaders.RECEIVED_TOPIC) String topic,
+            @org.springframework.messaging.handler.annotation.Header(org.springframework.kafka.support.KafkaHeaders.EXCEPTION_MESSAGE) String exceptionMessage) {
+        log.error(
+                "CDC message sent to DLT. Topic: {}, Payload: {}, Error: {}",
+                topic,
+                message,
+                exceptionMessage);
+        // TODO: Consider sending to alerting system (Slack, PagerDuty, etc.)
     }
 }
