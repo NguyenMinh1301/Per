@@ -218,9 +218,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
 
-    depends_on:
-      debezium-kafka-connect:
-        condition: service_healthy
+    depends_on: debezium-kafka-connect
     restart: "no"
 
   prometheus:
