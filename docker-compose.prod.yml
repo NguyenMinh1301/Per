@@ -162,7 +162,7 @@ services:
     container_name: debezium-kafka-connect
     ports:
       - "127.0.0.1:8083:8083"
-      - "127.0.0.1:8778:8778"
+
     networks:
       - per-network
     environment:
@@ -177,7 +177,7 @@ services:
       KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
-      ENABLE_JOLOKIA: "true"
+
     depends_on:
       kafka:
         condition: service_healthy
@@ -189,18 +189,6 @@ services:
       timeout: 10s
       retries: 5
       start_period: 60s
-
-  debezium-ui:
-    image: debezium/debezium-ui:2.5
-    container_name: debezium-ui
-    ports:
-      - "127.0.0.1:8084:8080"
-    networks:
-      - per-network
-    environment:
-      KAFKA_CONNECT_URIS: http://debezium-kafka-connect:8083
-    depends_on:
-      - debezium-kafka-connect
 
   init-kafka-connect:
     build:
