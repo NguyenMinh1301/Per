@@ -43,7 +43,19 @@ force_update_connector() {
     local name=$(get_connector_name)
     
     # Extract config to a temp file to avoid shell escaping issues
-    jq '.config' "$CONNECTOR_CONFIG" > /tmp/connector_payload.json
+    # Extract config to a temp file to avoid shell escaping issues
+    # Use envsubst to replace environment variables in the config file
+    if command -v envsubst >/dev/null 2>&1; then
+        envsubst < "$CONNECTOR_CONFIG" > /tmp/connector_payload.json
+    else
+        # Fallback if envsubst is not available (though we install it)
+        cat "$CONNECTOR_CONFIG" > /tmp/connector_payload.json
+    fi
+    # Validate JSON
+    if ! jq . /tmp/connector_payload.json >/dev/null 2>&1; then
+        log_error "Invalid JSON in connector config after substitution"
+        return 1
+    fi
     
     log_info "Force updating connector '$name' configuration..."
     log_info "Using PUT to ensure config is applied even if connector exists"
