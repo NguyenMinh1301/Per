@@ -30,24 +30,27 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     // These use JOIN FETCH to load Brand, Category, MadeIn in one query.
     // Variants are fetched separately to avoid Cartesian product.
 
-    @Query("SELECT DISTINCT p FROM Product p "
-            + "LEFT JOIN FETCH p.brand "
-            + "LEFT JOIN FETCH p.category "
-            + "LEFT JOIN FETCH p.madeIn "
-            + "WHERE p.brand.id = :brandId")
+    @Query(
+            "SELECT DISTINCT p FROM Product p "
+                    + "LEFT JOIN FETCH p.brand "
+                    + "LEFT JOIN FETCH p.category "
+                    + "LEFT JOIN FETCH p.madeIn "
+                    + "WHERE p.brand.id = :brandId")
     List<Product> findAllByBrandIdWithRelations(@Param("brandId") UUID brandId);
 
-    @Query("SELECT DISTINCT p FROM Product p "
-            + "LEFT JOIN FETCH p.brand "
-            + "LEFT JOIN FETCH p.category "
-            + "LEFT JOIN FETCH p.madeIn "
-            + "WHERE p.category.id = :categoryId")
+    @Query(
+            "SELECT DISTINCT p FROM Product p "
+                    + "LEFT JOIN FETCH p.brand "
+                    + "LEFT JOIN FETCH p.category "
+                    + "LEFT JOIN FETCH p.madeIn "
+                    + "WHERE p.category.id = :categoryId")
     List<Product> findAllByCategoryIdWithRelations(@Param("categoryId") UUID categoryId);
 
-    @Query("SELECT DISTINCT p FROM Product p "
-            + "LEFT JOIN FETCH p.brand "
-            + "LEFT JOIN FETCH p.category "
-            + "LEFT JOIN FETCH p.madeIn "
-            + "WHERE p.madeIn.id = :madeInId")
+    @Query(
+            "SELECT DISTINCT p FROM Product p "
+                    + "LEFT JOIN FETCH p.brand "
+                    + "LEFT JOIN FETCH p.category "
+                    + "LEFT JOIN FETCH p.madeIn "
+                    + "WHERE p.madeIn.id = :madeInId")
     List<Product> findAllByMadeInIdWithRelations(@Param("madeInId") UUID madeInId);
 }

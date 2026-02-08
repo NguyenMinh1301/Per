@@ -24,8 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Service for CDC-triggered Product indexing to Elasticsearch and Qdrant.
- * Provides methods for
+ * Service for CDC-triggered Product indexing to Elasticsearch and Qdrant. Provides methods for
  * direct indexing and cascade re-indexing.
  */
 @Service
@@ -71,10 +70,9 @@ public class ProductCdcIndexService {
     // ========== Bulk Indexing (Optimized for Cascade Updates) ==========
 
     /**
-     * Bulk index multiple products to Elasticsearch. Uses ES Bulk API for
-     * efficiency.
+     * Bulk index multiple products to Elasticsearch. Uses ES Bulk API for efficiency.
      *
-     * @param products            List of products (with relations already loaded)
+     * @param products List of products (with relations already loaded)
      * @param variantsByProductId Map of productId -> variants
      */
     public void bulkIndexProducts(
@@ -87,13 +85,12 @@ public class ProductCdcIndexService {
         List<IndexQuery> indexQueries = new ArrayList<>();
 
         for (Product product : products) {
-            List<ProductVariant> variants = variantsByProductId.getOrDefault(product.getId(), List.of());
+            List<ProductVariant> variants =
+                    variantsByProductId.getOrDefault(product.getId(), List.of());
             ProductDocument document = documentMapper.toDocument(product, variants);
 
-            IndexQuery indexQuery = new IndexQueryBuilder()
-                    .withId(document.getId())
-                    .withObject(document)
-                    .build();
+            IndexQuery indexQuery =
+                    new IndexQueryBuilder().withId(document.getId()).withObject(document).build();
             indexQueries.add(indexQuery);
         }
 
@@ -105,8 +102,7 @@ public class ProductCdcIndexService {
     }
 
     /**
-     * Re-index all products belonging to a specific brand. Called when a Brand
-     * entity is updated
+     * Re-index all products belonging to a specific brand. Called when a Brand entity is updated
      * via CDC. Uses optimized JOIN FETCH query and bulk indexing.
      */
     public void reindexProductsByBrand(UUID brandId) {
@@ -123,8 +119,7 @@ public class ProductCdcIndexService {
     }
 
     /**
-     * Re-index all products belonging to a specific category. Called when a
-     * Category entity is
+     * Re-index all products belonging to a specific category. Called when a Category entity is
      * updated via CDC.
      */
     public void reindexProductsByCategory(UUID categoryId) {
@@ -141,8 +136,7 @@ public class ProductCdcIndexService {
     }
 
     /**
-     * Re-index all products belonging to a specific MadeIn (country of origin).
-     * Called when a
+     * Re-index all products belonging to a specific MadeIn (country of origin). Called when a
      * MadeIn entity is updated via CDC.
      */
     public void reindexProductsByMadeIn(UUID madeInId) {
@@ -161,8 +155,7 @@ public class ProductCdcIndexService {
     // ========== Private Helpers ==========
 
     /**
-     * Fetches all variants for a list of products in a single query, then groups
-     * them by product
+     * Fetches all variants for a list of products in a single query, then groups them by product
      * ID.
      */
     private Map<UUID, List<ProductVariant>> fetchVariantsForProducts(List<Product> products) {
@@ -170,7 +163,6 @@ public class ProductCdcIndexService {
 
         List<ProductVariant> allVariants = variantRepository.findByProductIdIn(productIds);
 
-        return allVariants.stream()
-                .collect(Collectors.groupingBy(v -> v.getProduct().getId()));
+        return allVariants.stream().collect(Collectors.groupingBy(v -> v.getProduct().getId()));
     }
 }
