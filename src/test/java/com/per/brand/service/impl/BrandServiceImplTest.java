@@ -63,7 +63,7 @@ class BrandServiceImplTest {
                         .id(brandId)
                         .name("Test Brand")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
 
         brandResponse =
@@ -71,7 +71,7 @@ class BrandServiceImplTest {
                         .id(brandId)
                         .name("Test Brand")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
     }
 
@@ -194,7 +194,7 @@ class BrandServiceImplTest {
                     BrandCreateRequest.builder()
                             .name("New Brand")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             Brand newBrand =
@@ -202,7 +202,7 @@ class BrandServiceImplTest {
                             .id(UUID.randomUUID())
                             .name("New Brand")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             BrandResponse newBrandResponse =
@@ -210,7 +210,7 @@ class BrandServiceImplTest {
                             .id(newBrand.getId())
                             .name("New Brand")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(brandRepository.existsByNameIgnoreCase("New Brand")).thenReturn(false);
@@ -224,7 +224,7 @@ class BrandServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("New Brand");
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
 
             verify(brandRepository).existsByNameIgnoreCase("New Brand");
             verify(brandRepository).save(any(Brand.class));
@@ -238,7 +238,7 @@ class BrandServiceImplTest {
                     BrandCreateRequest.builder()
                             .name("New Brand")
                             .description("New Description")
-                            .isActive(null)
+                            .active(null)
                             .build();
 
             Brand newBrand =
@@ -246,14 +246,14 @@ class BrandServiceImplTest {
                             .id(UUID.randomUUID())
                             .name("New Brand")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             BrandResponse newBrandResponse =
                     BrandResponse.builder()
                             .id(newBrand.getId())
                             .name("New Brand")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(brandRepository.existsByNameIgnoreCase("New Brand")).thenReturn(false);
@@ -266,7 +266,7 @@ class BrandServiceImplTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
         }
 
         @Test
@@ -303,7 +303,7 @@ class BrandServiceImplTest {
                     BrandUpdateRequest.builder()
                             .name("Updated Brand")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             Brand updatedBrand =
@@ -311,7 +311,7 @@ class BrandServiceImplTest {
                             .id(brandId)
                             .name("Updated Brand")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             BrandResponse updatedBrandResponse =
@@ -319,7 +319,7 @@ class BrandServiceImplTest {
                             .id(brandId)
                             .name("Updated Brand")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             when(brandRepository.findById(brandId)).thenReturn(Optional.of(testBrand));
@@ -334,7 +334,7 @@ class BrandServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("Updated Brand");
-            assertThat(result.getIsActive()).isFalse();
+            assertThat(result.isActive()).isFalse();
 
             verify(brandRepository).findById(brandId);
             verify(brandRepository).save(any(Brand.class));
@@ -355,7 +355,7 @@ class BrandServiceImplTest {
                             .id(brandId)
                             .name("Test Brand")
                             .description("Updated Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             BrandResponse updatedBrandResponse =

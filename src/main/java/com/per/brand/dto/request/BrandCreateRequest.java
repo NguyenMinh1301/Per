@@ -37,5 +37,5 @@ public class BrandCreateRequest {
 
     private String imageUrl;
 
-    private Boolean isActive;
+    private Boolean active;
 }

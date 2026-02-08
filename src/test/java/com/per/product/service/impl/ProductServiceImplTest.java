@@ -91,10 +91,9 @@ class ProductServiceImplTest {
         categoryId = UUID.randomUUID();
         madeInId = UUID.randomUUID();
 
-        testBrand = Brand.builder().id(brandId).name("Test Brand").isActive(true).build();
-        testCategory =
-                Category.builder().id(categoryId).name("Test Category").isActive(true).build();
-        testMadeIn = MadeIn.builder().id(madeInId).name("Test Country").isActive(true).build();
+        testBrand = Brand.builder().id(brandId).name("Test Brand").active(true).build();
+        testCategory = Category.builder().id(categoryId).name("Test Category").active(true).build();
+        testMadeIn = MadeIn.builder().id(madeInId).name("Test Country").active(true).build();
 
         testProduct =
                 Product.builder()
@@ -103,7 +102,7 @@ class ProductServiceImplTest {
                         .category(testCategory)
                         .madeIn(testMadeIn)
                         .name("Test Product")
-                        .isActive(true)
+                        .active(true)
                         .build();
     }
 
@@ -246,7 +245,7 @@ class ProductServiceImplTest {
                             .madeIn(testMadeIn)
                             .name("New Product")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             ProductDetailResponse detailResponse =
@@ -308,7 +307,7 @@ class ProductServiceImplTest {
                             .category(testCategory)
                             .madeIn(testMadeIn)
                             .name("New Product")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             ProductVariant variant =

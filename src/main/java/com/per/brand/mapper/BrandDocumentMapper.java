@@ -16,7 +16,7 @@ public class BrandDocumentMapper {
                 .websiteUrl(brand.getWebsiteUrl())
                 .foundedYear(brand.getFoundedYear())
                 .imageUrl(brand.getImageUrl())
-                .isActive(brand.getIsActive())
+                .isActive(brand.isActive())
                 .build();
     }
 }

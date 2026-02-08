@@ -65,7 +65,7 @@ class MadeInServiceImplTest {
                         .isoCode("TC")
                         .region("Test Region")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
 
         madeInResponse =
@@ -75,7 +75,7 @@ class MadeInServiceImplTest {
                         .isoCode("TC")
                         .region("Test Region")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
     }
 
@@ -181,7 +181,7 @@ class MadeInServiceImplTest {
                             .isoCode("NC")
                             .region("New Region")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             MadeIn newMadeIn =
@@ -191,7 +191,7 @@ class MadeInServiceImplTest {
                             .isoCode("NC")
                             .region("New Region")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             MadeInResponse newMadeInResponse =
@@ -201,7 +201,7 @@ class MadeInServiceImplTest {
                             .isoCode("NC")
                             .region("New Region")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
@@ -215,7 +215,7 @@ class MadeInServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("New Country");
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
 
             verify(madeInRepository).existsByNameIgnoreCase("New Country");
         }
@@ -228,7 +228,7 @@ class MadeInServiceImplTest {
                     MadeInCreateRequest.builder()
                             .name("New Country")
                             .isoCode("NC")
-                            .isActive(null)
+                            .active(null)
                             .build();
 
             MadeIn newMadeIn =
@@ -236,14 +236,14 @@ class MadeInServiceImplTest {
                             .id(UUID.randomUUID())
                             .name("New Country")
                             .isoCode("NC")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             MadeInResponse newMadeInResponse =
                     MadeInResponse.builder()
                             .id(newMadeIn.getId())
                             .name("New Country")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(madeInRepository.existsByNameIgnoreCase("New Country")).thenReturn(false);
@@ -256,7 +256,7 @@ class MadeInServiceImplTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
         }
 
         @Test
@@ -291,7 +291,7 @@ class MadeInServiceImplTest {
                             .name("Updated Country")
                             .isoCode("UC")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             MadeIn updatedMadeIn =
@@ -300,7 +300,7 @@ class MadeInServiceImplTest {
                             .name("Updated Country")
                             .isoCode("UC")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             MadeInResponse updatedMadeInResponse =
@@ -309,7 +309,7 @@ class MadeInServiceImplTest {
                             .name("Updated Country")
                             .isoCode("UC")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             when(madeInRepository.findById(madeInId)).thenReturn(Optional.of(testMadeIn));
@@ -324,7 +324,7 @@ class MadeInServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("Updated Country");
-            assertThat(result.getIsActive()).isFalse();
+            assertThat(result.isActive()).isFalse();
 
             verify(madeInRepository).findById(madeInId);
             verify(madeInRepository).save(any(MadeIn.class));

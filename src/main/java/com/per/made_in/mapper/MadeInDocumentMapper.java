@@ -16,7 +16,7 @@ public class MadeInDocumentMapper {
                 .region(madeIn.getRegion())
                 .description(madeIn.getDescription())
                 .imageUrl(madeIn.getImageUrl())
-                .isActive(madeIn.getIsActive())
+                .isActive(madeIn.isActive())
                 .build();
     }
 }

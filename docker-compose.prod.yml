@@ -79,10 +79,24 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command:
+      - "postgres"
+      - "-c"
+      - "wal_level=logical"
+      - "-c"
+      - "max_wal_senders=4"
+      - "-c"
+      - "max_replication_slots=4"
     ports: [ "127.0.0.1:5432:5432" ]
     networks:
       - per-network
     volumes: [ "db:/var/lib/postgresql/data" ]
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   redis:
     image: redis:7-alpine
@@ -117,6 +131,16 @@ services:
       KAFKA_LOG_DIRS: /var/lib/kafka/data
     volumes:
       - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
 
   kafka-ui:
     container_name: kafka-ui
@@ -132,6 +156,59 @@ services:
       AUTH_TYPE: LOGIN_FORM
       SPRING_SECURITY_USER_NAME: ${KAFKA_UI_USERNAME}
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
+
+  debezium-kafka-connect:
+    image: debezium/connect:2.5
+    container_name: debezium-kafka-connect
+    ports:
+      - "127.0.0.1:8083:8083"
+    networks:
+      - per-network
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: debezium-connect
+      CONFIG_STORAGE_TOPIC: debezium_connect_configs
+      OFFSET_STORAGE_TOPIC: debezium_connect_offsets
+      STATUS_STORAGE_TOPIC: debezium_connect_statuses
+      CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      STATUS_STORAGE_REPLICATION_FACTOR: 1
+      KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
+      VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+    depends_on:
+      - kafka
+      - db
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  init-kafka-connect:
+    image: alpine:3.19
+    container_name: init-kafka-connect
+    networks:
+      - per-network
+    volumes:
+      - ./debezium/connector-postgres.json:/config/connector-postgres.json:ro
+      - ./debezium/init-connector.sh:/init/init-connector.sh:ro
+    environment:
+      KAFKA_CONNECT_URL: http://debezium-kafka-connect:8083
+      CONNECTOR_CONFIG: /config/connector-postgres.json
+      MAX_RETRIES: 60
+      RETRY_INTERVAL: 5
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    command: >
+      sh -c "apk add --no-cache curl jq bash gettext && bash /init/init-connector.sh"
+    depends_on:
+      debezium-kafka-connect:
+        condition: service_healthy
+    restart: "no"
 
   prometheus:
     image: prom/prometheus:latest
@@ -223,6 +300,16 @@ services:
       - discovery.type=single-node
     networks:
       - per-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
 
   logstash:
     image: logstash:7.17.25

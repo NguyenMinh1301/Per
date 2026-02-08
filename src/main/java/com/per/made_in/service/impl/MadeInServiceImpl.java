@@ -5,14 +5,11 @@ import java.util.UUID;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.config.cache.CacheNames;
-import com.per.common.config.kafka.KafkaTopicNames;
-import com.per.common.event.MadeInIndexEvent;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -20,7 +17,6 @@ import com.per.made_in.dto.request.MadeInCreateRequest;
 import com.per.made_in.dto.request.MadeInUpdateRequest;
 import com.per.made_in.dto.response.MadeInResponse;
 import com.per.made_in.entity.MadeIn;
-import com.per.made_in.mapper.MadeInDocumentMapper;
 import com.per.made_in.mapper.MadeInMapper;
 import com.per.made_in.repository.MadeInRepository;
 import com.per.made_in.service.MadeInService;
@@ -34,9 +30,9 @@ public class MadeInServiceImpl implements MadeInService {
 
     private final MadeInRepository madeInRepository;
     private final MadeInMapper madeInMapper;
-    private final MadeInDocumentMapper documentMapper;
     private final CacheEvictionHelper cacheEvictionHelper;
-    private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    // Note: Dual-write removed - CDC via Debezium handles ES sync
 
     @Override
     @Transactional(readOnly = true)
@@ -72,13 +68,11 @@ public class MadeInServiceImpl implements MadeInService {
 
         MadeIn madeIn = madeInMapper.toEntity(request);
         madeIn.setName(name);
-        madeIn.setIsActive(
-                request.getIsActive() == null || Boolean.TRUE.equals(request.getIsActive()));
 
         MadeIn saved = madeInRepository.save(madeIn);
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
-        publishIndexEvent(saved, MadeInIndexEvent.Action.INDEX);
+        // Note: ES sync handled by CDC
 
         return madeInMapper.toResponse(saved);
     }
@@ -100,15 +94,12 @@ public class MadeInServiceImpl implements MadeInService {
         if (name != null) {
             madeIn.setName(name);
         }
-        if (request.getIsActive() != null) {
-            madeIn.setIsActive(request.getIsActive());
-        }
 
         MadeIn saved = madeInRepository.save(madeIn);
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
         cacheEvictionHelper.evictAfterCommit(CacheNames.MADE_IN, id);
-        publishIndexEvent(saved, MadeInIndexEvent.Action.INDEX);
+        // Note: ES sync handled by CDC
 
         return madeInMapper.toResponse(saved);
     }
@@ -120,23 +111,7 @@ public class MadeInServiceImpl implements MadeInService {
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.MADE_INS);
         cacheEvictionHelper.evictAfterCommit(CacheNames.MADE_IN, id);
-
-        kafkaTemplate.send(
-                KafkaTopicNames.MADEIN_INDEX_TOPIC,
-                MadeInIndexEvent.builder()
-                        .action(MadeInIndexEvent.Action.DELETE)
-                        .madeInId(id.toString())
-                        .build());
-    }
-
-    private void publishIndexEvent(MadeIn madeIn, MadeInIndexEvent.Action action) {
-        kafkaTemplate.send(
-                KafkaTopicNames.MADEIN_INDEX_TOPIC,
-                MadeInIndexEvent.builder()
-                        .action(action)
-                        .madeInId(madeIn.getId().toString())
-                        .document(documentMapper.toDocument(madeIn))
-                        .build());
+        // Note: ES sync handled by CDC
     }
 
     private MadeIn findById(UUID id) {

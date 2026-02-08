@@ -19,8 +19,6 @@ import com.per.category.entity.Category;
 import com.per.category.repository.CategoryRepository;
 import com.per.common.config.cache.CacheEvictionHelper;
 import com.per.common.config.cache.CacheNames;
-import com.per.common.config.kafka.KafkaTopicNames;
-import com.per.common.event.ProductIndexEvent;
 import com.per.common.exception.ApiErrorCode;
 import com.per.common.exception.ApiException;
 import com.per.common.response.PageResponse;
@@ -35,7 +33,6 @@ import com.per.product.dto.response.ProductResponse;
 import com.per.product.dto.response.ProductVariantResponse;
 import com.per.product.entity.Product;
 import com.per.product.entity.ProductVariant;
-import com.per.product.mapper.ProductDocumentMapper;
 import com.per.product.mapper.ProductMapper;
 import com.per.product.mapper.ProductVariantMapper;
 import com.per.product.repository.ProductRepository;
@@ -56,9 +53,9 @@ public class ProductServiceImpl implements ProductService {
     private final MadeInRepository madeInRepository;
     private final ProductMapper productMapper;
     private final ProductVariantMapper productVariantMapper;
-    private final ProductDocumentMapper productDocumentMapper;
     private final CacheEvictionHelper cacheEvictionHelper;
-    private final org.springframework.kafka.core.KafkaTemplate<String, Object> kafkaTemplate;
+
+    // Note: Dual-write removed - CDC via Debezium handles ES/Qdrant sync
 
     @Override
     @Transactional(readOnly = true)
@@ -110,9 +107,7 @@ public class ProductServiceImpl implements ProductService {
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS, CacheNames.PRODUCT);
 
-        // Publish event for Elasticsearch indexing
-        publishIndexEvent(ProductIndexEvent.Action.INDEX, savedProduct, variants);
-
+        // Note: ES/Qdrant sync handled by CDC
         return buildDetail(savedProduct, variants);
     }
 
@@ -150,9 +145,7 @@ public class ProductServiceImpl implements ProductService {
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS);
         cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, id);
 
-        // Publish event for Elasticsearch indexing
-        publishIndexEvent(ProductIndexEvent.Action.INDEX, savedProduct, variants);
-
+        // Note: ES/Qdrant sync handled by CDC
         return buildDetail(savedProduct, variants);
     }
 
@@ -167,9 +160,7 @@ public class ProductServiceImpl implements ProductService {
 
         cacheEvictionHelper.evictAllAfterCommit(CacheNames.PRODUCTS);
         cacheEvictionHelper.evictAfterCommit(CacheNames.PRODUCT, id);
-
-        // Publish event for Elasticsearch deletion
-        publishDeleteEvent(id);
+        // Note: ES/Qdrant sync handled by CDC
     }
 
     @Override
@@ -362,28 +353,5 @@ public class ProductServiceImpl implements ProductService {
 
     private <T> T require(Optional<T> optional, ApiErrorCode errorCode, String message) {
         return optional.orElseThrow(() -> new ApiException(errorCode, message));
-    }
-
-    // --- Elasticsearch Indexing Helpers ---
-
-    private void publishIndexEvent(
-            ProductIndexEvent.Action action, Product product, List<ProductVariant> variants) {
-        var document = productDocumentMapper.toDocument(product, variants);
-        var event =
-                ProductIndexEvent.builder()
-                        .action(action)
-                        .productId(product.getId().toString())
-                        .document(document)
-                        .build();
-        kafkaTemplate.send(KafkaTopicNames.PRODUCT_INDEX_TOPIC, event);
-    }
-
-    private void publishDeleteEvent(UUID productId) {
-        var event =
-                ProductIndexEvent.builder()
-                        .action(ProductIndexEvent.Action.DELETE)
-                        .productId(productId.toString())
-                        .build();
-        kafkaTemplate.send(KafkaTopicNames.PRODUCT_INDEX_TOPIC, event);
     }
 }

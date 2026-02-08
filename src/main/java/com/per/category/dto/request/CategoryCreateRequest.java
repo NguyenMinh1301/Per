@@ -30,5 +30,5 @@ public class CategoryCreateRequest {
 
     private String imageUrl;
 
-    private Boolean isActive;
+    private Boolean active;
 }

@@ -33,5 +33,5 @@ public class MadeInUpdateRequest {
 
     private String imageUrl;
 
-    private Boolean isActive;
+    private Boolean active;
 }

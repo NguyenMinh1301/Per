@@ -14,7 +14,7 @@ public class CategoryDocumentMapper {
                 .name(category.getName())
                 .description(category.getDescription())
                 .imageUrl(category.getImageUrl())
-                .isActive(category.getIsActive())
+                .isActive(category.isActive())
                 .build();
     }
 }
