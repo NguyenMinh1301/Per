@@ -108,10 +108,8 @@ services:
       KEY_CONVERTER_SCHEMAS_ENABLE: "false"
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
     depends_on:
-      kafka:
-        condition: service_healthy
-      db:
-        condition: service_healthy
+      - kafka
+      - db
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
       interval: 30s
