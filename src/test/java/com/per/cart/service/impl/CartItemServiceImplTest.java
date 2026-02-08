@@ -128,11 +128,7 @@ class CartItemServiceImplTest {
             BigDecimal price = new BigDecimal("150000.00");
 
             Product product =
-                    Product.builder()
-                            .id(UUID.randomUUID())
-                            .name("Perfume A")
-                            .isActive(true)
-                            .build();
+                    Product.builder().id(UUID.randomUUID()).name("Perfume A").active(true).build();
             ProductVariant variant =
                     ProductVariant.builder()
                             .id(variantId)
@@ -142,7 +138,7 @@ class CartItemServiceImplTest {
                             .packageType("Bottle")
                             .price(price)
                             .stockQuantity(10)
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE))
@@ -175,11 +171,7 @@ class CartItemServiceImplTest {
             BigDecimal price = new BigDecimal("99000.00");
 
             Product product =
-                    Product.builder()
-                            .id(UUID.randomUUID())
-                            .name("Perfume B")
-                            .isActive(true)
-                            .build();
+                    Product.builder().id(UUID.randomUUID()).name("Perfume B").active(true).build();
             ProductVariant variant =
                     ProductVariant.builder()
                             .id(variantId)
@@ -189,7 +181,7 @@ class CartItemServiceImplTest {
                             .packageType("Bottle")
                             .price(price)
                             .stockQuantity(20)
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             Cart existingCart =
@@ -239,11 +231,7 @@ class CartItemServiceImplTest {
             BigDecimal price = new BigDecimal("120000.00");
 
             Product product =
-                    Product.builder()
-                            .id(UUID.randomUUID())
-                            .name("Perfume C")
-                            .isActive(true)
-                            .build();
+                    Product.builder().id(UUID.randomUUID()).name("Perfume C").active(true).build();
             ProductVariant variant =
                     ProductVariant.builder()
                             .id(variantId)
@@ -253,7 +241,7 @@ class CartItemServiceImplTest {
                             .packageType("Bottle")
                             .price(price)
                             .stockQuantity(15)
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             Cart cart = Cart.builder().id(cartId).user(user).status(CartStatus.ACTIVE).build();
@@ -291,11 +279,7 @@ class CartItemServiceImplTest {
             BigDecimal price = new BigDecimal("50000.00");
 
             Product product =
-                    Product.builder()
-                            .id(UUID.randomUUID())
-                            .name("Perfume D")
-                            .isActive(true)
-                            .build();
+                    Product.builder().id(UUID.randomUUID()).name("Perfume D").active(true).build();
             ProductVariant variant =
                     ProductVariant.builder()
                             .id(UUID.randomUUID())
@@ -303,7 +287,7 @@ class CartItemServiceImplTest {
                             .variantSku("SKU-000")
                             .price(price)
                             .stockQuantity(5)
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             Cart cart = Cart.builder().id(cartId).user(user).status(CartStatus.ACTIVE).build();

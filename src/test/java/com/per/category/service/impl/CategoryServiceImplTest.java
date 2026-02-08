@@ -63,7 +63,7 @@ class CategoryServiceImplTest {
                         .id(categoryId)
                         .name("Test Category")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
 
         categoryResponse =
@@ -71,7 +71,7 @@ class CategoryServiceImplTest {
                         .id(categoryId)
                         .name("Test Category")
                         .description("Test Description")
-                        .isActive(true)
+                        .active(true)
                         .build();
     }
 
@@ -175,7 +175,7 @@ class CategoryServiceImplTest {
                     CategoryCreateRequest.builder()
                             .name("New Category")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             Category newCategory =
@@ -183,7 +183,7 @@ class CategoryServiceImplTest {
                             .id(UUID.randomUUID())
                             .name("New Category")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             CategoryResponse newCategoryResponse =
@@ -191,7 +191,7 @@ class CategoryServiceImplTest {
                             .id(newCategory.getId())
                             .name("New Category")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
@@ -205,7 +205,7 @@ class CategoryServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("New Category");
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
 
             verify(categoryRepository).existsByNameIgnoreCase("New Category");
         }
@@ -218,7 +218,7 @@ class CategoryServiceImplTest {
                     CategoryCreateRequest.builder()
                             .name("New Category")
                             .description("New Description")
-                            .isActive(null)
+                            .active(null)
                             .build();
 
             Category newCategory =
@@ -226,14 +226,14 @@ class CategoryServiceImplTest {
                             .id(UUID.randomUUID())
                             .name("New Category")
                             .description("New Description")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             CategoryResponse newCategoryResponse =
                     CategoryResponse.builder()
                             .id(newCategory.getId())
                             .name("New Category")
-                            .isActive(true)
+                            .active(true)
                             .build();
 
             when(categoryRepository.existsByNameIgnoreCase("New Category")).thenReturn(false);
@@ -246,7 +246,7 @@ class CategoryServiceImplTest {
 
             // Then
             assertThat(result).isNotNull();
-            assertThat(result.getIsActive()).isTrue();
+            assertThat(result.isActive()).isTrue();
         }
 
         @Test
@@ -283,7 +283,7 @@ class CategoryServiceImplTest {
                     CategoryUpdateRequest.builder()
                             .name("Updated Category")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             Category updatedCategory =
@@ -291,7 +291,7 @@ class CategoryServiceImplTest {
                             .id(categoryId)
                             .name("Updated Category")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             CategoryResponse updatedCategoryResponse =
@@ -299,7 +299,7 @@ class CategoryServiceImplTest {
                             .id(categoryId)
                             .name("Updated Category")
                             .description("Updated Description")
-                            .isActive(false)
+                            .active(false)
                             .build();
 
             when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(testCategory));
@@ -314,7 +314,7 @@ class CategoryServiceImplTest {
             // Then
             assertThat(result).isNotNull();
             assertThat(result.getName()).isEqualTo("Updated Category");
-            assertThat(result.getIsActive()).isFalse();
+            assertThat(result.isActive()).isFalse();
 
             verify(categoryRepository).findById(categoryId);
             verify(categoryRepository).save(any(Category.class));
