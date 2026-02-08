@@ -1,5 +1,6 @@
 package com.per.product.repository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -15,4 +16,11 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
     boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
 
     Page<Product> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    // Cascade re-indexing queries for CDC
+    List<Product> findByBrandId(UUID brandId);
+
+    List<Product> findByCategoryId(UUID categoryId);
+
+    List<Product> findByMadeInId(UUID madeInId);
 }

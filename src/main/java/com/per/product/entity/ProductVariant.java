@@ -57,12 +57,15 @@ public class ProductVariant {
     @Column(name = "compare_at_price", precision = 15, scale = 2)
     private BigDecimal compareAtPrice;
 
+    @Builder.Default
     @Column(name = "currency_code", length = 10)
     private String currencyCode = "VND";
 
+    @Builder.Default
     @Column(name = "stock_quantity")
     private Integer stockQuantity = 0;
 
+    @Builder.Default
     @Column(name = "low_stock_threshold")
     private Integer lowStockThreshold = 0;
 
@@ -72,8 +75,9 @@ public class ProductVariant {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

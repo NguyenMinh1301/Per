@@ -106,14 +106,17 @@ public class Product {
     @Column(name = "occasion", length = 120)
     private Occasion occasion;
 
+    @Builder.Default
     @Column(name = "is_limited_edition", nullable = false)
-    private boolean isLimitedEdition = false;
+    private boolean limitedEdition = false;
 
+    @Builder.Default
     @Column(name = "is_discontinued", nullable = false)
-    private boolean isDiscontinued = false;
+    private boolean discontinued = false;
 
+    @Builder.Default
     @Column(name = "is_active", nullable = false)
-    private boolean isActive = true;
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
