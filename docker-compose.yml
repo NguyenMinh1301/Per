@@ -42,7 +42,6 @@ services:
     networks:
       - per-network
     environment:
-      # KRaft mode settings
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
@@ -86,7 +85,6 @@ services:
       - kafka
       - debezium-kafka-connect
 
-  # Kafka Connect (Debezium CDC)
   debezium-kafka-connect:
     image: debezium/connect:2.5
     container_name: debezium-kafka-connect
@@ -117,7 +115,6 @@ services:
       retries: 5
       start_period: 60s
 
-  # Debezium UI
   debezium-ui:
     image: debezium/debezium-ui:2.5
     container_name: debezium-ui
@@ -130,7 +127,6 @@ services:
     depends_on:
       - debezium-kafka-connect
 
-  # Init container for auto-registering Debezium connector
   init-kafka-connect:
     image: alpine:3.19
     container_name: init-kafka-connect
@@ -181,7 +177,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SING_UP=false
       - GF_SERVER_DOMAIN=localhost
-      # enable logger
       - GF_LOG_MODE=console file
       - GF_LOG_FILTERS=alerting.notifier.slack:debug alertmanager:debug ngalert:debug
     volumes:

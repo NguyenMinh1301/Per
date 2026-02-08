@@ -53,8 +53,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - OPENAI_CHAT_MODEL=${OPENAI_CHAT_MODEL:-gpt-3.5-turbo}
       - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
-      - RAG_SEARCH_TOP_K=${RAG_SEARCH_TOP_K:5}
-      - RAG_SIMILARITY_THRESHOLD=${RAG_SIMILARITY_THRESHOLD:0.3}
+      - RAG_SEARCH_TOP_K=${RAG_SEARCH_TOP_K:-5}
+      - RAG_SIMILARITY_THRESHOLD=${RAG_SIMILARITY_THRESHOLD:-0.3}
 
       - APP_ADMIN_USERNAME=${APP_ADMIN_USERNAME}
       - APP_ADMIN_EMAIL=${APP_ADMIN_EMAIL}
@@ -187,6 +187,18 @@ services:
       retries: 5
       start_period: 60s
 
+  debezium-ui:
+    image: debezium/debezium-ui:2.5
+    container_name: debezium-ui
+    ports:
+      - "127.0.0.1:8084:8080"
+    networks:
+      - per-network
+    environment:
+      KAFKA_CONNECT_URIS: http://debezium-kafka-connect:8083
+    depends_on:
+      - debezium-kafka-connect
+
   init-kafka-connect:
     image: alpine:3.19
     container_name: init-kafka-connect
@@ -238,7 +250,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SING_UP=false
       - GF_SERVER_DOMAIN=localhost
-      # enable logger
       - GF_LOG_MODE=console file
       - GF_LOG_FILTERS=alerting.notifier.slack:debug alertmanager:debug ngalert:debug
     volumes:
