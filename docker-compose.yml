@@ -128,20 +128,18 @@ services:
       - debezium-kafka-connect
 
   init-kafka-connect:
-    image: alpine:3.19
+    build:
+      context: ./debezium
+    image: per-init-connector:latest
     container_name: init-kafka-connect
     networks:
       - per-network
-    volumes:
-      - ./debezium/connector-postgres.json:/config/connector-postgres.json:ro
-      - ./debezium/init-connector.sh:/init/init-connector.sh:ro
     environment:
       KAFKA_CONNECT_URL: http://debezium-kafka-connect:8083
       CONNECTOR_CONFIG: /config/connector-postgres.json
       MAX_RETRIES: 60
       RETRY_INTERVAL: 5
-    command: >
-      sh -c "apk add --no-cache curl jq bash gettext && bash /init/init-connector.sh"
+
     depends_on:
       debezium-kafka-connect:
         condition: service_healthy
