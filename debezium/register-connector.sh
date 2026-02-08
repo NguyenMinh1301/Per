@@ -1,6 +1,4 @@
 #!/bin/bash
-# Debezium Connector Registration Script
-# Usage: ./register-connector.sh [--delete] [--status]
 
 set -e
 
@@ -8,11 +6,10 @@ CONNECT_URL="${KAFKA_CONNECT_URL:-http://localhost:8083}"
 CONNECTOR_NAME="per-postgres-connector"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
@@ -66,14 +63,12 @@ delete_connector() {
 register_connector() {
     log_info "Registering Debezium connector '${CONNECTOR_NAME}'..."
     
-    # Check if connector already exists
     if curl -s "${CONNECT_URL}/connectors/${CONNECTOR_NAME}" 2>/dev/null | grep -q "\"name\""; then
         log_warn "Connector already exists. Use --delete first to recreate."
         check_status
         return 0
     fi
-    
-    # Register connector
+
     local response
     response=$(curl -s -X POST "${CONNECT_URL}/connectors" \
         -H "Content-Type: application/json" \
@@ -87,12 +82,10 @@ register_connector() {
     
     log_info "Connector registered successfully!"
     
-    # Wait a moment for connector to start
     sleep 3
     check_status
 }
 
-# Main
 case "${1:-}" in
     --delete)
         wait_for_connect

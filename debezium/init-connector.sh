@@ -1,12 +1,4 @@
 #!/bin/bash
-# ============================================================
-# Init Kafka Connect - Force Update Connector Configuration
-# ============================================================
-# This script waits for Kafka Connect to be ready and then
-# FORCE UPDATES the Debezium connector config using PUT.
-# This ensures new config is ALWAYS applied, even if a
-# broken connector already exists.
-# ============================================================
 
 set -e
 
@@ -41,14 +33,10 @@ get_connector_name() {
 
 force_update_connector() {
     local name=$(get_connector_name)
-    
-    # Extract config to a temp file to avoid shell escaping issues
-    # Extract config to a temp file to avoid shell escaping issues
-    # Use envsubst to replace environment variables in the config file
+
     if command -v envsubst >/dev/null 2>&1; then
         envsubst < "$CONNECTOR_CONFIG" > /tmp/connector_payload.json
     else
-        # Fallback if envsubst is not available (though we install it)
         cat "$CONNECTOR_CONFIG" > /tmp/connector_payload.json
     fi
     # Validate JSON
@@ -57,21 +45,20 @@ force_update_connector() {
         return 1
     fi
     
+    jq '.config' /tmp/connector_payload.json > /tmp/connector_config_only.json
+    
     log_info "Force updating connector '$name' configuration..."
     log_info "Using PUT to ensure config is applied even if connector exists"
     
-    # Log the key config values for verification
-    local pub_mode=$(jq -r '."publication.autocreate.mode" // "not set"' /tmp/connector_payload.json)
+    local pub_mode=$(jq -r '."publication.autocreate.mode" // "not set"' /tmp/connector_config_only.json)
     log_info "Applying config with publication.autocreate.mode = $pub_mode"
     
-    # PUT /connectors/{name}/config - Creates OR Updates connector
-    # This is idempotent and will overwrite any existing config
     local response
     local http_code
     
     http_code=$(curl -s -o /tmp/response.txt -w "%{http_code}" -X PUT \
         -H "Content-Type: application/json" \
-        -d @/tmp/connector_payload.json \
+        -d @/tmp/connector_config_only.json \
         "$KAFKA_CONNECT_URL/connectors/$name/config")
     
     response=$(cat /tmp/response.txt 2>/dev/null || echo "")
@@ -96,7 +83,6 @@ restart_connector_tasks() {
     
     log_info "Restarting connector tasks to ensure clean state..."
     
-    # Restart the connector and tasks
     curl -sf -X POST "$KAFKA_CONNECT_URL/connectors/$name/restart?includeTasks=true&onlyFailed=false" > /dev/null 2>&1 || true
     
     sleep 3
@@ -127,7 +113,6 @@ check_connector_status() {
         fi
     else
         log_error "Connector state: $connector_state"
-        # Since we just updated it, fail if connector itself is not running
         exit 1
     fi
 }
@@ -142,7 +127,6 @@ main() {
         exit 1
     fi
     
-    # Show current config source
     log_info "Config file: $CONNECTOR_CONFIG"
     
     wait_for_kafka_connect || exit 1
