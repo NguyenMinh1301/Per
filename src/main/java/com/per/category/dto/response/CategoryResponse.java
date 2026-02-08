@@ -19,7 +19,7 @@ public class CategoryResponse {
     private String descriptions;
     private String imagePublicId;
     private String imageUrl;
-    private Boolean isActive;
+    private boolean active;
     private Instant createdAt;
     private Instant updatedAt;
 }

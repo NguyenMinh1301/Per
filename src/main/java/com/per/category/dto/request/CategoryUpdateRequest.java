@@ -28,5 +28,5 @@ public class CategoryUpdateRequest {
 
     private String imageUrl;
 
-    private Boolean isActive;
+    private Boolean active;
 }
