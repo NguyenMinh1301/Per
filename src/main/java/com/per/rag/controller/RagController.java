@@ -38,109 +38,119 @@ import reactor.core.publisher.Flux;
 @Tag(name = "RAG", description = "Shopping Assistant AI APIs")
 public class RagController extends BaseController {
 
-        private final ChatService chatService;
-        private final VectorStoreService vectorStoreService;
-        private final com.per.rag.service.DocumentIndexService documentIndexService;
+    private final ChatService chatService;
+    private final VectorStoreService vectorStoreService;
+    private final com.per.rag.service.DocumentIndexService documentIndexService;
 
-        @PostMapping(ApiConstants.Rag.CHAT)
-        @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-        public ResponseEntity<ApiResponse<com.per.rag.dto.response.ShopAssistantResponse>> chat(
-                        @Valid @RequestBody com.per.rag.dto.request.ChatRequest request) {
-                com.per.rag.dto.response.ShopAssistantResponse response = chatService.chat(request.getQuestion());
-                return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.RAG_CHAT_SUCCESS, response));
+    @PostMapping(ApiConstants.Rag.CHAT)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
+    public ResponseEntity<ApiResponse<com.per.rag.dto.response.ShopAssistantResponse>> chat(
+            @Valid @RequestBody com.per.rag.dto.request.ChatRequest request) {
+        com.per.rag.dto.response.ShopAssistantResponse response =
+                chatService.chat(request.getQuestion());
+        return ResponseEntity.ok(ApiResponse.success(ApiSuccessCode.RAG_CHAT_SUCCESS, response));
+    }
+
+    @GetMapping(value = ApiConstants.Rag.CHAT_STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
+    public Flux<ServerSentEvent<String>> chatStream(@RequestParam String question) {
+        return chatService
+                .chatStream(question)
+                .map(chunk -> ServerSentEvent.<String>builder().data(chunk).build());
+    }
+
+    @PostMapping(ApiConstants.Rag.INDEX)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<IndexStatusResponse>> reindexProducts() {
+        try {
+            log.info("Starting product indexing for AI assistant");
+            int documentsIndexed = vectorStoreService.indexAllProducts();
+
+            IndexStatusResponse response =
+                    IndexStatusResponse.builder()
+                            .status("Indexing completed successfully")
+                            .documentsIndexed(documentsIndexed)
+                            .build();
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResponse.success(ApiSuccessCode.RAG_INDEX_SUCCESS, response));
+        } catch (Exception e) {
+            log.error("Failed to reindex products", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure(ApiErrorCode.RAG_INDEXING_FAILED));
         }
+    }
 
-        @GetMapping(value = ApiConstants.Rag.CHAT_STREAM, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-        @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-        public Flux<ServerSentEvent<String>> chatStream(@RequestParam String question) {
-                return chatService
-                                .chatStream(question)
-                                .map(chunk -> ServerSentEvent.<String>builder().data(chunk).build());
+    @PostMapping(ApiConstants.Rag.INDEX_KNOWLEDGE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
+    @Operation(
+            summary = "Index knowledge base",
+            description = "Index all markdown files from knowledge base directory (Admin only)")
+    public ResponseEntity<ApiResponse<IndexStatusResponse>> indexKnowledgeBase() {
+        try {
+            log.info("Starting knowledge base indexing");
+            int documentsIndexed = documentIndexService.indexKnowledgeBase();
+
+            IndexStatusResponse response =
+                    IndexStatusResponse.builder()
+                            .status("Knowledge base indexed successfully")
+                            .documentsIndexed(documentsIndexed)
+                            .build();
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(ApiSuccessCode.RAG_KNOWLEDGE_INDEX_SUCCESS, response));
+        } catch (Exception e) {
+            log.error("Failed to index knowledge base", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure(ApiErrorCode.RAG_KNOWLEDGE_INDEX_FAILED));
         }
+    }
 
-        @PostMapping(ApiConstants.Rag.INDEX)
-        @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<ApiResponse<IndexStatusResponse>> reindexProducts() {
-                try {
-                        log.info("Starting product indexing for AI assistant");
-                        int documentsIndexed = vectorStoreService.indexAllProducts();
+    @DeleteMapping(ApiConstants.Rag.DELETE_KNOWLEDGE)
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Clear knowledge base",
+            description = "Remove all knowledge base documents from vector store (Admin only)")
+    public ResponseEntity<ApiResponse<Void>> clearKnowledgeBase() {
+        try {
+            log.info("Clearing knowledge base");
+            documentIndexService.clearKnowledgeBase();
 
-                        IndexStatusResponse response = IndexStatusResponse.builder()
-                                        .status("Indexing completed successfully")
-                                        .documentsIndexed(documentsIndexed)
-                                        .build();
-
-                        return ResponseEntity.status(HttpStatus.OK)
-                                        .body(ApiResponse.success(ApiSuccessCode.RAG_INDEX_SUCCESS, response));
-                } catch (Exception e) {
-                        log.error("Failed to reindex products", e);
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(ApiResponse.failure(ApiErrorCode.RAG_INDEXING_FAILED));
-                }
+            return ResponseEntity.ok(
+                    ApiResponse.success(ApiSuccessCode.RAG_KNOWLEDGE_DELETE_SUCCESS));
+        } catch (Exception e) {
+            log.error("Failed to clear knowledge base", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure(ApiErrorCode.RAG_KNOWLEDGE_INDEX_FAILED));
         }
+    }
 
-        @PostMapping(ApiConstants.Rag.INDEX_KNOWLEDGE)
-        @PreAuthorize("hasRole('ADMIN')")
-        @RateLimiter(name = "mediumTraffic", fallbackMethod = "rateLimit")
-        @Operation(summary = "Index knowledge base", description = "Index all markdown files from knowledge base directory (Admin only)")
-        public ResponseEntity<ApiResponse<IndexStatusResponse>> indexKnowledgeBase() {
-                try {
-                        log.info("Starting knowledge base indexing");
-                        int documentsIndexed = documentIndexService.indexKnowledgeBase();
+    @GetMapping(ApiConstants.Rag.KNOWLEDGE_STATUS)
+    @Operation(
+            summary = "Get knowledge base status",
+            description = "Check if knowledge base is indexed and view document counts")
+    public ResponseEntity<ApiResponse<com.per.rag.dto.response.KnowledgeStatusResponse>>
+            getKnowledgeStatus() {
+        try {
+            java.util.Map<String, Object> statusMap = vectorStoreService.getKnowledgeStatus();
 
-                        IndexStatusResponse response = IndexStatusResponse.builder()
-                                        .status("Knowledge base indexed successfully")
-                                        .documentsIndexed(documentsIndexed)
-                                        .build();
+            com.per.rag.dto.response.KnowledgeStatusResponse response =
+                    com.per.rag.dto.response.KnowledgeStatusResponse.builder()
+                            .totalDocuments((Integer) statusMap.get("totalDocuments"))
+                            .products((Integer) statusMap.get("products"))
+                            .brands((Integer) statusMap.get("brands"))
+                            .categories((Integer) statusMap.get("categories"))
+                            .knowledge((Integer) statusMap.get("knowledge"))
+                            .isIndexed((Boolean) statusMap.get("isIndexed"))
+                            .build();
 
-                        return ResponseEntity.ok(
-                                        ApiResponse.success(ApiSuccessCode.RAG_KNOWLEDGE_INDEX_SUCCESS, response));
-                } catch (Exception e) {
-                        log.error("Failed to index knowledge base", e);
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(ApiResponse.failure(ApiErrorCode.RAG_KNOWLEDGE_INDEX_FAILED));
-                }
+            return ResponseEntity.ok(
+                    ApiResponse.success(ApiSuccessCode.RAG_CHAT_SUCCESS, response));
+        } catch (Exception e) {
+            log.error("Failed to get knowledge status", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.failure(ApiErrorCode.RAG_SEARCH_FAILED));
         }
-
-        @DeleteMapping(ApiConstants.Rag.DELETE_KNOWLEDGE)
-        @PreAuthorize("hasRole('ADMIN')")
-        @Operation(summary = "Clear knowledge base", description = "Remove all knowledge base documents from vector store (Admin only)")
-        public ResponseEntity<ApiResponse<Void>> clearKnowledgeBase() {
-                try {
-                        log.info("Clearing knowledge base");
-                        documentIndexService.clearKnowledgeBase();
-
-                        return ResponseEntity.ok(
-                                        ApiResponse.success(ApiSuccessCode.RAG_KNOWLEDGE_DELETE_SUCCESS));
-                } catch (Exception e) {
-                        log.error("Failed to clear knowledge base", e);
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(ApiResponse.failure(ApiErrorCode.RAG_KNOWLEDGE_INDEX_FAILED));
-                }
-        }
-
-        @GetMapping(ApiConstants.Rag.KNOWLEDGE_STATUS)
-        @Operation(summary = "Get knowledge base status", description = "Check if knowledge base is indexed and view document counts")
-        public ResponseEntity<ApiResponse<com.per.rag.dto.response.KnowledgeStatusResponse>> getKnowledgeStatus() {
-                try {
-                        java.util.Map<String, Object> statusMap = vectorStoreService.getKnowledgeStatus();
-
-                        com.per.rag.dto.response.KnowledgeStatusResponse response = com.per.rag.dto.response.KnowledgeStatusResponse
-                                        .builder()
-                                        .totalDocuments((Integer) statusMap.get("totalDocuments"))
-                                        .products((Integer) statusMap.get("products"))
-                                        .brands((Integer) statusMap.get("brands"))
-                                        .categories((Integer) statusMap.get("categories"))
-                                        .knowledge((Integer) statusMap.get("knowledge"))
-                                        .isIndexed((Boolean) statusMap.get("isIndexed"))
-                                        .build();
-
-                        return ResponseEntity.ok(
-                                        ApiResponse.success(ApiSuccessCode.RAG_CHAT_SUCCESS, response));
-                } catch (Exception e) {
-                        log.error("Failed to get knowledge status", e);
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                        .body(ApiResponse.failure(ApiErrorCode.RAG_SEARCH_FAILED));
-                }
-        }
+    }
 }
