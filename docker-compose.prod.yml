@@ -162,6 +162,7 @@ services:
     container_name: debezium-kafka-connect
     ports:
       - "127.0.0.1:8083:8083"
+      - "127.0.0.1:8778:8778"
 
     networks:
       - per-network
@@ -177,18 +178,30 @@ services:
       KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      ENABLE_JOLOKIA: "true"
 
     depends_on:
-      kafka:
-        condition: service_healthy
-      db:
-        condition: service_healthy
+      - kafka
+      - db
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/connectors || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
+
+  debezium-ui:
+    image: debezium/debezium-ui:2.5
+    container_name: debezium-ui
+    hostname: debezium-ui
+    ports:
+      - "127.0.0.1:8085:8080"
+    networks:
+      - per-network
+    environment:
+      KAFKA_CONNECT_ENDPOINTS: http://debezium-kafka-connect:8083
+    depends_on:
+      - debezium-kafka-connect
 
   init-kafka-connect:
     build:
@@ -206,7 +219,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
 
-    depends_on: debezium-kafka-connect
+    depends_on:
+      - debezium-kafka-connect
     restart: "no"
 
   prometheus:

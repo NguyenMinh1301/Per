@@ -90,6 +90,7 @@ services:
     container_name: debezium-kafka-connect
     ports:
       - "8083:8083"
+      - "8778:8778"
     networks:
       - per-network
     environment:
@@ -105,15 +106,16 @@ services:
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       KEY_CONVERTER_SCHEMAS_ENABLE: "false"
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      ENABLE_JOLOKIA: "true"
     depends_on:
       - kafka
       - db
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/connectors || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
 
   debezium-ui:
     image: debezium/debezium-ui:2.5
