@@ -132,7 +132,7 @@ services:
     volumes:
       - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1" ]
+      test: [ "CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:29092 || exit 1" ]
       interval: 15s
       timeout: 10s
       retries: 5
@@ -162,6 +162,8 @@ services:
     container_name: debezium-kafka-connect
     ports:
       - "127.0.0.1:8083:8083"
+      - "127.0.0.1:8778:8778"
+
     networks:
       - per-network
     environment:
@@ -175,27 +177,29 @@ services:
       STATUS_STORAGE_REPLICATION_FACTOR: 1
       KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
       VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
-      KEY_CONVERTER_SCHEMAS_ENABLE: "false"
       VALUE_CONVERTER_SCHEMAS_ENABLE: "false"
+      ENABLE_JOLOKIA: "true"
+
     depends_on:
       - kafka
       - db
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8083/connectors" ]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 60s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8083/connectors || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
 
   debezium-ui:
     image: debezium/debezium-ui:2.5
     container_name: debezium-ui
+    hostname: debezium-ui
     ports:
-      - "127.0.0.1:8084:8080"
+      - "127.0.0.1:8085:8080"
     networks:
       - per-network
     environment:
-      KAFKA_CONNECT_URIS: http://debezium-kafka-connect:8083
+      KAFKA_CONNECT_ENDPOINTS: http://debezium-kafka-connect:8083
     depends_on:
       - debezium-kafka-connect
 
@@ -216,8 +220,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
 
     depends_on:
-      debezium-kafka-connect:
-        condition: service_healthy
+      - debezium-kafka-connect
     restart: "no"
 
   prometheus:
