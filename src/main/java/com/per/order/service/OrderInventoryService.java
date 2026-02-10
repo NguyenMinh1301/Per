@@ -24,6 +24,12 @@ public class OrderInventoryService {
 
     @Transactional
     public void restoreStock(Order order) {
+        if (order.getStatus() == com.per.order.enums.OrderStatus.CANCELLED
+                || order.getStatus() == com.per.order.enums.OrderStatus.FAILED) {
+            // Already restored/processed
+            return;
+        }
+
         Map<UUID, ProductVariant> variantsToUpdate = new HashMap<>();
         for (OrderItem item : order.getItems()) {
             UUID variantId = item.getProductVariant().getId();
@@ -32,7 +38,7 @@ public class OrderInventoryService {
                             variantId,
                             id ->
                                     productVariantRepository
-                                            .findById(id)
+                                            .findByIdWithLock(id) // Use Pessimistic Lock
                                             .orElseThrow(
                                                     () ->
                                                             new ApiException(

@@ -64,10 +64,10 @@ public class PayOsWebhookServiceImpl implements PayOsWebhookService {
 
         Order order = payment.getOrder();
         if (success) {
-            order.setStatus(OrderStatus.PAID);
+            order.transitionTo(OrderStatus.PAID);
         } else if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
             orderInventoryService.restoreStock(order);
-            order.setStatus(OrderStatus.CANCELLED);
+            order.transitionTo(OrderStatus.CANCELLED);
         }
 
         persistTransactionIfNeeded(payment, data, success);

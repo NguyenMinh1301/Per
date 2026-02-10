@@ -43,7 +43,7 @@ resilience4j:
         limitRefreshPeriod: 60s
         timeoutDuration: 5s
         registerHealthIndicator: true
-
+        
       #Media
       mediaSingle:
         limitForPeriod: 3
