@@ -63,6 +63,18 @@ Description: The now and forever fragrance...
 ### Multi-Collection Search
 The system searches across multiple vector collections (`products`, `brands`, `knowledge`) to gather comprehensive context.
 
+## 5. Security & Optimization
+### Document Chunking (Knowledge Base)
+To improve retrieval relevance and manage Context Window limits:
+-   **Strategy**: Recursive Character Text Splitter.
+-   **Size**: ~800 tokens (approx. 3200 characters).
+-   **Overlap**: ~100 tokens (approx. 400 characters).
+-   **Separators**: Paragraphs (`\n\n`) -> Sentences (`. `) -> Words (` `).
+
+### Prompt Security
+-   **Prevention**: Utilizes `PromptTemplate` with parameterized inputs to separate System Instructions from User Queries.
+-   **Sanitization**: User input is treated strictly as data, preventing "Ignore previous instructions" attacks.
+
 ## 5. Maintenance & Operations
 
 ### Troubleshooting

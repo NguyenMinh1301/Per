@@ -39,9 +39,16 @@ stateDiagram-v2
 Controlled by the `Payment` module's `CheckoutService` to ensure an Order is only created when a Payment intent is established.
 
 ### Inventory Management
-`OrderInventoryService` handles stock logic.
-- **Deduction**: Happens at Checkout (Safe Reservation).
-- **Restoration**: Happens if Payment fails or Order is Cancelled.
+`OrderInventoryService` handles stock logic with strict concurrency control.
+-   **Locking**: Uses Pessimistic Write Lock (`select ... for update`) on `ProductVariant` during deduction and restoration.
+-   **Deduction**: Happens at Checkout (Safe Reservation).
+-   **Restoration**: Happens if Payment fails or Order is Cancelled.
+
+### Strict State Machine
+Transitions are enforced by `Order.transitionTo()`.
+-   **Pending Payment**: Can transition to `PAID`, `FAILED`, or `CANCELLED`.
+-   **Terminal States**: `PAID`, `FAILED`, `CANCELLED` cannot be modified.
+-   **Guard**: Runtime checks prevent illegal transitions (e.g., re-opening a cancelled order).
 
 ## 5. Maintenance & Operations
 
