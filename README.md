@@ -9,6 +9,8 @@
   &nbsp;&nbsp;
    <a href="https://kafka.apache.org/" target="_blank"><img src="assets/img/kafka.svg" height="140" alt="Kafka" /></a>
   &nbsp;&nbsp;
+   <a href="https://debezium.io/" target="_blank"><img src="assets/img/debeziumio.svg" height="140" alt="Debezium" /></a>
+  &nbsp;&nbsp;
    <a href="https://www.elastic.co/" target="_blank"><img src="assets/img/elastic.svg" height="140" alt="Elasticsearch" /></a>
   &nbsp;&nbsp;
    <a href="https://www.docker.com/" target="_blank"><img src="assets/img/docker.svg" height="140" alt="Docker" /></a>

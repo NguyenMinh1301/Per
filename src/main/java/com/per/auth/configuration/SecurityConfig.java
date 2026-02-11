@@ -61,7 +61,7 @@ public class SecurityConfig {
         "/per/made-in/search",
     };
 
-    private static final String[] publicRAGEndpoints = {"/per/rag/chat"};
+    private static final String[] publicRagEndpoints = {"/per/rag/chat", "/per/rag/chat/stream"};
 
     private static final String[] publicOtherEndpoints = {
         "/per/v3/api-docs/**",
@@ -85,7 +85,7 @@ public class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers(HttpMethod.GET, publicGetEndpoints)
                                         .permitAll()
-                                        .requestMatchers(publicRAGEndpoints)
+                                        .requestMatchers(publicRagEndpoints)
                                         .permitAll()
                                         .requestMatchers(publicOtherEndpoints)
                                         .permitAll()

@@ -61,6 +61,14 @@ if (paymentTransactionRepository.findByReference(ref).isPresent()) {
 }
 ```
 
+## 5. Security & Concurrency
+
+### Checkout Locking
+To prevent overselling during high traffic (e.g., Flash Sales):
+-   `CheckoutService` acquires a **Pessimistic Write Lock** on `ProductVariant` records.
+-   Stock availability is checked *after* the lock is acquired.
+-   Stock is decremented within the same transaction.
+
 ## 5. Maintenance & Operations
 
 ### Troubleshooting

@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import com.per.cart.entity.Cart;
@@ -81,7 +81,7 @@ public class CheckoutServiceImpl implements CheckoutService {
         for (CartItem cartItem : selectedItems) {
             ProductVariant variant =
                     productVariantRepository
-                            .findById(cartItem.getProductVariant().getId())
+                            .findByIdWithLock(cartItem.getProductVariant().getId())
                             .orElseThrow(
                                     () ->
                                             new ApiException(

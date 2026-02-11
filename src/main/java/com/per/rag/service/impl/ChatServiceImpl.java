@@ -1,10 +1,14 @@
 package com.per.rag.service.impl;
 
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.ai.converter.BeanOutputConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -64,6 +68,7 @@ public class ChatServiceImpl implements ChatService {
                     new BeanOutputConverter<>(ShopAssistantResponse.class);
 
             // Build prompt with context, question, and format instructions
+            // Ensure parameters are passed as variables, not concatenated
             PromptTemplate promptTemplate = new PromptTemplate(systemPromptTemplate);
             Prompt prompt =
                     promptTemplate.create(
@@ -118,20 +123,24 @@ public class ChatServiceImpl implements ChatService {
             // Build multi-source context
             String context = contextBuilderHelper.buildMultiSourceContext(searchResult);
 
-            // Streaming prompt
-            String streamPrompt =
+            // Secure Streaming Logic using Messages
+            String systemText =
                     """
-					You are a fragrance consultant. Use this context to answer the question:
+					You are a fragrance consultant. Use this context to answer the user's question.
 
-					%s
-
-					QUESTION: %s
+					CONTEXT:
+					{context}
 
 					Provide a helpful, conversational response.
-					"""
-                            .formatted(context, question);
+					""";
 
-            return chatModel.stream(streamPrompt);
+            SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemText);
+            Message systemMessage = systemPromptTemplate.createMessage(Map.of("context", context));
+            Message userMessage = new UserMessage(question);
+
+            // Stream response
+            return chatModel.stream(new Prompt(List.of(systemMessage, userMessage)))
+                    .map(chatResponse -> chatResponse.getResult().getOutput().getText());
 
         } catch (ApiException e) {
             return Flux.error(e);

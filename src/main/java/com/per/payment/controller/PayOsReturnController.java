@@ -50,7 +50,7 @@ public class PayOsReturnController {
             payment.setStatus(PaymentStatus.CANCELLED);
             if (order != null && order.getStatus() == OrderStatus.PENDING_PAYMENT) {
                 orderInventoryService.restoreStock(order);
-                order.setStatus(OrderStatus.CANCELLED);
+                order.transitionTo(OrderStatus.CANCELLED);
             }
         }
 

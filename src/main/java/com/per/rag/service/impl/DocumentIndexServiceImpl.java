@@ -186,30 +186,116 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
             List<PointStruct> points = new ArrayList<>();
 
             for (KnowledgeDoc doc : documents) {
-                float[] embedding = embeddingModel.embed(doc.content);
+                // Chunking logic
+                List<String> chunks = splitText(doc.content);
+                int totalChunks = chunks.size();
 
-                PointStruct point =
-                        PointStruct.newBuilder()
-                                .setId(
-                                        io.qdrant.client.grpc.Points.PointId.newBuilder()
-                                                .setUuid(doc.id)
-                                                .build())
-                                .setVectors(
-                                        io.qdrant.client.grpc.Points.Vectors.newBuilder()
-                                                .setVector(
-                                                        io.qdrant.client.grpc.Points.Vector
-                                                                .newBuilder()
-                                                                .addAllData(toFloatList(embedding))
-                                                                .build())
-                                                .build())
-                                .putAllPayload(toPayload(doc.metadata))
-                                .build();
+                for (int i = 0; i < totalChunks; i++) {
+                    String chunkContent = chunks.get(i);
+                    float[] embedding = embeddingModel.embed(chunkContent);
 
-                points.add(point);
+                    // Create deterministic UUID for chunk: filename + chunkIndex
+                    String chunkId =
+                            java.util
+                                    .UUID
+                                    .nameUUIDFromBytes(
+                                            (doc.metadata.get("source") + "_" + i)
+                                                    .getBytes(
+                                                            java.nio.charset.StandardCharsets
+                                                                    .UTF_8))
+                                    .toString();
+
+                    // Clone metadata and add chunk info
+                    Map<String, Object> chunkMetadata = new HashMap<>(doc.metadata);
+                    chunkMetadata.put("chunk_index", i);
+                    chunkMetadata.put("total_chunks", totalChunks);
+                    chunkMetadata.put("content", chunkContent); // Store chunk content in payload
+
+                    PointStruct point =
+                            PointStruct.newBuilder()
+                                    .setId(
+                                            io.qdrant.client.grpc.Points.PointId.newBuilder()
+                                                    .setUuid(chunkId)
+                                                    .build())
+                                    .setVectors(
+                                            io.qdrant.client.grpc.Points.Vectors.newBuilder()
+                                                    .setVector(
+                                                            io.qdrant.client.grpc.Points.Vector
+                                                                    .newBuilder()
+                                                                    .addAllData(
+                                                                            toFloatList(embedding))
+                                                                    .build())
+                                                    .build())
+                                    .putAllPayload(toPayload(chunkMetadata))
+                                    .build();
+
+                    points.add(point);
+                }
             }
 
-            client.upsertAsync(knowledgeCollection, points).get();
+            if (!points.isEmpty()) {
+                log.info(
+                        "Generated {} chunks (vectors) for {} knowledge documents",
+                        points.size(),
+                        documents.size());
+                // Upsert in batches if too large (optional, but good practice)
+                client.upsertAsync(knowledgeCollection, points).get();
+            }
         }
+    }
+
+    /**
+     * Splits text into chunks of approximately 800 tokens (using characters as proxy). Simple
+     * recursive strategy: split by paragraphs, then sentences. 1 token ~= 4 chars. 800 tokens ~=
+     * 3200 chars.
+     */
+    private List<String> splitText(String text) {
+        final int MAX_CHUNK_SIZE = 3200; // ~800 tokens
+        final int OVERLAP = 400; // ~100 tokens
+
+        List<String> chunks = new ArrayList<>();
+        if (text == null || text.isEmpty()) {
+            return chunks;
+        }
+
+        int start = 0;
+        while (start < text.length()) {
+            int end = Math.min(start + MAX_CHUNK_SIZE, text.length());
+
+            if (end < text.length()) {
+                // Try to find a paragraph break
+                int lastParagraph = text.lastIndexOf("\n\n", end);
+                if (lastParagraph > start) {
+                    end = lastParagraph;
+                } else {
+                    // Try to find a sentence break
+                    int lastSentence = text.lastIndexOf(". ", end);
+                    if (lastSentence > start) {
+                        end = lastSentence + 1;
+                    } else {
+                        // Try to find a space
+                        int lastSpace = text.lastIndexOf(" ", end);
+                        if (lastSpace > start) {
+                            end = lastSpace;
+                        }
+                    }
+                }
+            }
+
+            String chunk = text.substring(start, end).trim();
+            if (!chunk.isEmpty()) {
+                chunks.add(chunk);
+            }
+
+            if (end == text.length()) {
+                break;
+            }
+
+            // Move start back for overlap, but ensure checking progress
+            start = Math.max(end - OVERLAP, start + 1);
+        }
+
+        return chunks;
     }
 
     private KnowledgeDoc createKnowledgeDoc(Path filePath) throws IOException {
@@ -227,7 +313,10 @@ public class DocumentIndexServiceImpl implements DocumentIndexService {
         metadata.put("source", filename);
         metadata.put("category", category);
         metadata.put("documentName", filename.replace(".md", ""));
-        metadata.put("content", content);
+        // content is now stored in chunk payload, not top-level doc metadata used for
+        // ID generation
+        // metadata.put("content", content); // Removed to save space in doc object,
+        // added per chunk
 
         String documentId =
                 java.util

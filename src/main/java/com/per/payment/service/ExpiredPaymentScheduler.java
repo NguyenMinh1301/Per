@@ -28,7 +28,8 @@ public class ExpiredPaymentScheduler {
     @Value("${payment.expiration-check-batch-size:50}")
     private int batchSize;
 
-    // @Scheduled(fixedDelayString = "${payment.expiration-check-interval:PT1M}")
+    @org.springframework.scheduling.annotation.Scheduled(
+            fixedDelayString = "${payment.expiration-check-interval:PT1M}")
     @Transactional
     public void markExpiredPayments() {
         Instant now = Instant.now();
@@ -50,7 +51,7 @@ public class ExpiredPaymentScheduler {
         Order order = payment.getOrder();
         if (order.getStatus() == OrderStatus.PENDING_PAYMENT) {
             orderInventoryService.restoreStock(order);
-            order.setStatus(OrderStatus.FAILED);
+            order.transitionTo(OrderStatus.CANCELLED);
             log.info(
                     "Order {} marked as FAILED due to expiration (payment {}).",
                     order.getOrderCode(),
