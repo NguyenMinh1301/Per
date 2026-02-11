@@ -24,6 +24,7 @@ services:
       # --- Redis ---
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
       # --- Qdrant ---
       - QDRANT_HOST=${QDRANT_HOST}
