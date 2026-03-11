@@ -26,20 +26,6 @@
   </a>
 </p>
 
-## Module Documentation
-
-| Module | Purpose | Tech Stack |
-| :--- | :--- | :--- |
-| **[Common](docs/modules/common/README.md)** | Shared Utilities, Global Exceptions | Spring Web, Resilience4j |
-| **[Auth](docs/modules/auth/README.md)** | Security, JWT, Role Management | Spring Security 6, JJWT |
-| **[User](docs/modules/user/README.md)** | Identity & Profile Management | JPA, PostgreSQL |
-| **[Product](docs/modules/product/README.md)** | Catalog, Elasticsearch Sync | Elastic, Kafka |
-| **[Media](docs/modules/media/README.md)** | Cloudinary Asset Management | Cloudinary SDK |
-| **[Cart](docs/modules/cart/README.md)** | Persistent Shopping Cart | JPA (Persistent) |
-| **[Order](docs/modules/order/README.md)** | Transaction Lifecycle | State Machine |
-| **[Payment](docs/modules/payment/README.md)** | Gateways & Webhooks | PayOS SDK |
-| **[RAG](docs/modules/rag/README.md)** | AI Shopping Assistant | Spring AI, Qdrant |
-
 ## Quick Start
 
 ### Prerequisites
@@ -54,27 +40,6 @@ docker-compose up -d
 ### Run Application
 ```bash
 ./mvnw spring-boot:run
-```
-
-## System Architecture
-
-The application follows a **Modular Monolith** pattern with **Event-Driven** consistency by default.
-
-```mermaid
-graph TD
-    Client[Client Apps] -->|REST API| Core[Spring Boot Core]
-    
-    subgraph "Data & Messaging"
-        Core -->|Transactional| DB[(PostgreSQL)]
-        Core -->|Cache| Redis[(Redis)]
-        Core -->|Event Pub| Kafka{Kafka}
-    end
-    
-    subgraph "Search & AI"
-        Kafka -->|Consumer| Core
-        Core -->|Query| ES[(Elasticsearch)]
-        Core -->|RAG| Qdrant[(Qdrant Vector DB)]
-    end
 ```
 
 ## License
