@@ -18,7 +18,7 @@
 
 [![Vietnamese Version](https://img.shields.io/badge/Language-Vietnamese-red)](README.vi.md)
 
-**Per** is a production-ready Modular Monolith e-commerce system built with Java 21, Spring Boot 3.5, and a robust Event-Driven Architecture.
+**Per** is a Modular Monolith e-commerce system built with Java 21, Spring Boot 3.5, and a robust Event-Driven Architecture.
 
 <p align="center">
   <a href="./">
